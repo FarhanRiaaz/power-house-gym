@@ -36,10 +36,10 @@ class BillExpenseDatasource {
         .into(_driftClient.billExpenses)
         .insertReturning(
       Expenz.BillExpensesCompanion(
-        category: Value(billExpense.category),
-        amount: Value(billExpense.amount),
-        date: Value(billExpense.date),
-        description: Value(billExpense.description),
+        category: Value(billExpense.category??""),
+        amount: Value(billExpense.amount??0.0),
+        date: Value(billExpense.date??DateTime.now()),
+        description: Value(billExpense.description??""),
       ),
       mode: InsertMode.insert,
     )
