@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 void main() => runApp(FingerprintApp());
 
 class FingerprintApp extends StatelessWidget {
+  const FingerprintApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -52,6 +54,8 @@ class Member {
 }
 
 class FingerprintHome extends StatefulWidget {
+  const FingerprintHome({super.key});
+
   @override
   _FingerprintHomeState createState() => _FingerprintHomeState();
 }

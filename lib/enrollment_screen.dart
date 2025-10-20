@@ -5,7 +5,7 @@ class EnrollmentFormScreen extends StatefulWidget {
   final String fmdBase64;
   final Function(Member) onSave;
 
-  EnrollmentFormScreen({required this.fmdBase64, required this.onSave});
+  const EnrollmentFormScreen({super.key, required this.fmdBase64, required this.onSave});
 
   @override
   _EnrollmentFormScreenState createState() => _EnrollmentFormScreenState();
