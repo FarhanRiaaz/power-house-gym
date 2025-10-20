@@ -2,19 +2,19 @@ import 'dart:convert';
 
 /// Data class representing a financial transaction (e.g., fee payment, expense).
 class FinancialTransaction {
-  final int id;
-  final String type; // e.g., "Fee Payment", "Expense", "Bill"
-  final double amount;
-  final DateTime transactionDate;
-  final String description;
-  final String? relatedMemberId; // Null for general expenses/bills
+  final int? id;
+  final String? type; // e.g., "Fee Payment", "Expense", "Bill"
+  final double? amount;
+  final DateTime? transactionDate;
+  final String? description;
+  final int? relatedMemberId; // Null for general expenses/bills
 
   FinancialTransaction({
-    required this.id,
-    required this.type,
-    required this.amount,
-    required this.transactionDate,
-    required this.description,
+     this.id,
+     this.type,
+     this.amount,
+     this.transactionDate,
+     this.description,
     this.relatedMemberId,
   });
 
@@ -23,7 +23,7 @@ class FinancialTransaction {
         'id': id,
         'type': type,
         'amount': amount,
-        'transactionDate': transactionDate.toIso8601String(),
+        'transactionDate': transactionDate?.toIso8601String(),
         'description': description,
         'relatedMemberId': relatedMemberId,
       };
@@ -47,7 +47,7 @@ class FinancialTransaction {
     double? amount,
     DateTime? transactionDate,
     String? description,
-    String? relatedMemberId,
+    int? relatedMemberId,
   }) {
     return FinancialTransaction(
       id: id ?? this.id,
@@ -95,7 +95,7 @@ class FinancialTransaction {
 
   /// Sort by date (latest first)
   static List<FinancialTransaction> sortByDate(List<FinancialTransaction> list) {
-    list.sort((a, b) => b.transactionDate.compareTo(a.transactionDate));
+    list.sort((a, b) => b.transactionDate!.compareTo(a.transactionDate!));
     return list;
   }
 
@@ -103,6 +103,6 @@ class FinancialTransaction {
   static double totalByType(List<FinancialTransaction> list, String type) {
     return list
         .where((tx) => tx.type == type)
-        .fold(0.0, (sum, tx) => sum + tx.amount);
+        .fold(0.0, (sum, tx) => sum + tx.amount!);
   }
 }

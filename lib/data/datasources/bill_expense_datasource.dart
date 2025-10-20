@@ -1,14 +1,16 @@
 import 'package:drift/drift.dart';
-import 'package:finger_print_flutter/core/data/drift/drift_client.dart';
+import 'package:finger_print_flutter/core/data/drift/drift_client.dart' as Expenz;
+
+import '../../domain/entities/models/bill_payment.dart';
 
 class BillExpenseDatasource {
-  final DriftClient _driftClient;
+  final Expenz.DriftClient _driftClient;
 
   BillExpenseDatasource(this._driftClient);
 
   // --- Utility Functions (Mappers) ---
 
-  BillExpense mapBillExpenseEntityToBillExpense(BillExpense entity) {
+  BillExpense mapBillExpenseEntityToBillExpense(Expenz.BillExpense entity) {
     return BillExpense(
       id: entity.id,
       category: entity.category,
@@ -19,7 +21,7 @@ class BillExpenseDatasource {
   }
 
   List<BillExpense> mapBillExpenseEntityListToBillExpenseList(
-      List<BillExpense> entities) {
+      List<Expenz.BillExpense> entities) {
     return entities
         .map((entity) => mapBillExpenseEntityToBillExpense(entity))
         .toList();
@@ -33,7 +35,7 @@ class BillExpenseDatasource {
     return _driftClient
         .into(_driftClient.billExpenses)
         .insertReturning(
-      BillExpensesCompanion(
+      Expenz.BillExpensesCompanion(
         category: Value(billExpense.category),
         amount: Value(billExpense.amount),
         date: Value(billExpense.date),

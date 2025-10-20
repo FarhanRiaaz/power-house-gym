@@ -1,8 +1,8 @@
-import 'package:finger_print_flutter/core/data/drift/drift_client.dart';
 import 'package:finger_print_flutter/data/datasources/attendance_datasource.dart';
 import 'package:finger_print_flutter/domain/repository/attendance/attendance_repository.dart';
 
 import '../../../core/enum.dart' show Gender;
+import '../../../domain/entities/models/attendance_record.dart';
 
 
 class AttendanceRepositoryImpl implements AttendanceRepository {

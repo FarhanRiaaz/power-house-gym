@@ -1,6 +1,7 @@
-import 'package:finger_print_flutter/core/data/drift/drift_client.dart';
 import 'package:finger_print_flutter/data/datasources/bill_expense_datasource.dart';
 import 'package:finger_print_flutter/domain/repository/expense/expense_repository.dart';
+
+import '../../../domain/entities/models/bill_payment.dart';
 
 class ExpenseRepositoryImpl implements ExpenseRepository {
   final BillExpenseDatasource _expenseDatasource;

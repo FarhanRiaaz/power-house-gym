@@ -5,7 +5,7 @@ import 'package:finger_print_flutter/core/enum.dart';
 
 /// Data class representing a fitness club member.
 class Member {
-  final String? memberId; // Unique ID, possibly generated on registration
+  final int? memberId; // Unique ID, possibly generated on registration
   final String? name;
   final String? phoneNumber;
   final String? fatherName;
@@ -66,7 +66,7 @@ class Member {
 
   /// Create a copy with optional overrides
   Member copyWith({
-    String? memberId,
+    int? memberId,
     String? name,
     String? phoneNumber,
     String? fatherName,

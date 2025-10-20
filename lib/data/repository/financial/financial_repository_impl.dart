@@ -1,6 +1,7 @@
-import 'package:finger_print_flutter/core/data/drift/drift_client.dart';
 import 'package:finger_print_flutter/data/datasources/financial_datasouce.dart';
 import 'package:finger_print_flutter/domain/repository/financial/financial_repository.dart';
+
+import '../../../domain/entities/models/financial_transaction.dart';
 
 
 class FinancialRepositoryImpl implements FinancialRepository {

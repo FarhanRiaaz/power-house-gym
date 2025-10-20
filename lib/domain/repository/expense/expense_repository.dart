@@ -1,4 +1,5 @@
-import 'package:finger_print_flutter/core/data/drift/drift_client.dart';
+
+import '../../entities/models/bill_payment.dart';
 
 /// Defines the contract for managing the gym's overhead costs (Bill Expenses).
 abstract class ExpenseRepository {

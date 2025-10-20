@@ -2,7 +2,8 @@ import 'dart:typed_data';
 
 import 'package:finger_print_flutter/core/enum.dart';
 
-import '../../../core/data/drift/drift_client.dart' show Member;
+import '../../entities/models/member.dart';
+
 
 abstract class MemberRepository {
   /// Retrieves a list of all members, filtered by gender scope.

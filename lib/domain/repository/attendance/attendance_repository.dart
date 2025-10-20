@@ -1,6 +1,7 @@
 import 'package:finger_print_flutter/core/enum.dart';
 
-import '../../../core/data/drift/drift_client.dart';
+import '../../entities/models/attendance_record.dart';
+
 
 
 /// Defines the contract for managing all attendance-related data and logic.

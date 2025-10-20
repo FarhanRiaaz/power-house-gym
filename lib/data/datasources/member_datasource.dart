@@ -1,14 +1,16 @@
 import 'dart:typed_data';
 import 'package:drift/drift.dart';
-import 'package:finger_print_flutter/core/data/drift/drift_client.dart';
+import 'package:finger_print_flutter/core/data/drift/drift_client.dart' as Memberz;
 import 'package:finger_print_flutter/core/enum.dart';
 
+import '../../domain/entities/models/member.dart' ;
+
 class MemberDatasource {
-  final DriftClient _driftClient;
+  final Memberz.DriftClient _driftClient;
 
   MemberDatasource(this._driftClient);
 
-  Member mapEntityToModel(Member entity) {
+  Member mapEntityToModel(Memberz.Member entity) {
     return Member(
       memberId: entity.memberId,
       name: entity.name,
@@ -25,15 +27,15 @@ class MemberDatasource {
 
   Future<Member> insert(Member member) async {
     final inserted = await _driftClient.into(_driftClient.members).insertReturning(
-      MembersCompanion.insert(
-        memberId: Value(member.memberId),
-        name: member.name,
-        phoneNumber: member.phoneNumber,
-        fatherName: member.fatherName,
-        gender: member.gender,
-        membershipType: member.membershipType,
-        registrationDate: member.registrationDate,
-        lastFeePaymentDate: member.lastFeePaymentDate,
+      Memberz.MembersCompanion.insert(
+        memberId: Value(member.memberId??0),
+        name: member.name ??"",
+        phoneNumber: member.phoneNumber??"",
+        fatherName: member.fatherName??"",
+        gender: member.gender??Gender.male,
+        membershipType: member.membershipType??"",
+        registrationDate: member.registrationDate??DateTime.now(),
+        lastFeePaymentDate: member.lastFeePaymentDate??DateTime.now(),
         fingerprintTemplate: Value(member.fingerprintTemplate),
         notes: Value(member.notes),
       ),
@@ -66,13 +68,13 @@ class MemberDatasource {
 
   Future<void> update(Member member) async {
     await (_driftClient.update(_driftClient.members)
-          ..where((m) => m.memberId.equals(member.memberId)))
-        .write(MembersCompanion(
-      name: Value(member.name),
-      phoneNumber: Value(member.phoneNumber),
-      fatherName: Value(member.fatherName),
-      membershipType: Value(member.membershipType),
-      lastFeePaymentDate: Value(member.lastFeePaymentDate),
+          ..where((m) => m.memberId.equals(member.memberId??0)))
+        .write(Memberz.MembersCompanion(
+      name: Value(member.name??""),
+      phoneNumber: Value(member.phoneNumber??""),
+      fatherName: Value(member.fatherName??""),
+      membershipType: Value(member.membershipType??""),
+      lastFeePaymentDate: Value(member.lastFeePaymentDate??DateTime.now()),
       fingerprintTemplate: Value(member.fingerprintTemplate),
       notes: Value(member.notes),
     ));

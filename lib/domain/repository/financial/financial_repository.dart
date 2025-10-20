@@ -1,6 +1,6 @@
 
 
-import 'package:finger_print_flutter/core/data/drift/drift_client.dart';
+import '../../entities/models/financial_transaction.dart';
 
 /// Defines the contract for managing all income (Financial Transactions) and reporting.
 abstract class FinancialRepository {

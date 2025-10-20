@@ -4,7 +4,8 @@ import 'package:finger_print_flutter/core/enum.dart';
 import 'package:finger_print_flutter/data/datasources/member_datasource.dart';
 import 'package:finger_print_flutter/domain/repository/member/member_repository.dart';
 
-import '../../../core/data/drift/drift_client.dart' show Member;
+import '../../../domain/entities/models/member.dart';
+
 
 class MemberRepositoryImpl implements MemberRepository {
   final MemberDatasource _memberDataSource;

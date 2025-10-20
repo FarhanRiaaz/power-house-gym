@@ -1,15 +1,17 @@
 import 'package:drift/drift.dart';
-import 'package:finger_print_flutter/core/data/drift/drift_client.dart';
+
+import '../../core/data/drift/drift_client.dart' as Financialz;
+import '../../domain/entities/models/financial_transaction.dart';
 
 class FinancialTransactionDatasource {
-  final DriftClient _driftClient;
+  final Financialz.DriftClient _driftClient;
 
   FinancialTransactionDatasource(this._driftClient);
 
   // --- Utility Functions (Mappers) ---
 
   FinancialTransaction mapTransactionEntityToTransaction(
-    FinancialTransaction entity,
+      Financialz.FinancialTransaction entity,
   ) {
     return FinancialTransaction(
       id: entity.id,
@@ -22,7 +24,7 @@ class FinancialTransactionDatasource {
   }
 
   List<FinancialTransaction> mapTransactionEntityListToTransactionList(
-    List<FinancialTransaction> entities,
+    List<Financialz.FinancialTransaction> entities,
   ) {
     return entities
         .map((entity) => mapTransactionEntityToTransaction(entity))
@@ -39,11 +41,11 @@ class FinancialTransactionDatasource {
     return _driftClient
         .into(_driftClient.financialTransactions)
         .insertReturning(
-          FinancialTransactionsCompanion(
-            type: Value(transaction.type),
-            amount: Value(transaction.amount),
-            transactionDate: Value(transaction.transactionDate),
-            description: Value(transaction.description),
+      Financialz.FinancialTransactionsCompanion(
+            type: Value(transaction.type??""),
+            amount: Value(transaction.amount??0.0),
+            transactionDate: Value(transaction.transactionDate??DateTime.now()),
+            description: Value(transaction.description??""),
             relatedMemberId: Value(transaction.relatedMemberId),
           ),
           mode: InsertMode.insert,
