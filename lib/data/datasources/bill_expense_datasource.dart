@@ -54,6 +54,14 @@ class BillExpenseDatasource {
         .get();
     return mapBillExpenseEntityListToBillExpenseList(entities);
   }
+  // Watch All Bills/Expenses (Reactive):--------------------------------------
+  /// Provides a stream of all bills and expenses for real-time reporting.
+  Stream<List<BillExpense>> watchAllBillExpenses() {
+    return (_driftClient.select(_driftClient.billExpenses)
+      ..orderBy([(t) => OrderingTerm.desc(t.date)]))
+        .watch()
+        .map(mapBillExpenseEntityListToBillExpenseList);
+  }
 
   // Delete Bill/Expense:-------------------------------------------------------
   /// Deletes an expense record (Super Admin only).
