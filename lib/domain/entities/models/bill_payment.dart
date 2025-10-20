@@ -2,18 +2,18 @@ import 'dart:convert';
 
 /// Data class for tracking general expenses/bills.
 class BillExpense {
-  final int id;
-  final String category; // e.g., "Rent", "Utility", "Salary"
-  final double amount;
-  final DateTime date;
-  final String description;
+  final int? id;
+  final String? category; // e.g., "Rent", "Utility", "Salary"
+  final double? amount;
+  final DateTime? date;
+  final String? description;
 
   BillExpense({
-    required this.id,
-    required this.category,
-    required this.amount,
-    required this.date,
-    required this.description,
+     this.id,
+     this.category,
+     this.amount,
+     this.date,
+     this.description,
   });
 
   /// Convert to JSON
@@ -21,7 +21,7 @@ class BillExpense {
         'id': id,
         'category': category,
         'amount': amount,
-        'date': date.toIso8601String(),
+        'date': date?.toIso8601String(),
         'description': description,
       };
 
@@ -93,32 +93,32 @@ class BillExpense {
 
   /// Filter by category
   static List<BillExpense> filterByCategory(List<BillExpense> list, String category) {
-    return list.where((e) => e.category.toLowerCase() == category.toLowerCase()).toList();
+    return list.where((e) => e.category?.toLowerCase() == category.toLowerCase()).toList();
   }
 
   /// Sort by date (latest first)
   static List<BillExpense> sortByDate(List<BillExpense> list) {
-    list.sort((a, b) => b.date.compareTo(a.date));
+    list.sort((a, b) => b.date!.compareTo(a.date!));
     return list;
   }
 
   /// Total amount by category
   static double totalByCategory(List<BillExpense> list, String category) {
     return list
-        .where((e) => e.category.toLowerCase() == category.toLowerCase())
-        .fold(0.0, (sum, e) => sum + e.amount);
+        .where((e) => e.category?.toLowerCase() == category.toLowerCase())
+        .fold(0.0, (sum, e) => sum + e.amount!);
   }
 
   /// Total amount overall
   static double totalAmount(List<BillExpense> list) {
-    return list.fold(0.0, (sum, e) => sum + e.amount);
+    return list.fold(0.0, (sum, e) => sum + e.amount!);
   }
 
   /// Group by category
   static Map<String, List<BillExpense>> groupByCategory(List<BillExpense> list) {
     final Map<String, List<BillExpense>> grouped = {};
     for (var e in list) {
-      grouped.putIfAbsent(e.category, () => []).add(e);
+      grouped.putIfAbsent(e.category!, () => []).add(e);
     }
     return grouped;
   }
