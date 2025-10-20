@@ -5,26 +5,26 @@ import 'package:finger_print_flutter/core/enum.dart';
 
 /// Data class representing a fitness club member.
 class Member {
-  final String memberId; // Unique ID, possibly generated on registration
-  final String name;
-  final String phoneNumber;
-  final String fatherName;
-  final Gender gender;
-  final String membershipType; // e.g., "Fitness Club", "Weightlifting"
-  final DateTime registrationDate;
-  final DateTime lastFeePaymentDate;
+  final String? memberId; // Unique ID, possibly generated on registration
+  final String? name;
+  final String? phoneNumber;
+  final String? fatherName;
+  final Gender? gender;
+  final String? membershipType; // e.g., "Fitness Club", "Weightlifting"
+  final DateTime? registrationDate;
+  final DateTime? lastFeePaymentDate;
   final Uint8List? fingerprintTemplate; // Biometric data
   final String? notes;
 
   Member({
-    required this.memberId,
-    required this.name,
-    required this.phoneNumber,
-    required this.fatherName,
-    required this.gender,
-    required this.membershipType,
-    required this.registrationDate,
-    required this.lastFeePaymentDate,
+     this.memberId,
+     this.name,
+     this.phoneNumber,
+     this.fatherName,
+     this.gender,
+     this.membershipType,
+     this.registrationDate,
+     this.lastFeePaymentDate,
     this.fingerprintTemplate,
     this.notes,
   });
@@ -35,10 +35,10 @@ class Member {
         'name': name,
         'phoneNumber': phoneNumber,
         'fatherName': fatherName,
-        'gender': gender.name,
+        'gender': gender?.name,
         'membershipType': membershipType,
-        'registrationDate': registrationDate.toIso8601String(),
-        'lastFeePaymentDate': lastFeePaymentDate.toIso8601String(),
+        'registrationDate': registrationDate?.toIso8601String(),
+        'lastFeePaymentDate': lastFeePaymentDate?.toIso8601String(),
         'fingerprintTemplate': fingerprintTemplate != null
             ? base64Encode(fingerprintTemplate!)
             : null,
@@ -139,25 +139,25 @@ class Member {
   /// Check if fee is overdue (e.g., monthly)
   bool get isFeeOverdue {
     final now = DateTime.now();
-    final dueDate = lastFeePaymentDate.add(Duration(days: 30));
+    final dueDate = lastFeePaymentDate!.add(Duration(days: 30));
     return now.isAfter(dueDate);
   }
 
   /// Filter by membership type
   static List<Member> filterByType(List<Member> list, String type) {
     return list
-        .where((m) => m.membershipType.toLowerCase() == type.toLowerCase())
+        .where((m) => m.membershipType?.toLowerCase() == type.toLowerCase())
         .toList();
   }
 
   /// Sort by registration date
   static List<Member> sortByRegistrationDate(List<Member> list) {
-    list.sort((a, b) => b.registrationDate.compareTo(a.registrationDate));
+    list.sort((a, b) => b.registrationDate!.compareTo(a.registrationDate!));
     return list;
   }
 
   /// Find by ID
   static Member? findById(List<Member> list, String id) {
-    return list.firstWhere((m) => m.memberId == id, orElse: () => null);
+    return list.firstWhere((m) => m.memberId == id, orElse: () => Member());
   }
 }

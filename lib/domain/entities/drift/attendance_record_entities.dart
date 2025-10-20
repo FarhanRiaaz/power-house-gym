@@ -9,7 +9,4 @@ class AttendanceRecords extends Table {
   TextColumn get memberId => text().references(Members, #memberId)();
 
   DateTimeColumn get checkInTime => dateTime()();
-
-  @override
-  Set<Column> get primaryKey => {id};
 }

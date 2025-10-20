@@ -1,0 +1,65 @@
+import 'package:drift/drift.dart';
+import 'package:finger_print_flutter/core/data/drift/drift_client.dart';
+
+class BillExpenseDatasource {
+  final DriftClient _driftClient;
+
+  BillExpenseDatasource(this._driftClient);
+
+  // --- Utility Functions (Mappers) ---
+
+  BillExpense mapBillExpenseEntityToBillExpense(BillExpense entity) {
+    return BillExpense(
+      id: entity.id,
+      category: entity.category,
+      amount: entity.amount,
+      date: entity.date,
+      description: entity.description,
+    );
+  }
+
+  List<BillExpense> mapBillExpenseEntityListToBillExpenseList(
+      List<BillExpense> entities) {
+    return entities
+        .map((entity) => mapBillExpenseEntityToBillExpense(entity))
+        .toList();
+  }
+
+  // --- CRUD Operations ---
+
+  // Insert Bill/Expense:-------------------------------------------------------
+  /// Records a new monthly bill or operating expense.
+  Future<BillExpense> insertBillExpense(BillExpense billExpense) {
+    return _driftClient
+        .into(_driftClient.billExpenses)
+        .insertReturning(
+      BillExpensesCompanion(
+        category: Value(billExpense.category),
+        amount: Value(billExpense.amount),
+        date: Value(billExpense.date),
+        description: Value(billExpense.description),
+      ),
+      mode: InsertMode.insert,
+    )
+        .then((rows) => mapBillExpenseEntityToBillExpense(rows));
+  }
+
+  // Get Bills/Expenses by Date Range:------------------------------------------
+  /// Retrieves all bills and expenses within a specified date range for reporting.
+  Future<List<BillExpense>> getBillsByDateRange(
+      DateTime start, DateTime end) async {
+    final entities = await (_driftClient.select(_driftClient.billExpenses)
+      ..where((t) =>
+          t.date.isBetween(Variable.withDateTime(start), Variable.withDateTime(end))))
+        .get();
+    return mapBillExpenseEntityListToBillExpenseList(entities);
+  }
+
+  // Delete Bill/Expense:-------------------------------------------------------
+  /// Deletes an expense record (Super Admin only).
+  Future<void> deleteBillExpense(int billId) async {
+    await (_driftClient.delete(_driftClient.billExpenses)
+      ..where((t) => t.id.equals(billId)))
+        .go();
+  }
+}

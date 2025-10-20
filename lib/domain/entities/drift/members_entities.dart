@@ -25,7 +25,4 @@ class Members extends Table {
   BlobColumn get fingerprintTemplate => blob().nullable()();
 
   TextColumn get notes => text().nullable()();
-
-  @override
-  Set<Column> get primaryKey => {memberId};
 }

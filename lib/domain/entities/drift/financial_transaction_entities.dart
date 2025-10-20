@@ -16,9 +16,6 @@ class FinancialTransactions extends Table {
   TextColumn get description => text().withLength(min: 1, max: 255)();
 
   // Optional link back to the member if it's a fee payment
-  TextColumn get relatedMemberId =>
-      text().references(Members, #memberId).nullable()();
-
-  @override
-  Set<Column> get primaryKey => {id};
+  IntColumn get relatedMemberId =>
+      integer().references(Members, #memberId).nullable()();
 }
