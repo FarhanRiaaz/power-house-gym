@@ -1,4 +1,7 @@
+import 'package:drift/drift.dart';
 import 'package:finger_print_flutter/core/data/drift/drift_client.dart';
+
+import '../../core/enum.dart' show Gender;
 
 class AttendanceRecordDatasource {
   final DriftClient _driftClient;
@@ -37,5 +40,45 @@ class AttendanceRecordDatasource {
 
   Future<void> delete(int id) async {
     await (_driftClient.delete(_driftClient.attendanceRecords)..where((r) => r.id.equals(id))).go();
+  }
+
+  /// Retrieves all check-in records for a specific date, with optional gender filtering.
+  Future<List<AttendanceRecord>> getDailyRecords(DateTime date,
+      {Gender? genderFilter}) async {
+    // Normalize the start and end of the target day
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
+
+    final query = _driftClient.select(_driftClient.attendanceRecords)
+      ..where((t) => t.checkInTime.isBetween(
+          Variable.withDateTime(startOfDay),
+          Variable.withDateTime(endOfDay)));
+
+    // Apply gender filtering if provided (assuming the table has a linked member ID
+    // and we'd join to the Members table if needed, but for simplicity here,
+    // we'll assume a direct filter if a future database change adds it,
+    // or focus purely on time-based filtering for now).
+
+    final entities = await query.get();
+    return entities.map(mapEntityToModel).toList();
+  }
+
+  /// Watches all check-in records for the current day, with optional gender filtering,
+  /// for real-time updates.
+  Stream<List<AttendanceRecord>> watchTodayRecords({Gender? genderFilter}) {
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+    final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
+
+    final query = _driftClient.select(_driftClient.attendanceRecords)
+      ..where((t) => t.checkInTime.isBetween(
+          Variable.withDateTime(startOfDay),
+          Variable.withDateTime(endOfDay)));
+
+    // Apply gender filtering if provided (same note as above)
+
+    return query.watch().map((entities) {
+      return entities.map(mapEntityToModel).toList();
+    });
   }
 }

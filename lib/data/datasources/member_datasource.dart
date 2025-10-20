@@ -78,6 +78,27 @@ class MemberDatasource {
     ));
   }
 
+  // 1. Reactive stream for watching all members (with optional gender filter)
+  Stream<List<Member>> watchAll({Gender? genderFilter}) {
+    final query = _driftClient.select(_driftClient.members);
+    if (genderFilter != null) {
+      query.where((m) => m.gender.equals(genderFilter.name));
+    }
+
+    // Use .watch() to get a stream of query results
+    return query.watch().map((entities) {
+      return entities.map(mapEntityToModel).toList();
+    });
+  }
+
+// 2. Reactive stream for watching a single member by ID
+  Stream<Member?> watchById(int memberId) {
+    return (_driftClient.select(_driftClient.members)
+      ..where((m) => m.memberId.equals(memberId)))
+        .watchSingleOrNull()
+        .map((entity) => entity != null ? mapEntityToModel(entity) : null);
+  }
+
   Future<void> delete(int memberId) async {
     await (_driftClient.delete(_driftClient.members)
           ..where((m) => m.memberId.equals(memberId)))

@@ -75,7 +75,7 @@ class AttendanceRecord {
 
   /// Filter by member
   static List<AttendanceRecord> forMember(
-      List<AttendanceRecord> list, String memberId) {
+      List<AttendanceRecord> list, int memberId) {
     return list.where((r) => r.memberId == memberId).toList();
   }
 
