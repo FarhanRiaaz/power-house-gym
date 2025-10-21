@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
+
+import 'package:csv/csv.dart';
 
 /// A simplified class to demonstrate the core logic of converting a
 /// List of Lists (table data) into a single CSV formatted string.
@@ -46,7 +49,8 @@ class SimpleCsvConverter {
         // 3. If quoting is needed, apply escaping logic
         if (needsQuotes) {
           // Escape any existing quote characters by doubling them up (" -> "")
-          processedField = fieldString.replaceAll(textDelimiter, '$textDelimiter$textDelimiter');
+          processedField = fieldString.replaceAll(
+              textDelimiter, '$textDelimiter$textDelimiter');
 
           // Wrap the entire field in the text delimiters
           processedField = '$textDelimiter$processedField$textDelimiter';
@@ -65,5 +69,35 @@ class SimpleCsvConverter {
     }
 
     return buffer.toString();
+  }
+
+  Future<List<List<String>>> readCsvFile(String filePath) async {
+    try {
+      // 1. Read the file content as a single string
+      final csvString = await File(filePath).readAsString();
+
+      // 2. Initialize the converter (defaults to comma delimiter)
+      const converter = CsvToListConverter();
+
+      // The converter returns List<List<dynamic>>. We must correctly type this.
+      final List<List<dynamic>> convertedData = converter.convert(csvString);
+
+      // 3. Convert the List<List<dynamic>> structure to the required List<List<String>>
+      // by iterating over the rows and converting every dynamic element to String.
+      final List<List<String>> resultData = convertedData.map((row) {
+        // Map over the inner list (row) and ensure all elements are converted to String
+        return row.map((e) => e.toString()).toList();
+      }).toList();
+
+      return resultData;
+    } on FileSystemException catch (e) {
+      // Handle cases where the file doesn't exist or permissions are wrong
+      print('Error: File system exception for path $filePath. Details: $e');
+      return [];
+    } catch (e) {
+      // Catch any other general parsing or reading errors
+      print('An unexpected error occurred while reading the CSV: $e');
+      return [];
+    }
   }
 }

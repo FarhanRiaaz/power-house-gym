@@ -1,13 +1,11 @@
-
-import 'package:finger_print_flutter/data/datasources/attendance_datasource.dart';
+import 'dart:io';
+import 'package:finger_print_flutter/core/list_to_csv_converter.dart';
 import 'package:finger_print_flutter/domain/repository/attendance/attendance_repository.dart';
 import 'package:finger_print_flutter/domain/repository/expense/expense_repository.dart';
 import 'package:finger_print_flutter/domain/repository/financial/financial_repository.dart';
 import 'package:finger_print_flutter/domain/repository/member/member_repository.dart';
-
-import '../../../../domain/entities/models/bill_payment.dart' show BillExpense;
-import '../../../../domain/entities/models/financial_transaction.dart' show FinancialTransaction;
-import '../../../../domain/entities/models/member.dart' show Member;
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 
 /// Concrete implementation for handling file I/O and data formatting.
 /// (The actual file I/O logic would use packages like `csv` or `excel`
@@ -18,24 +16,61 @@ class DataUtilityServiceImpl implements DataUtilityService {
   final ExpenseRepository expenseRepository;
   final AttendanceRepository attendanceRepository;
 
+  DataUtilityServiceImpl(
+    this.memberRepository,
+    this.financialRepository,
+    this.expenseRepository,
+    this.attendanceRepository,
+  );
 
-  DataUtilityServiceImpl(this.memberRepository,this.financialRepository,this.expenseRepository,this.attendanceRepository);
+  Future<String> getPowerHouseDirectoryPath() async {
+    // If this code is run on Android/iOS/Web, getDesktopDirectory() will return null
+    // or throw an error, as it is only supported on Windows, macOS, and Linux.
+    try {
+      // 1. Call the method provided by path_provider
+      final desktopDir = await getDownloadsDirectory();
+
+      if (desktopDir == null) {
+        // Fallback for non-desktop environments or if the path is unknown.
+        print(
+          'Warning: Desktop directory not resolvable. Using temporary directory instead.',
+        );
+        final tempDir = await getTemporaryDirectory();
+        return p.join(tempDir.path, 'PowerHouse');
+      }
+
+      // 2. Construct the full path: /Desktop/PowerHouse
+      final powerhouseDirPath = p.join(desktopDir.path, 'PowerHouse');
+      final powerhouseDir = Directory(powerhouseDirPath);
+
+      // 3. Ensure the directory is created.
+      await powerhouseDir.create(recursive: true);
+
+      print('PowerHouse directory ready at: $powerhouseDirPath');
+
+      // 4. Return the path string.
+      return powerhouseDirPath;
+    } catch (e) {
+      print(
+        'Error finding or creating PowerHouse directory. Check if you ran "flutter pub get": $e',
+      );
+      return '';
+    }
+  }
 
   @override
-  Future<bool> exportData({List<Member>? members, List<FinancialTransaction>? transactions, List<BillExpense>? expenses, String? baseDirectoryPath
-  }) async {
-
-
+  Future<void> exportData() async {
     print('--- Use Case: Starting Data Export Orchestration ---');
-
+    final baseDirectoryPath = await getPowerHouseDirectoryPath();
     // 1. Fetch all necessary data from the Repositories
     // (This is the business logic determining what data needs to go out)
-    final members = await memberRepository.getMembersToExport();
-    final transactions = await financialRepository.getTransactionsForPeriod();
-    final expenses = await expenseRepository.getUpcomingExpenses();
-    final attendance = await attendanceRepository.getUpcomingExpenses();
+    final members = await memberRepository.exportToCsv();
+    final transactions = await financialRepository.exportToCsv();
+    final expenses = await expenseRepository.exportToCsv();
+    final attendance = await attendanceRepository.exportToCsv();
 
     // 2. Perform any required business validation or formatting checks here
+
     final List<_ExportTask> tasks = [
       _ExportTask(
         data: members,
@@ -59,54 +94,49 @@ class DataUtilityServiceImpl implements DataUtilityService {
         filePath: '$baseDirectoryPath/expenses_export.csv',
       ),
     ];
-
-    // 3. Execute all tasks sequentially and track results
-    final List<bool> results = [];
-
     for (final task in tasks) {
       if (task.data.isNotEmpty) {
-        final success = await fileService.exportSingleTable(
-          data: task.data,
-          filePath: task.filePath,
-          tableName: task.tableName,
-        );
-        results.add(success);
+        try {
+          // 3. Create a File object using the target path
+          final file = File(task.filePath);
+
+          // 4. Use writeAsString to asynchronously save the content
+          await file.writeAsString(task.data, encoding: systemEncoding);
+
+          print('SUCCESS: CSV file generated and saved.');
+          print('Path: ${file.absolute.path}');
+          print('Content saved:\n---');
+        } catch (e) {
+          print('ERROR: Could not write file: $e');
+        }
       } else {
-        // If the table is empty, we consider this export task successful.
         print('Skipping export for empty table: ${task.tableName}');
-        results.add(true);
       }
     }
 
-    // 4. Determine overall success
-    final overallSuccess = results.every((r) => r == true);
-
-    print('--- Use Case: Batch Export completed (Overall Success: $overallSuccess) ---');
-    return overallSuccess;
+    print('--- Use Case: Batch Export completed!');
   }
 
   @override
-  Future<int> importNewMembers(String filePath) async {
-    // [Mock Logic] In a real app, this would read the file, validate data,
-    // and process it via the InsertMemberUseCase.
-    print('Importing members from $filePath...');
-
-    // Simulate reading 15 new members
-    await Future.delayed(const Duration(seconds: 1));
-    return 15;
+  Future<List<List<String>>> importNewMembers(String filePath) async {
+    return await SimpleCsvConverter().readCsvFile(filePath);
   }
-
 }
 
 abstract class DataUtilityService {
-  Future<bool> exportData({List<Member> members, List<FinancialTransaction> transactions, List<BillExpense> expenses, String baseDirectoryPath});
-  Future<int> importNewMembers(String filePath);
+  Future<void> exportData();
+
+  Future<List<List<String>>> importNewMembers(String filePath);
 }
 
 class _ExportTask {
-  final List data;
+  final String data;
   final String tableName;
   final String filePath;
-  _ExportTask({required this.data, required this.tableName, required this.filePath});
-}
 
+  _ExportTask({
+    required this.data,
+    required this.tableName,
+    required this.filePath,
+  });
+}

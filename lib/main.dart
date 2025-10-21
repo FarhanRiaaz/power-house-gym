@@ -1,9 +1,19 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:finger_print_flutter/enrollment_screen.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(FingerprintApp());
+import 'di/service_locator.dart';
+
+Future<void> main() async {
+  return runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await ServiceLocator.configureDependencies();
+    runApp(FingerprintApp());
+  }, (error, stackTrace) {});
+}
+
 
 class FingerprintApp extends StatelessWidget {
   const FingerprintApp({super.key});
@@ -306,43 +316,3 @@ void showUnrecognizedFingerprintPopup(String fmdBase64) {
     );
   }
 }
-
-
-
-//
-// Future<void> main() async {
-//   const converter = SimpleCsvConverter();
-//
-//   // 1. Define the input data
-//   final List<List<dynamic>> sampleData = [
-//     ['ID', 'Name', 'Address Notes', 'Amount'],
-//     [1, 'Alice', 'No issues', 150.0],
-//     [2, 'Bob', '123 Main St, Apt 2B', 200.50],
-//     [3, 'Charlie', 'Said "Invoice sent"', 99.0],
-//     [4, 'Dana', 'Needs follow up\nCheck payment', 50.0],
-//   ];
-//
-//   // 2. Use the converter to get the final CSV content string
-//   final csvOutput = converter.convert(sampleData);
-//
-//   // Define the target file path
-//   // The path "./output_data.csv" is relative to where the script is executed.
-//   const String filePath = 'output_data.csv';
-//
-//   try {
-//     // 3. Create a File object using the target path
-//     final file = File(filePath);
-//
-//     // 4. Use writeAsString to asynchronously save the content
-//     await file.writeAsString(csvOutput, encoding: systemEncoding);
-//
-//     print('SUCCESS: CSV file generated and saved.');
-//     print('Path: ${file.absolute.path}');
-//     print('Content saved:\n---');
-//     print(csvOutput);
-//     print('---');
-//
-//   } catch (e) {
-//     print('ERROR: Could not write file: $e');
-//   }
-// }

@@ -6,25 +6,24 @@ import 'package:finger_print_flutter/data/service/report/export/export_data_serv
 ///
 /// Type: int (Number of records imported)
 /// Params: String (The file path for the source file)
-class ImportDataUseCase extends UseCase<int, String> {
+class ExportDataUseCase extends UseCase<void, void> {
   final DataUtilityService _dataUtilityService;
 
-  ImportDataUseCase(this._dataUtilityService);
+  ExportDataUseCase(this._dataUtilityService);
 
   @override
-  Future<int> call({required String params}) async {
-    return _dataUtilityService.importNewMembers(params);
+  Future<void> call({required void params}) async {
+    return _dataUtilityService.exportData();
   }
 }
 
 
-class ImportDataUseCase extends UseCase<int, String> {
+class ImportDataUseCase extends UseCase<List<List<String>>, String> {
   final DataUtilityService _dataUtilityService;
 
   ImportDataUseCase(this._dataUtilityService);
-
   @override
-  Future<int> call({required String params}) async {
-    return _dataUtilityService.importNewMembers(params);
+  Future<List<List<String>>> call({required String params}) async {
+    return await _dataUtilityService.importNewMembers(params);
   }
 }
