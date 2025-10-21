@@ -6,7 +6,7 @@ class AttendanceRecords extends Table {
   IntColumn get id => integer().autoIncrement()();
 
   // Foreign Key reference to the Members table
-  TextColumn get memberId => text().references(Members, #memberId)();
+  IntColumn get memberId => integer().references(Members, #memberId)();
 
   DateTimeColumn get checkInTime => dateTime()();
 }

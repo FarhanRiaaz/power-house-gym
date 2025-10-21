@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:finger_print_flutter/core/enum.dart';
+import 'package:finger_print_flutter/domain/entities/models/csv.dart';
 
 /// Data class representing a fitness club member.
-class Member {
+class Member implements CsvConvertible {
   final int? memberId; // Unique ID, possibly generated on registration
   final String? name;
   final String? phoneNumber;
@@ -13,7 +14,7 @@ class Member {
   final String? membershipType; // e.g., "Fitness Club", "Weightlifting"
   final DateTime? registrationDate;
   final DateTime? lastFeePaymentDate;
-  final Uint8List? fingerprintTemplate; // Biometric data
+  final String? fingerprintTemplate; // Biometric data
   final String? notes;
 
   Member({
@@ -40,7 +41,7 @@ class Member {
         'registrationDate': registrationDate?.toIso8601String(),
         'lastFeePaymentDate': lastFeePaymentDate?.toIso8601String(),
         'fingerprintTemplate': fingerprintTemplate != null
-            ? base64Encode(fingerprintTemplate!)
+            ? (fingerprintTemplate!)
             : null,
         'notes': notes,
       };
@@ -58,7 +59,7 @@ class Member {
       registrationDate: DateTime.parse(json['registrationDate']),
       lastFeePaymentDate: DateTime.parse(json['lastFeePaymentDate']),
       fingerprintTemplate: json['fingerprintTemplate'] != null
-          ? base64Decode(json['fingerprintTemplate'])
+          ? (json['fingerprintTemplate'])
           : null,
       notes: json['notes'],
     );
@@ -74,7 +75,7 @@ class Member {
     String? membershipType,
     DateTime? registrationDate,
     DateTime? lastFeePaymentDate,
-    Uint8List? fingerprintTemplate,
+    String? fingerprintTemplate,
     String? notes,
   }) {
     return Member(
@@ -121,7 +122,7 @@ class Member {
       notes.hashCode ^
       fingerprintTemplate.hashCode;
 
-  bool _fingerprintEqual(Uint8List? a, Uint8List? b) {
+  bool _fingerprintEqual(String? a, String? b) {
     if (a == null || b == null) return a == b;
     if (a.length != b.length) return false;
     for (int i = 0; i < a.length; i++) {
@@ -134,6 +135,90 @@ class Member {
   @override
   String toString() {
     return 'Member($memberId, $name, $membershipType, feePaid: $lastFeePaymentDate)';
+  }
+  ///  for excel export things
+  @override
+  List<String> toCsvHeader() {
+    // Defines the friendly column names in the exact order the fields appear
+    return [
+      'Member ID',
+      'Name',
+      'Phone Number',
+      "Father's Name",
+      'Gender',
+      'Membership Type',
+      'Registration Date',
+      'Last Fee Payment',
+      'Fingerprint Template',
+      'Notes',
+    ];
+  }
+
+  @override
+  List<String> toCsvRow() {
+    // Converts all fields to strings in the exact same order as the header.
+    // Use the null-safe operators (?. and ?? '') to handle optional fields gracefully.
+    return [
+      memberId.toString(),
+      name??"",
+      phoneNumber??"",
+      fatherName??"",
+      gender?.name ?? '', // Use enum name, default to empty string if null
+      membershipType??"",
+      registrationDate?.toIso8601String() ?? '',
+      lastFeePaymentDate?.toIso8601String() ?? '',
+      fingerprintTemplate ?? '',
+      notes ?? '',
+    ];
+  }
+  /// for excel import thing
+
+  // --- CSV IMPORT (FACTORY CONSTRUCTOR) ---
+
+  /// Creates a Member object from an ordered List of String values (a CSV row).
+  /// This is the function that makes import possible!
+  factory Member.fromCsvRow(List<String> row) {
+    if (row.length < 10) {
+      throw const FormatException("CSV row must contain at least 10 fields.");
+    }
+
+    // Helper function to safely parse a DateTime from an ISO 8601 string.
+    DateTime? parseDateTime(String? value) {
+      if (value == null || value.isEmpty) return null;
+      try {
+        return DateTime.tryParse(value);
+      } catch (_) {
+        return null;
+      }
+    }
+
+    Gender? parseGender(String? value) {
+      if (value == null || value.isEmpty) return null;
+      final String normalizedValue = value.toLowerCase();
+      return Gender.values.firstWhere(
+              (g) => g.name == normalizedValue,
+          orElse: () => throw FormatException("Invalid gender value: $value")
+      );
+    }
+
+    // Convert ID, expecting it to be the first element (Index 0)
+    final parsedId = int.tryParse(row[0]);
+
+    // NOTE: We only allow the import of new data, so we ignore the parsedId here
+    // and let the database assign a new one, unless you explicitly manage IDs.
+
+    return Member(
+      memberId: parsedId, // Keep it if it was provided, but often ignored for new inserts
+      name: row[1],
+      phoneNumber: row[2],
+      fatherName: row[3],
+      gender: parseGender(row[4]),
+      membershipType: row[5],
+      registrationDate: parseDateTime(row[6]),
+      lastFeePaymentDate: parseDateTime(row[7]),
+      fingerprintTemplate: row[8].isEmpty ? null : row[8],
+      notes: row[9].isEmpty ? null : row[9],
+    );
   }
 
   /// Check if fee is overdue (e.g., monthly)

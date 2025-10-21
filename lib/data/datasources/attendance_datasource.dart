@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:finger_print_flutter/core/list_to_csv_converter.dart';
 
 import '../../core/data/drift/drift_client.dart' as Attendancez;
 import '../../core/enum.dart' show Gender;
@@ -22,8 +23,8 @@ class AttendanceRecordDatasource {
         .into(_driftClient.attendanceRecords)
         .insertReturning(
           Attendancez.AttendanceRecordsCompanion.insert(
-            memberId: record.memberId,
-            checkInTime: record.checkInTime,
+            memberId: record.memberId ?? 0,
+            checkInTime: record.checkInTime ?? DateTime.now(),
           ),
         );
     return mapEntityToModel(inserted);
@@ -36,7 +37,7 @@ class AttendanceRecordDatasource {
     return entities.map(mapEntityToModel).toList();
   }
 
-  Future<List<AttendanceRecord>> getByMember(String memberId) async {
+  Future<List<AttendanceRecord>> getByMember(int memberId) async {
     final query = _driftClient.select(_driftClient.attendanceRecords)
       ..where((r) => r.memberId.equals(memberId));
     final entities = await query.get();
@@ -95,5 +96,91 @@ class AttendanceRecordDatasource {
     return query.watch().map((entities) {
       return entities.map(mapEntityToModel).toList();
     });
+  }
+
+  Future<int> insertBatchFromCsv(List<List<String>> csvData) async {
+    final attendanceToInsert = <AttendanceRecord>[];
+    int successCount = 0;
+
+    // 1. Convert CSV rows to Member objects (Validation and Mapping)
+    for (final row in csvData) {
+      try {
+        final member = AttendanceRecord.fromCsvRow(row);
+        attendanceToInsert.add(member);
+      } on FormatException catch (e) {
+        // Log the error for the specific row and skip it.
+        print('Skipping row due to format error: ${e.message} in row: $row');
+      } catch (e) {
+        print('An unexpected error occurred during parsing: $e');
+      }
+    }
+
+    if (attendanceToInsert.isEmpty) {
+      print('No valid members found to insert.');
+      return 0;
+    }
+
+    // 2. Insert objects in a single, efficient database batch transaction
+    try {
+      await _driftClient.batch((batch) async {
+        for (final member in attendanceToInsert) {
+          // IMPORTANT: Convert the Member model back into a Drift Companion
+          // (or map/entity) format before inserting.
+          // This mock uses a simplified insert call for demonstration.
+          await _driftClient
+              .into(_driftClient.attendanceRecords)
+              .insertReturning(
+                Attendancez.AttendanceRecordsCompanion.insert(
+                  memberId: member.memberId ?? 0,
+                  checkInTime: member.checkInTime ?? DateTime.now(),
+                ),
+              );
+          successCount++;
+        }
+      });
+      print('Batch insertion complete. $successCount attendance processed.');
+      return successCount;
+    } catch (e) {
+      print('Database Batch Error: Failed to insert attendance: $e');
+      return 0; // Return 0 or re-throw based on required error handling
+    }
+  }
+
+  /// Retrieves all members and generates a complete CSV string for export.
+  ///
+  /// Returns a Future<String> containing the CSV data.
+  Future<String> exportToCsv() async {
+    // 1. Retrieve data from the database
+    print('Fetching all members from database...');
+    final List<AttendanceRecord> members = await getAll();
+    if (members.isEmpty) {
+      print('No members found to export.');
+      // Return a CSV with only the header
+      return const SimpleCsvConverter().convert([
+        AttendanceRecord().toCsvHeader(),
+      ]);
+    }
+
+    // 2. Prepare all data rows
+    final List<List<dynamic>> csvData = [];
+
+    // Add the header row first
+    csvData.add(members.first.toCsvHeader());
+
+    // Add all member data rows
+    for (final member in members) {
+      csvData.add(member.toCsvRow());
+    }
+    // 3. Convert the list of lists into a single CSV string
+    const converter = SimpleCsvConverter(
+      // Using a comma separator is standard for CSV, but you can change it
+      fieldDelimiter: ',',
+      textDelimiter:
+          '"', // Use quotes to encapsulate strings that contain commas
+    );
+    //final csvString =
+    return converter.convert(csvData);
+    // print('CSV string generated successfully.');
+    // return csvString;
   }
 }

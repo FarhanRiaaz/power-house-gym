@@ -1,5 +1,6 @@
 import 'package:finger_print_flutter/core/base_usecase.dart';
-import 'package:finger_print_flutter/domain/entities/auth/auth_service.dart';
+import 'package:finger_print_flutter/data/service/auth/auth_service.dart';
+import 'package:finger_print_flutter/data/service/biometric/biometric_service.dart';
 import 'package:finger_print_flutter/domain/entities/models/admin_user.dart';
 
 class LoginParams {
@@ -65,18 +66,24 @@ class ChangePasswordUseCase extends UseCase<bool, ChangePasswordParams> {
   }
 }
 
-/// Use case to enroll a new fingerprint template.
-///
-/// Type: String? (The generated template string)
-/// Params: int (The Member ID to associate the template with)
-class EnrollFingerprintUseCase extends UseCase<String?, int> {
+/// Use Case for enrolling a new fingerprint.
+class EnrollFingerprintUseCase extends UseCase<String?, void> {
   final BiometricService _biometricService;
-
   EnrollFingerprintUseCase(this._biometricService);
 
   @override
-  Future<String?> call({required int params}) {
-    // Logic: Enroll fingerprint and return the template string
-    return _biometricService.enroll(params);
+  Future<String?> call({required void params}) {
+    return _biometricService.enrollUser();
+  }
+}
+
+/// Use Case for verifying an existing user via fingerprint match.
+class VerifyFingerprintUseCase extends UseCase<String?, void> {
+  final BiometricService _biometricService;
+  VerifyFingerprintUseCase(this._biometricService);
+
+  @override
+  Future<String?> call({required void params}) {
+    return _biometricService.verifyUser();
   }
 }

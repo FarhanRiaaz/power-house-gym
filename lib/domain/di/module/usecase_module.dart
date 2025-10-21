@@ -1,12 +1,9 @@
-import 'package:finger_print_flutter/domain/entities/auth/auth_service.dart';
-import 'package:finger_print_flutter/domain/entities/auth/auth_service_impl.dart';
-import 'package:finger_print_flutter/domain/entities/report/export/export_data_service_impl.dart';
+
 import 'package:finger_print_flutter/domain/repository/attendance/attendance_repository.dart';
 import 'package:finger_print_flutter/domain/repository/expense/expense_repository.dart';
 import 'package:finger_print_flutter/domain/repository/financial/financial_repository.dart';
 import 'package:finger_print_flutter/domain/repository/member/member_repository.dart';
 import 'package:finger_print_flutter/domain/usecases/attendance/log_attendance_usecase.dart';
-import 'package:finger_print_flutter/domain/usecases/auth/auth_usecase.dart';
 import 'package:finger_print_flutter/domain/usecases/bill/bill_usecase.dart';
 import 'package:finger_print_flutter/domain/usecases/financial/financial_usecase.dart';
 import 'package:finger_print_flutter/domain/usecases/member/member_usecase.dart';
@@ -16,26 +13,6 @@ final getIt = GetIt.instance;
 
 mixin UseCaseModule {
   static Future<void> configureUseCaseModuleInjection() async {
-    // Standalone Services (Auth, Biometric, Data Utility)
-    getIt.registerLazySingleton<AuthService>(() => AuthServiceImpl());
-
-    getIt.registerLazySingleton<DataUtilityService>(() => DataUtilityServiceImpl());
-
-    getIt.registerLazySingleton<BiometricService>(() => BiometricServiceImpl());
-
-
-    getIt.registerFactory(() => LoginUseCase(getIt<AuthService>()));
-    getIt.registerFactory(() => LogoutUseCase(getIt<AuthService>()));
-    getIt.registerFactory(() => ChangePasswordUseCase(getIt<AuthService>()));
-
-    // --- Biometric Use Cases ---
-    getIt.registerFactory(() => EnrollFingerprintUseCase(getIt<BiometricService>()));
-
-    // --- Data Utility Use Cases ---
-    getIt.registerFactory(() => ExportDataUseCase(getIt<DataUtilityService>()));
-    getIt.registerFactory(() => ImportMembersUseCase(getIt<DataUtilityService>()));
-
-
 
     // Member Use Cases (depend on MemberRepository)
     getIt.registerFactory(() => GetAllMembersUseCase(getIt<MemberRepository>()));

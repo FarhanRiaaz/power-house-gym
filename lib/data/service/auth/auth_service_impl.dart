@@ -1,5 +1,5 @@
 import 'package:finger_print_flutter/core/enum.dart' show UserRole;
-import 'package:finger_print_flutter/domain/entities/auth/auth_service.dart';
+import 'package:finger_print_flutter/data/service/auth/auth_service.dart';
 import 'package:finger_print_flutter/domain/entities/models/admin_user.dart';
 
 /// A simple authentication service using hardcoded credentials.

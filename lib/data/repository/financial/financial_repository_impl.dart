@@ -30,4 +30,16 @@ class FinancialRepositoryImpl implements FinancialRepository {
   Future<void> deleteTransaction(int transactionId) {
     return _transactionDatasource.deleteTransaction(transactionId);
   }
+
+  /// Takes parsed CSV data and inserts it into the database using a batch operation.
+  /// This is the single, powerful function you can call from your Import Use Case.
+  @override
+  Future<int> insertBatchFromCsv(List<List<String>> csvData) async {
+    return await _transactionDatasource.insertBatchFromCsv(csvData);
+  }
+
+  @override
+  Future<String> exportToCsv() async {
+    return await _transactionDatasource.exportToCsv();
+  }
 }

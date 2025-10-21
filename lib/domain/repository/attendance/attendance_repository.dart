@@ -10,7 +10,7 @@ abstract class AttendanceRepository {
   Future<AttendanceRecord> logCheckIn(AttendanceRecord memberId);
 
   /// Retrieves the complete attendance history for a single member.
-  Future<List<AttendanceRecord>> getAttendanceHistory(String memberId);
+  Future<List<AttendanceRecord>> getAttendanceHistory(int memberId);
 
   /// Gets a report of all check-ins for a specific date, optionally filtered by gender.
   Future<List<AttendanceRecord>> getDailyAttendanceReport(DateTime date, Gender? scope);
@@ -18,4 +18,10 @@ abstract class AttendanceRepository {
   /// Watches all attendance records for the day, filtered by gender scope,
   /// for real-time dashboard updates.
   Stream<List<AttendanceRecord>> watchTodayAttendance(Gender? scope);
+
+  /// Takes parsed CSV data and inserts it into the database using a batch operation.
+  /// This is the single, powerful function you can call from your Import Use Case.
+  Future<int> insertBatchFromCsv(List<List<String>> csvData);
+  /// Export data to excel sheet so that it can be stored
+  Future<String> exportToCsv();
 }

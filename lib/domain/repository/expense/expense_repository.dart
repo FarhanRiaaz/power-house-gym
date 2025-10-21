@@ -15,4 +15,10 @@ abstract class ExpenseRepository {
 
   /// Deletes an expense record (typically restricted to Super Admin).
   Future<void> deleteExpense(int billId);
+
+  /// Takes parsed CSV data and inserts it into the database using a batch operation.
+  /// This is the single, powerful function you can call from your Import Use Case.
+  Future<int> insertBatchFromCsv(List<List<String>> csvData);
+  /// Export data to excel sheet so that it can be stored
+  Future<String> exportToCsv();
 }

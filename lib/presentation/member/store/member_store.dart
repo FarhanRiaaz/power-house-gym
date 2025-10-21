@@ -105,7 +105,7 @@ abstract class _MemberStore with Store {
 
   /// Looks up a member for attendance check-in.
   @action
-  Future<Member?> findMemberByFingerprint(Uint8List template) async {
+  Future<Member?> findMemberByFingerprint(String template) async {
     try {
       final member = await _findByFingerprintUseCase.call(params: template);
       selectedMember = member;

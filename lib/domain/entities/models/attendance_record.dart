@@ -1,22 +1,24 @@
 import 'dart:convert';
 
+import 'package:finger_print_flutter/domain/entities/models/csv.dart';
+
 /// Data class representing an attendance record.
-class AttendanceRecord {
-  final int id;
-  final String memberId;
-  final DateTime checkInTime;
+class AttendanceRecord  implements CsvConvertible{
+  final int? id;
+  final int? memberId;
+  final DateTime? checkInTime;
 
   AttendanceRecord({
-    required this.id,
-    required this.memberId,
-    required this.checkInTime,
+     this.id,
+     this.memberId,
+     this.checkInTime,
   });
 
   /// Convert to JSON
   Map<String, dynamic> toJson() => {
         'id': id,
         'memberId': memberId,
-        'checkInTime': checkInTime.toIso8601String(),
+        'checkInTime': checkInTime?.toIso8601String(),
       };
 
   /// Create from JSON
@@ -43,7 +45,7 @@ class AttendanceRecord {
   /// Create a copy with optional overrides
   AttendanceRecord copyWith({
     int? id,
-    String? memberId,
+    int? memberId,
     DateTime? checkInTime,
   }) {
     return AttendanceRecord(
@@ -73,6 +75,41 @@ class AttendanceRecord {
     return 'AttendanceRecord(id: $id, memberId: $memberId, checkIn: $checkInTime)';
   }
 
+  ///Import Export to CSV
+
+  @override
+  List<String> toCsvHeader() {
+    // Defines the friendly column names in the exact order the fields appear
+    return [
+      'ID',
+      'Member Id',
+      'checkIn Time',
+    ];
+  }
+  @override
+  List<String> toCsvRow() {
+    // We use the ISO 8601 format for a precise and unambiguous timestamp.
+    return [
+      id.toString(),
+      memberId.toString(),
+      checkInTime?.toIso8601String() ?? DateTime.now().toIso8601String(),
+    ];
+  }
+  /// Assumes the input List<String> contains elements in the order:
+  /// [id, memberId, checkInTime (ISO 8601 string)]
+  factory AttendanceRecord.fromCsvRow(List<String> row) {
+    if (row.length != 3) {
+      throw FormatException('CSV row must contain exactly 3 fields.');
+    }
+
+    // We assume the ID and Member ID are simple strings and the time is ISO 8601.
+    return AttendanceRecord(
+      id: int.tryParse(row[0])??0,
+      memberId: int.tryParse(row[1])??0,
+      checkInTime: DateTime.parse(row[2]),
+    );
+  }
+
   /// Filter by member
   static List<AttendanceRecord> forMember(
       List<AttendanceRecord> list, int memberId) {
@@ -81,7 +118,7 @@ class AttendanceRecord {
 
   /// Sort by check-in time (latest first)
   static List<AttendanceRecord> sortByDate(List<AttendanceRecord> list) {
-    list.sort((a, b) => b.checkInTime.compareTo(a.checkInTime));
+    list.sort((a, b) => b.checkInTime!.compareTo(a.checkInTime!));
     return list;
   }
 
@@ -91,11 +128,11 @@ class AttendanceRecord {
   }
 
   /// Group by member
-  static Map<String, List<AttendanceRecord>> groupByMember(
+  static Map<int, List<AttendanceRecord>> groupByMember(
       List<AttendanceRecord> list) {
-    final Map<String, List<AttendanceRecord>> grouped = {};
+    final Map<int, List<AttendanceRecord>> grouped = {};
     for (var r in list) {
-      grouped.putIfAbsent(r.memberId, () => []).add(r);
+      grouped.putIfAbsent(r.memberId!, () => []).add(r);
     }
     return grouped;
   }

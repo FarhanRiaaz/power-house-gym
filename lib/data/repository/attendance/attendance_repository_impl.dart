@@ -16,7 +16,7 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
   }
 
   @override
-  Future<List<AttendanceRecord>> getAttendanceHistory(String memberId) {
+  Future<List<AttendanceRecord>> getAttendanceHistory(int memberId) {
     return _attendanceDatasource.getByMember(memberId);
   }
 
@@ -29,5 +29,17 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
   @override
   Stream<List<AttendanceRecord>> watchTodayAttendance(Gender? scope) {
     return _attendanceDatasource.watchTodayRecords(genderFilter: scope);
+  }
+
+  /// Takes parsed CSV data and inserts it into the database using a batch operation.
+  /// This is the single, powerful function you can call from your Import Use Case.
+  @override
+  Future<int> insertBatchFromCsv(List<List<String>> csvData) async {
+    return await _attendanceDatasource.insertBatchFromCsv(csvData);
+  }
+
+  @override
+  Future<String> exportToCsv() async {
+    return await _attendanceDatasource.exportToCsv();
   }
 }

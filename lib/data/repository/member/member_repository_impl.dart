@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:finger_print_flutter/core/enum.dart';
 import 'package:finger_print_flutter/data/datasources/member_datasource.dart';
+import 'package:finger_print_flutter/domain/entities/models/fmd_model.dart';
 import 'package:finger_print_flutter/domain/repository/member/member_repository.dart';
 
 import '../../../domain/entities/models/member.dart';
@@ -25,7 +26,7 @@ class MemberRepositoryImpl implements MemberRepository {
   }
 
   @override
-  Future<Member?> findMemberByFingerprint(Uint8List fingerprintTemplate) {
+  Future<Member?> findMemberByFingerprint(String fingerprintTemplate) {
      return _memberDataSource.getByFingerprint(fingerprintTemplate);
 
   }
@@ -56,4 +57,22 @@ class MemberRepositoryImpl implements MemberRepository {
   Stream<Member?> watchMemberById(int id) {
     return _memberDataSource.watchById(id);
   }
+
+  @override
+  Future<List<FmdData>> getAllFmds({Gender? genderFilter}) {
+    return _memberDataSource.getAllFmds(genderFilter: genderFilter);
+  }
+
+  /// Takes parsed CSV data and inserts it into the database using a batch operation.
+  /// This is the single, powerful function you can call from your Import Use Case.
+  @override
+  Future<int> insertBatchFromCsv(List<List<String>> csvData) async {
+   return await _memberDataSource.insertBatchFromCsv(csvData);
+  }
+
+  @override
+  Future<String> exportToCsv() async {
+   return await _memberDataSource.exportToCsv();
+  }
+
 }

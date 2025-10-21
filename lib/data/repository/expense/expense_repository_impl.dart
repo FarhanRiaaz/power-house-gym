@@ -30,4 +30,16 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   Future<void> deleteExpense(int billId) {
     return _expenseDatasource.deleteBillExpense(billId);
   }
+
+  /// Takes parsed CSV data and inserts it into the database using a batch operation.
+  /// This is the single, powerful function you can call from your Import Use Case.
+  @override
+  Future<int> insertBatchFromCsv(List<List<String>> csvData) async {
+    return await _expenseDatasource.insertBatchFromCsv(csvData);
+  }
+
+  @override
+  Future<String> exportToCsv() async {
+    return await _expenseDatasource.exportToCsv();
+  }
 }

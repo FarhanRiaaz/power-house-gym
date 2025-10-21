@@ -1,7 +1,7 @@
-import 'dart:convert';
+import 'package:finger_print_flutter/domain/entities/models/csv.dart';
 
 /// Data class representing a financial transaction (e.g., fee payment, expense).
-class FinancialTransaction {
+class FinancialTransaction implements CsvConvertible {
   final int? id;
   final String? type; // e.g., "Fee Payment", "Expense", "Bill"
   final double? amount;
@@ -104,5 +104,48 @@ class FinancialTransaction {
     return list
         .where((tx) => tx.type == type)
         .fold(0.0, (sum, tx) => sum + tx.amount!);
+  }
+
+
+  ///Import Export to CSV
+
+  @override
+  List<String> toCsvHeader() {
+    // Defines the friendly column names in the exact order the fields appear
+    return [
+      'ID',
+      'Type',
+      'Amount',
+      'Date',
+      'Member',
+    ];
+  }
+  @override
+  List<String> toCsvRow() {
+    // We use the ISO 8601 format for a precise and unambiguous timestamp.
+    return [
+      id.toString(),
+      type ?? "",
+      amount.toString(),
+      transactionDate?.toIso8601String() ?? DateTime.now().toIso8601String(),
+      description ?? "",
+      relatedMemberId.toString(),
+    ];
+  }
+  /// Assumes the input List<String> contains elements in the order:
+  /// [id, memberId, checkInTime (ISO 8601 string)]
+  factory FinancialTransaction.fromCsvRow(List<String> row) {
+    if (row.length != 6) {
+      throw FormatException('CSV row must contain exactly 6 fields.');
+    }
+    // We assume the ID and Member ID are simple strings and the time is ISO 8601.
+    return FinancialTransaction(
+      id: int.tryParse(row[0])??0,
+      type: row[1]?? "",
+        amount: double.tryParse(row[2]),
+      transactionDate: DateTime.parse(row[3]),
+      description: row[4]?? "",
+        relatedMemberId: int.tryParse(row[5]),
+    );
   }
 }

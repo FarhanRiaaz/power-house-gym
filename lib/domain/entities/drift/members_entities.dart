@@ -22,7 +22,7 @@ class Members extends Table {
   DateTimeColumn get lastFeePaymentDate => dateTime()();
 
   // Biometric data (Uint8List in Dart, stored as BLOB in SQLite)
-  BlobColumn get fingerprintTemplate => blob().nullable()();
+  TextColumn get fingerprintTemplate => text().withLength(min: 1, max: 6000)();
 
   TextColumn get notes => text().nullable()();
 }

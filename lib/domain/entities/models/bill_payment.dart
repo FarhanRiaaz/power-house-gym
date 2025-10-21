@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:finger_print_flutter/domain/entities/models/csv.dart';
+
 /// Data class for tracking general expenses/bills.
-class BillExpense {
+class BillExpense implements CsvConvertible {
   final int? id;
   final String? category; // e.g., "Rent", "Utility", "Salary"
   final double? amount;
@@ -121,5 +123,46 @@ class BillExpense {
       grouped.putIfAbsent(e.category!, () => []).add(e);
     }
     return grouped;
+  }
+
+
+  ///Import Export to CSV
+
+  @override
+  List<String> toCsvHeader() {
+    // Defines the friendly column names in the exact order the fields appear
+    return [
+      'ID',
+      'Category',
+      'Amount',
+      'Date',
+    ];
+  }
+  @override
+  List<String> toCsvRow() {
+    // We use the ISO 8601 format for a precise and unambiguous timestamp.
+    return [
+      id.toString(),
+      category??"",
+      amount.toString(),
+      date?.toIso8601String() ?? DateTime.now().toIso8601String(),
+      description??""
+    ];
+  }
+  /// Assumes the input List<String> contains elements in the order:
+  /// [id, memberId, checkInTime (ISO 8601 string)]
+  factory BillExpense.fromCsvRow(List<String> row) {
+    if (row.length != 5) {
+      throw FormatException('CSV row must contain exactly 5 fields.');
+    }
+
+    // We assume the ID and Member ID are simple strings and the time is ISO 8601.
+    return BillExpense(
+      id: int.tryParse(row[0])??0,
+      category: row[1]??"",
+      amount: double.tryParse(row[2]),
+      date: DateTime.parse(row[3]),
+      description: row[4] ??"",
+    );
   }
 }

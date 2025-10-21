@@ -89,13 +89,13 @@ class FindMemberByIdUseCase extends UseCase<Member?, int> {
 ///
 /// Type: Member?
 /// Params: String (The encoded fingerprint template string)
-class FindMemberByFingerprintUseCase extends UseCase<Member?, Uint8List> {
+class FindMemberByFingerprintUseCase extends UseCase<Member?, String> {
   final MemberRepository _memberRepository;
 
   FindMemberByFingerprintUseCase(this._memberRepository);
 
   @override
-  Future<Member?> call({required Uint8List params}) {
+  Future<Member?> call({required String params}) {
     // IMPORTANT: The repository layer will be responsible for converting
     // this String representation of the template back to Uint8List for the DB lookup.
     return _memberRepository.findMemberByFingerprint(params);
