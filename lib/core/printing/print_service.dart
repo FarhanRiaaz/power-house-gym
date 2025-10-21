@@ -4,14 +4,9 @@ import 'package:printing/printing.dart';
 
 import '../../domain/entities/models/financial_transaction.dart';
 
-// --- RECEIPT SERVICE IMPLEMENTATION ---
 class ReceiptService {
   // Define the target width for visual spacing mimicry
   static const int _receiptWidth = 40;
-
-  // Note: In a real app, inject or initialize a native printer service
-  // (e.g., a mock for _printerService here is not needed
-  // since we use the Printing package directly).
 
   /// Helper to format the current date and time for the receipt header.
   String _formatDateTime(DateTime now) {
@@ -108,11 +103,14 @@ class ReceiptService {
       final doc = pw.Document();
       final dividerText = List.generate(_receiptWidth, (index) => '-').join();
 
-      // Define a custom page format for a narrow receipt (e.g., 80mm width)
-      // Height is set to infinity to allow content to dictate the length
+      // Define page format: 5 inches wide (5 * 72.0 points) and infinite height
       doc.addPage(
         pw.Page(
-          pageFormat: const PdfPageFormat(7.5 * PdfPageFormat.cm, double.infinity, marginAll: 0.5 * PdfPageFormat.cm),
+          pageFormat: const PdfPageFormat(
+            5 * 72.0, // Width: 5 inches (360 points)
+            double.infinity, // Height: Continuous roll
+            marginAll: 0.2 * 72.0, // Margin: 0.2 inches (14.4 points)
+          ),
           build: (pw.Context context) {
             return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -164,8 +162,6 @@ class ReceiptService {
 
                 // Motivational Message
                 _generateMotivation(attendancePercentage),
-
-                // Note: No <CUT_COMMAND> here as PDF printing handles paper cuts via native driver.
               ],
             );
           },
@@ -182,8 +178,8 @@ class ReceiptService {
 
     } catch (e) {
       print('Error during receipt printing: $e');
-      // Handle error, e.g., show a dialog to the user
       return false;
     }
   }
 }
+
