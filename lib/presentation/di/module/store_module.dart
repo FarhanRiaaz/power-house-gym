@@ -1,0 +1,70 @@
+import 'dart:async';
+import 'package:finger_print_flutter/domain/usecases/attendance/log_attendance_usecase.dart';
+import 'package:finger_print_flutter/domain/usecases/auth/auth_usecase.dart';
+import 'package:finger_print_flutter/domain/usecases/bill/bill_usecase.dart';
+import 'package:finger_print_flutter/domain/usecases/financial/financial_usecase.dart';
+import 'package:finger_print_flutter/domain/usecases/member/member_usecase.dart';
+import 'package:finger_print_flutter/presentation/attendance/store/attendance_store.dart';
+import 'package:finger_print_flutter/presentation/auth/store/auth_store.dart';
+import 'package:finger_print_flutter/presentation/expense/store/expense_store.dart';
+import 'package:finger_print_flutter/presentation/financial/store/financial_store.dart';
+import 'package:finger_print_flutter/presentation/member/store/member_store.dart';
+import 'package:get_it/get_it.dart';
+
+
+// this contain most of injection part for stores
+final getIt = GetIt.instance;
+mixin StoreModule {
+  static Future<void> configureStoreModuleInjection() async {
+    // Stores are registered as Singletons (Lazy/Eager) as they manage application state.
+    // Member Store
+    getIt.registerLazySingleton<MemberStore>(
+          () => MemberStore(
+        getIt<GetAllMembersUseCase>(),getIt<UpdateMemberUseCase>(),
+        getIt<InsertMemberUseCase>(),
+        getIt<DeleteMemberUseCase>(),
+        getIt<FindMemberByIdUseCase>(),
+        getIt<FindMemberByFingerprintUseCase>(),
+       // getIt<EnrollFingerprintUseCase>(), // New Biometric dependency
+      ),
+    );
+
+    // Attendance Store
+    getIt.registerLazySingleton<AttendanceStore>(
+          () => AttendanceStore(
+        getIt<LogAttendanceUseCase>(),
+        getIt<WatchTodayAttendanceUseCase>(),
+        getIt<GetDailyAttendanceReportUseCase>(),
+      ),
+    );
+
+    // Financial Store
+    getIt.registerLazySingleton<FinancialStore>(
+          () => FinancialStore(
+        getIt<RecordFinancialTransactionUseCase>(),
+        getIt<WatchAllTransactionsUseCase>(),
+        getIt<GetTransactionsByDateRangeUseCase>(),
+        getIt<DeleteTransactionUseCase>(),
+      ),
+    );
+
+    // Expense Store
+    getIt.registerLazySingleton<ExpenseStore>(
+          () => ExpenseStore(
+        getIt<InsertBillExpenseUseCase>(),
+        getIt<WatchAllExpensesUseCase>(),
+        getIt<GetBillsByDateRangeUseCase>(),
+        getIt<DeleteBillExpenseUseCase>(),
+      ),
+    );
+
+    // --- Auth Store ---
+    getIt.registerLazySingleton<AuthStore>(
+          () => AuthStore(
+        getIt<LoginUseCase>(),
+        getIt<LogoutUseCase>(),
+        getIt<ChangePasswordUseCase>(),
+      ),
+    );
+  }
+}
