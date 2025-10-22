@@ -3,6 +3,7 @@ import 'package:finger_print_flutter/presentation/member/store/member_store.dart
 import 'package:flutter/material.dart';
 import '../../../domain/entities/models/member.dart';
 import '../../di/service_locator.dart';
+import '../components/app_text_field.dart';
 
 class EditMemberDialog extends StatelessWidget {
   final Member member;
@@ -22,23 +23,23 @@ class EditMemberDialog extends StatelessWidget {
           children: [
             Text('Edit Member', style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 16),
-            AppTextField(
-              label: 'Name',
-              initialValue: member.name,
-              onChanged: (val) => store.selectedMember = member.copyWith(name: val),
-            ),
+            // AppTextField(
+            //   label: 'Name',
+            //   initialValue: member.name,
+            //   onChanged: (val) => store.selectedMember = member.copyWith(name: val),
+            // ),
             const SizedBox(height: 12),
-            AppTextField(
-              label: 'Phone',
-              initialValue: member.phone,
-              onChanged: (val) => store.selectedMember = member.copyWith(phone: val),
-            ),
+            // AppTextField(
+            //   label: 'Phone',
+            //   initialValue: member.phone,
+            //   onChanged: (val) => store.selectedMember = member.copyWith(phone: val),
+            // ),
             const SizedBox(height: 12),
-            AppTextField(
-              label: 'Notes',
-              initialValue: member.notes,
-              onChanged: (val) => store.selectedMember = member.copyWith(notes: val),
-            ),
+            // AppTextField(
+            //   label: 'Notes',
+            //   initialValue: member.notes,
+            //   onChanged: (val) => store.selectedMember = member.copyWith(notes: val),
+            // ),
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
