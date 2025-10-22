@@ -621,6 +621,7 @@ class _MemberFormDialogState extends State<_MemberFormDialog> {
                     labelText: 'Gender',
                     border: OutlineInputBorder(),
                   ),
+                    dropdownColor: AppColors.backgroundDark,
                   items: Gender.values.map((Gender gender) {
                     return DropdownMenuItem<Gender>(
                       value: gender,
