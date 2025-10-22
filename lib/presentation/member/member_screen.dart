@@ -563,6 +563,27 @@ class _MemberFormDialogState extends State<_MemberFormDialog> {
     }
   }
 
+  void _showFingerprintDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AppDialog(
+        title: 'Fingerprint Registration',
+        // The message requested by the user
+        message: 'Put your finger into the biometric device to capture.',
+        type: AppDialogType.info,
+        actions: [
+          // Simulated registration completion (just closes the dialog)
+          AppButton(
+            label: 'Captured (OK)',
+            onPressed: () => Navigator.of(ctx).pop(),
+            variant: AppButtonVariant.primary,
+            icon: Icons.check_circle,
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -583,7 +604,7 @@ class _MemberFormDialogState extends State<_MemberFormDialog> {
                   validator: (value) => value!.isEmpty ? 'Name is required' : null,
                   prefixIcon: Icons.person,
                 ),
-                SizedBox(height: 14),
+                const SizedBox(height: 14),
                 // 💡 AppTextField for Father Name - Now passes required controller
                 AppTextField(
                   label: 'Father Name *',
@@ -591,8 +612,8 @@ class _MemberFormDialogState extends State<_MemberFormDialog> {
                   validator: (value) => value!.isEmpty ? 'Father Name is required' : null,
                   prefixIcon: Icons.family_restroom,
                 ),
-                
-                SizedBox(height: 14),
+
+                const  SizedBox(height: 14),
                 // 💡 AppTextField for Phone Number - Now passes required controller
                 AppTextField(
                   label: 'Phone Number',
@@ -601,7 +622,8 @@ class _MemberFormDialogState extends State<_MemberFormDialog> {
                   prefixIcon: Icons.phone,
                 ),
 
-                SizedBox(height: 14),
+                const  SizedBox(height: 14),
+
                 // 💡 AppDatePicker for Registration Date
                 AppDatePicker(
                   label: 'Registration Date',
@@ -613,7 +635,7 @@ class _MemberFormDialogState extends State<_MemberFormDialog> {
                   },
                 ),
 
-                SizedBox(height: 14),
+                const   SizedBox(height: 14),
                 // Standard Flutter Dropdown for Gender
                 DropdownButtonFormField<Gender>(
                   value: _currentMember.gender,
@@ -636,7 +658,7 @@ class _MemberFormDialogState extends State<_MemberFormDialog> {
                   },
                 ),
 
-                SizedBox(height: 16,),
+                const    SizedBox(height: 16,),
                 // 💡 AppTextField for Membership Type - Now passes required controller
                 AppTextField(
                   label: 'Membership Type',
@@ -644,14 +666,23 @@ class _MemberFormDialogState extends State<_MemberFormDialog> {
                   prefixIcon: Icons.fitness_center,
                 ),
                 // 💡 AppTextField for Notes - Now passes required controller
-                
-                SizedBox(height: 14),
+
+                const     SizedBox(height: 14),
                 AppTextField(
                   label: 'Notes',
                   controller: _notesController,
                   maxLines: 3,
                   prefixIcon: Icons.note_alt,
                 ),
+                const SizedBox(height: 14),
+                widget.member == null?   AppButton(
+                  label: 'Register Fingerprint',
+                  icon: Icons.fingerprint,
+                  onPressed: _showFingerprintDialog,
+                  variant: AppButtonVariant.secondary,
+                  fullWidth: true, // Make it span the width of the dialog
+                ):SizedBox.shrink(),
+
               ],
             ),
           ),
