@@ -306,12 +306,14 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
                   onPressed: () => _showMemberForm(member, true),
                   variant: AppButtonVariant.secondary,
                   isOutline: true,
+                  fullWidth: false,
                 ),
                 const SizedBox(width: 8),
                 AppButton(
                   label: 'Delete',
                   icon: Icons.delete,
                   onPressed: () => _removeMember(member),
+                  fullWidth: false,
                   variant: AppButtonVariant.danger,
                 ),
               ],
@@ -355,6 +357,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
                   label: 'PAY FEE NOW',
                   icon: Icons.payment,
                   onPressed: () => _payFee(member),
+                  fullWidth: false,
                   variant: AppButtonVariant.primary,
                 ),
                 // 💡 AppButton for Print Receipt
@@ -362,6 +365,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
                   label: 'Print Receipt',
                   icon: Icons.print,
                   onPressed: () => _printReceipt(member),
+                  fullWidth: false,
                   variant: AppButtonVariant.secondary,
                 ),
               ],
@@ -406,7 +410,9 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
           child: _buildMemberDetailView(member),
         ),
         actions: [
-          AppButton(label: 'Close', onPressed: () => Navigator.of(ctx).pop(), variant: AppButtonVariant.secondary),
+          AppButton(label: 'Close',
+              fullWidth: false,
+              onPressed: () => Navigator.of(ctx).pop(), variant: AppButtonVariant.secondary),
         ],
       ),
     );
@@ -643,12 +649,14 @@ class _MemberFormDialogState extends State<_MemberFormDialog> {
         AppButton(
           label: 'Cancel',
           onPressed: () => Navigator.of(context).pop(),
+          fullWidth: false,
           variant: AppButtonVariant.secondary,
         ),
         // 💡 AppButton for Save
         AppButton(
           label: widget.member == null ? 'Add Member' : 'Save Changes',
           onPressed: _saveForm,
+          fullWidth: false,
           variant: AppButtonVariant.primary,
         ),
       ],
