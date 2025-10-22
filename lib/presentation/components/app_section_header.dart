@@ -7,6 +7,7 @@ class AppSectionHeader extends StatelessWidget {
   final String? actionLabel;
   final VoidCallback? onActionTap;
   final IconData? actionIcon;
+  final Widget? trailingWidget;
 
   const AppSectionHeader({
     super.key,
@@ -14,6 +15,7 @@ class AppSectionHeader extends StatelessWidget {
     this.actionLabel,
     this.onActionTap,
     this.actionIcon,
+    this.trailingWidget,
   });
 
   @override
@@ -30,6 +32,7 @@ class AppSectionHeader extends StatelessWidget {
               icon: Icon(actionIcon ?? Icons.add, color: AppColors.primary),
               label: Text(actionLabel!, style: AppTextStyles.body.copyWith(color: AppColors.primary)),
             ),
+          if (trailingWidget != null) trailingWidget!,
         ],
       ),
     );

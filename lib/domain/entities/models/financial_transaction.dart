@@ -59,6 +59,7 @@ class FinancialTransaction implements CsvConvertible {
     );
   }
 
+
   /// Equality override
   @override
   bool operator ==(Object other) =>
@@ -147,5 +148,14 @@ class FinancialTransaction implements CsvConvertible {
       description: row[4]?? "",
         relatedMemberId: int.tryParse(row[5]),
     );
+  }
+}
+// Extension to help with finding first where (similar to collections in other languages)
+extension ListExtension<T> on List<T> {
+  T? firstWhereOrNull(bool Function(T element) test) {
+    for (var element in this) {
+      if (test(element)) return element;
+    }
+    return null;
   }
 }

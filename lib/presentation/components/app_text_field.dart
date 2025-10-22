@@ -1,6 +1,7 @@
 import 'package:finger_print_flutter/core/style/app_colors.dart';
 import 'package:finger_print_flutter/core/style/app_text_styles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class AppTextField extends StatelessWidget {
   final String label;
@@ -14,6 +15,7 @@ class AppTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final FormFieldSetter<String>? onSaved;
   final int maxLines;
+  final List<TextInputFormatter>? inputFormatters;
 
   const AppTextField({
     super.key,
@@ -28,6 +30,7 @@ class AppTextField extends StatelessWidget {
     this.onChanged,
     this.onSaved,
     this.maxLines = 1,
+    this.inputFormatters,
   });
 
   @override
@@ -40,6 +43,7 @@ class AppTextField extends StatelessWidget {
       validator: validator,
       onChanged: onChanged,
       onSaved: onSaved,
+      inputFormatters: inputFormatters,
       style: AppTextStyles.body,
       decoration: InputDecoration(
         labelText: label,

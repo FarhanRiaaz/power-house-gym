@@ -4,11 +4,11 @@ import 'package:finger_print_flutter/domain/entities/models/csv.dart';
 
 /// Data class for tracking general expenses/bills.
 class BillExpense implements CsvConvertible {
-  final int? id;
-  final String? category; // e.g., "Rent", "Utility", "Salary"
-  final double? amount;
-  final DateTime? date;
-  final String? description;
+   int? id;
+   String? category; // e.g., "Rent", "Utility", "Salary"
+   double? amount;
+   DateTime? date;
+   String? description;
 
   BillExpense({
      this.id,

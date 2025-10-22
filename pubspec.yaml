@@ -49,6 +49,7 @@ dependencies:
   pdf: ^3.11.3
   printing: ^5.14.2
   share_plus: ^11.1.0
+  lottie: ^3.3.2
   intl: any
 dev_dependencies:
   flutter_test:
@@ -79,6 +80,7 @@ flutter:
   assets:
     - assets/images/login_bg.png
     - assets/images/logo.png
+    - assets/images/illus.png
 
 
   # To add assets to your application, add an assets section, like this:

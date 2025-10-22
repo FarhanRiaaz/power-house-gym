@@ -6,6 +6,9 @@ import 'package:finger_print_flutter/enrollment_screen.dart';
 import 'package:finger_print_flutter/presentation/auth/login_screen.dart';
 import 'package:finger_print_flutter/presentation/auth/route_manager.dart';
 import 'package:finger_print_flutter/presentation/dashboard/dashboard_screen.dart';
+import 'package:finger_print_flutter/presentation/expense/expense_screen.dart';
+import 'package:finger_print_flutter/presentation/financial/financial_transaction_screen.dart';
+import 'package:finger_print_flutter/presentation/member/attendance_screen.dart';
 import 'package:finger_print_flutter/presentation/member/member_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -14,11 +17,11 @@ import 'di/service_locator.dart';
 Future<void> main() async {
   return runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
+
     await ServiceLocator.configureDependencies();
     runApp(FingerprintApp());
   }, (error, stackTrace) {});
 }
-
 
 class FingerprintApp extends StatelessWidget {
   const FingerprintApp({super.key});
@@ -27,12 +30,13 @@ class FingerprintApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Power House Management',
- theme: AppTheme.light,
-  darkTheme: AppTheme.dark,
-  themeMode: ThemeMode.system,
-  // initialRoute: RouteManager.dashboard,
-  // onGenerateRoute: RouteManager.generateRoute,
-      home: ManageMemberScreen(),
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
+      // initialRoute: RouteManager.dashboard,
+      // onGenerateRoute: RouteManager.generateRoute,
+      home: AttendanceScreen(onUpdate: () {}),
     );
   }
 }
@@ -53,18 +57,18 @@ class Member {
   });
 
   Map<String, dynamic> toJson() => {
-        "member_id": memberId,
-        "name": name,
-        "fmd_base64": fmdBase64,
-      };
+    "member_id": memberId,
+    "name": name,
+    "fmd_base64": fmdBase64,
+  };
 
   static Member fromJson(Map<String, dynamic> json) => Member(
-        memberId: json["member_id"],
-        name: json["name"],
-        feeDue: DateTime.now().add(Duration(days: 7)),
-        attendance: [],
-        fmdBase64: json["fmd_base64"],
-      );
+    memberId: json["member_id"],
+    name: json["name"],
+    feeDue: DateTime.now().add(Duration(days: 7)),
+    attendance: [],
+    fmdBase64: json["fmd_base64"],
+  );
 
   @override
   String toString() {
@@ -85,10 +89,13 @@ class _FingerprintHomeState extends State<FingerprintHome> {
   bool scanningEnabled = false;
   bool isPopupVisible = false;
 
-  final String jsonPath = 'C:\\Users\\farha\\finger_print_flutter\\assets\\members.json';
- // final String exePath = 'C:\\Users\\farha\\FingerprintApp\\bin\\Debug\\net9.0\\FingerprintApp.exe';
+  final String jsonPath =
+      'C:\\Users\\farha\\finger_print_flutter\\assets\\members.json';
 
- final String exePath = 'C:\\Users\\farha\\finger_print_flutter\\assets\\FingerprintApp.exe';
+  // final String exePath = 'C:\\Users\\farha\\FingerprintApp\\bin\\Debug\\net9.0\\FingerprintApp.exe';
+
+  final String exePath =
+      'C:\\Users\\farha\\finger_print_flutter\\assets\\FingerprintApp.exe';
 
   @override
   void initState() {
@@ -113,7 +120,7 @@ class _FingerprintHomeState extends State<FingerprintHome> {
   Future<void> saveMembersToJson() async {
     final file = File(jsonPath);
     final jsonData = {
-      "members": members.values.map((m) => m.toJson()).toList()
+      "members": members.values.map((m) => m.toJson()).toList(),
     };
     await file.writeAsString(jsonEncode(jsonData));
   }
@@ -127,98 +134,97 @@ class _FingerprintHomeState extends State<FingerprintHome> {
     if (scanningEnabled) startScanningLoop();
   }
 
-Future<void> startScanningLoop() async {
-  while (mounted && scanningEnabled) {
-    final result = await Process.run(
-      exePath,
-      ['match', jsonPath],
-      workingDirectory: File(exePath).parent.path,
-    );
+  Future<void> startScanningLoop() async {
+    while (mounted && scanningEnabled) {
+      final result = await Process.run(exePath, [
+        'match',
+        jsonPath,
+      ], workingDirectory: File(exePath).parent.path);
 
-    final output = result.stdout.toString().trim();
-    final error = result.stderr.toString().trim();
-    print("C# STDOUT:\n$output");
-    if (error.isNotEmpty) print("C# STDERR:\n$error");
+      final output = result.stdout.toString().trim();
+      final error = result.stderr.toString().trim();
+      print("C# STDOUT:\n$output");
+      if (error.isNotEmpty) print("C# STDERR:\n$error");
 
-    if (output.isEmpty || output.contains("MATCH_FAILED_TIMEOUT")) {
-      await Future.delayed(Duration(milliseconds: 400));
-      continue; // No finger detected — skip popup
-    }
-
-    final lines = output.split('\n').map((line) => line.trim()).toList();
-    final matchLine = lines.firstWhere(
-      (line) => line.startsWith('MATCH:') || line == 'NO_MATCH_REGISTER',
-      orElse: () => '',
-    );
-
-    if (matchLine.startsWith('MATCH:')) {
-      final memberId = matchLine.split(':')[1].trim();
-      final member = members[memberId];
-
-      if (member == null) {
-        showPopup("User not registered. Please enroll.");
-      } else if (DateTime.now().isAfter(member.feeDue)) {
-        showPopup("Your fee is overdue. Please pay.");
-      } else {
-        member.attendance.add(DateTime.now());
-        await saveMembersToJson();
-        showPopup("Welcome ${member.name}! Attendance marked.");
+      if (output.isEmpty || output.contains("MATCH_FAILED_TIMEOUT")) {
+        await Future.delayed(Duration(milliseconds: 400));
+        continue; // No finger detected — skip popup
       }
-    } else if (matchLine == 'NO_MATCH_REGISTER') {
-      final fmdLine = lines.firstWhere(
-        (line) => line.startsWith('FMD_BASE64:'),
+
+      final lines = output.split('\n').map((line) => line.trim()).toList();
+      final matchLine = lines.firstWhere(
+        (line) => line.startsWith('MATCH:') || line == 'NO_MATCH_REGISTER',
         orElse: () => '',
       );
 
-      if (fmdLine.isNotEmpty) {
-        final fmdBase64 = fmdLine.split(':')[1].trim();
-        showUnrecognizedFingerprintPopup(fmdBase64);
-      } else {
-        print("FMD_BASE64 line not found.");
+      if (matchLine.startsWith('MATCH:')) {
+        final memberId = matchLine.split(':')[1].trim();
+        final member = members[memberId];
+
+        if (member == null) {
+          showPopup("User not registered. Please enroll.");
+        } else if (DateTime.now().isAfter(member.feeDue)) {
+          showPopup("Your fee is overdue. Please pay.");
+        } else {
+          member.attendance.add(DateTime.now());
+          await saveMembersToJson();
+          showPopup("Welcome ${member.name}! Attendance marked.");
+        }
+      } else if (matchLine == 'NO_MATCH_REGISTER') {
+        final fmdLine = lines.firstWhere(
+          (line) => line.startsWith('FMD_BASE64:'),
+          orElse: () => '',
+        );
+
+        if (fmdLine.isNotEmpty) {
+          final fmdBase64 = fmdLine.split(':')[1].trim();
+          showUnrecognizedFingerprintPopup(fmdBase64);
+        } else {
+          print("FMD_BASE64 line not found.");
+        }
       }
+
+      await Future.delayed(Duration(milliseconds: 400));
     }
-
-    await Future.delayed(Duration(milliseconds: 400));
   }
-}
 
-void showUnrecognizedFingerprintPopup(String fmdBase64) {
-  if (isPopupVisible) return;
-  isPopupVisible = true;
+  void showUnrecognizedFingerprintPopup(String fmdBase64) {
+    if (isPopupVisible) return;
+    isPopupVisible = true;
 
-  showDialog(
-    context: context,
-    builder: (_) => AlertDialog(
-      title: Text("Unrecognized Fingerprint"),
-      content: Text("Fingerprint not recognized. Register this user?"),
-      actions: [
-        TextButton(
-          child: Text("Cancel"),
-          onPressed: () {
-            Navigator.of(context).pop();
-            isPopupVisible = false;
-          },
-        ),
-        ElevatedButton(
-          child: Text("Register"),
-          onPressed: () {
-            Navigator.of(context).pop();
-            isPopupVisible = false;
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => EnrollmentFormScreen(
-                  fmdBase64: fmdBase64,
-                  onSave: addNewMember,
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("Unrecognized Fingerprint"),
+        content: Text("Fingerprint not recognized. Register this user?"),
+        actions: [
+          TextButton(
+            child: Text("Cancel"),
+            onPressed: () {
+              Navigator.of(context).pop();
+              isPopupVisible = false;
+            },
+          ),
+          ElevatedButton(
+            child: Text("Register"),
+            onPressed: () {
+              Navigator.of(context).pop();
+              isPopupVisible = false;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => EnrollmentFormScreen(
+                    fmdBase64: fmdBase64,
+                    onSave: addNewMember,
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
-      ],
-    ),
-  );
-}
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
 
   // 🔹 NEW: Add this method to save a new member
   void addNewMember(Member member) async {
@@ -232,23 +238,18 @@ void showUnrecognizedFingerprintPopup(String fmdBase64) {
     scanningEnabled = false;
     setState(() => result = "Capturing fingerprint...");
 
-    final enrollResult = await Process.run(
-      exePath,
-      ['enroll'],
-      workingDirectory: File(exePath).parent.path,
-    );
+    final enrollResult = await Process.run(exePath, [
+      'enroll',
+    ], workingDirectory: File(exePath).parent.path);
 
     final output = enrollResult.stdout.toString().trim();
     print("Enrollment STDOUT:\n$output");
 
-
-
-
     final lines = output.split('\n');
     if (lines.contains("ENROLL_FAILED_EMPTY_FMD")) {
-  showPopup("No fingerprint detected. Please try again.");
-  return;
-}
+      showPopup("No fingerprint detected. Please try again.");
+      return;
+    }
 
     final successLine = lines.firstWhere(
       (line) => line.trim() == "ENROLL_SUCCESS",
@@ -260,7 +261,10 @@ void showUnrecognizedFingerprintPopup(String fmdBase64) {
       return;
     }
 
-    final fmdLine = lines.firstWhere((line) => line.startsWith("FMD_BASE64:"), orElse: () => "");
+    final fmdLine = lines.firstWhere(
+      (line) => line.startsWith("FMD_BASE64:"),
+      orElse: () => "",
+    );
     if (fmdLine.isEmpty) {
       showPopup("No fingerprint data received.");
       return;
@@ -270,7 +274,8 @@ void showUnrecognizedFingerprintPopup(String fmdBase64) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => EnrollmentFormScreen(fmdBase64: fmdBase64, onSave: addNewMember),
+        builder: (_) =>
+            EnrollmentFormScreen(fmdBase64: fmdBase64, onSave: addNewMember),
       ),
     );
   }
@@ -291,7 +296,7 @@ void showUnrecognizedFingerprintPopup(String fmdBase64) {
               Navigator.of(context).pop();
               isPopupVisible = false;
             },
-          )
+          ),
         ],
       ),
     );
