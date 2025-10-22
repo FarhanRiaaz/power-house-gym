@@ -436,35 +436,37 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const AppSectionHeader(title: 'Manage Members'),
-              const SizedBox(height: 20),
-
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width:MediaQuery.of(context).size.width * 0.4,
-                child: _buildMemberListView(true),
-              ),
-              const SizedBox(width: 24),
-              Expanded(
-                child: _selectedMember != null
-                    ? _buildMemberDetailView(_selectedMember!)
-                    : AppEmptyState(
-                  message: 'Select a member to view details and actions.',
-                  icon: Icons.contact_page,
+      backgroundColor: Colors.transparent,
+      body: BackgroundWrapper(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const AppSectionHeader(title: 'Manage Members'),
+                const SizedBox(height: 20),
+        
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width:MediaQuery.of(context).size.width * 0.4,
+                  child: _buildMemberListView(true),
                 ),
-              ),
-            ],
-          )
-            ],
+                const SizedBox(width: 24),
+                Expanded(
+                  child: _selectedMember != null
+                      ? _buildMemberDetailView(_selectedMember!)
+                      : AppEmptyState(
+                    message: 'Select a member to view details and actions.',
+                    icon: Icons.contact_page,
+                  ),
+                ),
+              ],
+            )
+              ],
+            ),
           ),
         ),
       ),
@@ -521,7 +523,7 @@ class _MemberFormDialogState extends State<_MemberFormDialog> {
         name: '',
         phoneNumber: '',
         fatherName: '',
-        membershipType: 'Silver 6 Months',
+        membershipType: '',
         registrationDate: DateTime.now(),
       );
     }
@@ -565,9 +567,10 @@ class _MemberFormDialogState extends State<_MemberFormDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(widget.member == null ? 'Add New Member' : 'Edit Member: ${widget.member!.name}'),
+      backgroundColor: AppColors.backgroundDark,
       content: SingleChildScrollView(
         child: SizedBox(
-          width: 500,
+          width: 800,
           child: Form(
             key: _formKey,
             child: Column(
@@ -580,6 +583,7 @@ class _MemberFormDialogState extends State<_MemberFormDialog> {
                   validator: (value) => value!.isEmpty ? 'Name is required' : null,
                   prefixIcon: Icons.person,
                 ),
+                SizedBox(height: 14),
                 // 💡 AppTextField for Father Name - Now passes required controller
                 AppTextField(
                   label: 'Father Name *',
@@ -587,6 +591,8 @@ class _MemberFormDialogState extends State<_MemberFormDialog> {
                   validator: (value) => value!.isEmpty ? 'Father Name is required' : null,
                   prefixIcon: Icons.family_restroom,
                 ),
+                
+                SizedBox(height: 14),
                 // 💡 AppTextField for Phone Number - Now passes required controller
                 AppTextField(
                   label: 'Phone Number',
@@ -595,6 +601,7 @@ class _MemberFormDialogState extends State<_MemberFormDialog> {
                   prefixIcon: Icons.phone,
                 ),
 
+                SizedBox(height: 14),
                 // 💡 AppDatePicker for Registration Date
                 AppDatePicker(
                   label: 'Registration Date',
@@ -606,6 +613,7 @@ class _MemberFormDialogState extends State<_MemberFormDialog> {
                   },
                 ),
 
+                SizedBox(height: 14),
                 // Standard Flutter Dropdown for Gender
                 DropdownButtonFormField<Gender>(
                   value: _currentMember.gender,
@@ -616,7 +624,8 @@ class _MemberFormDialogState extends State<_MemberFormDialog> {
                   items: Gender.values.map((Gender gender) {
                     return DropdownMenuItem<Gender>(
                       value: gender,
-                      child: Text(gender.name.toUpperCase()),
+                      
+                      child: Text(gender.name.toUpperCase(),),
                     );
                   }).toList(),
                   onChanged: (Gender? newValue) {
@@ -626,6 +635,7 @@ class _MemberFormDialogState extends State<_MemberFormDialog> {
                   },
                 ),
 
+                SizedBox(height: 16,),
                 // 💡 AppTextField for Membership Type - Now passes required controller
                 AppTextField(
                   label: 'Membership Type',
@@ -633,6 +643,8 @@ class _MemberFormDialogState extends State<_MemberFormDialog> {
                   prefixIcon: Icons.fitness_center,
                 ),
                 // 💡 AppTextField for Notes - Now passes required controller
+                
+                SizedBox(height: 14),
                 AppTextField(
                   label: 'Notes',
                   controller: _notesController,
