@@ -1,7 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:finger_print_flutter/core/style/app_theme.dart';
 import 'package:finger_print_flutter/enrollment_screen.dart';
+import 'package:finger_print_flutter/presentation/auth/login_screen.dart';
+import 'package:finger_print_flutter/presentation/auth/route_manager.dart';
+import 'package:finger_print_flutter/presentation/dashboard/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'di/service_locator.dart';
@@ -21,9 +25,13 @@ class FingerprintApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Gym Fingerprint System',
-      theme: ThemeData.dark(),
-      home: FingerprintHome(),
+      title: 'Power House Management',
+ theme: AppTheme.light,
+  darkTheme: AppTheme.dark,
+  themeMode: ThemeMode.system,
+  initialRoute: RouteManager.dashboard,
+  onGenerateRoute: RouteManager.generateRoute,
+      home: DashboardScreen(),
     );
   }
 }

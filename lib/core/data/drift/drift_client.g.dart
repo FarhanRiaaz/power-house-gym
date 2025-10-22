@@ -116,13 +116,17 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
   static const VerificationMeta _fingerprintTemplateMeta =
       const VerificationMeta('fingerprintTemplate');
   @override
-  late final GeneratedColumn<Uint8List> fingerprintTemplate =
-      GeneratedColumn<Uint8List>(
+  late final GeneratedColumn<String> fingerprintTemplate =
+      GeneratedColumn<String>(
         'fingerprint_template',
         aliasedName,
-        true,
-        type: DriftSqlType.blob,
-        requiredDuringInsert: false,
+        false,
+        additionalChecks: GeneratedColumn.checkTextLength(
+          minTextLength: 1,
+          maxTextLength: 6000,
+        ),
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
       );
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
@@ -232,6 +236,8 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
           _fingerprintTemplateMeta,
         ),
       );
+    } else if (isInserting) {
+      context.missing(_fingerprintTemplateMeta);
     }
     if (data.containsKey('notes')) {
       context.handle(
@@ -283,9 +289,9 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
         data['${effectivePrefix}last_fee_payment_date'],
       )!,
       fingerprintTemplate: attachedDatabase.typeMapping.read(
-        DriftSqlType.blob,
+        DriftSqlType.string,
         data['${effectivePrefix}fingerprint_template'],
-      ),
+      )!,
       notes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
@@ -311,7 +317,7 @@ class Member extends DataClass implements Insertable<Member> {
   final String membershipType;
   final DateTime registrationDate;
   final DateTime lastFeePaymentDate;
-  final Uint8List? fingerprintTemplate;
+  final String fingerprintTemplate;
   final String? notes;
   const Member({
     required this.memberId,
@@ -322,7 +328,7 @@ class Member extends DataClass implements Insertable<Member> {
     required this.membershipType,
     required this.registrationDate,
     required this.lastFeePaymentDate,
-    this.fingerprintTemplate,
+    required this.fingerprintTemplate,
     this.notes,
   });
   @override
@@ -340,9 +346,7 @@ class Member extends DataClass implements Insertable<Member> {
     map['membership_type'] = Variable<String>(membershipType);
     map['registration_date'] = Variable<DateTime>(registrationDate);
     map['last_fee_payment_date'] = Variable<DateTime>(lastFeePaymentDate);
-    if (!nullToAbsent || fingerprintTemplate != null) {
-      map['fingerprint_template'] = Variable<Uint8List>(fingerprintTemplate);
-    }
+    map['fingerprint_template'] = Variable<String>(fingerprintTemplate);
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
     }
@@ -359,9 +363,7 @@ class Member extends DataClass implements Insertable<Member> {
       membershipType: Value(membershipType),
       registrationDate: Value(registrationDate),
       lastFeePaymentDate: Value(lastFeePaymentDate),
-      fingerprintTemplate: fingerprintTemplate == null && nullToAbsent
-          ? const Value.absent()
-          : Value(fingerprintTemplate),
+      fingerprintTemplate: Value(fingerprintTemplate),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
@@ -386,7 +388,7 @@ class Member extends DataClass implements Insertable<Member> {
       lastFeePaymentDate: serializer.fromJson<DateTime>(
         json['lastFeePaymentDate'],
       ),
-      fingerprintTemplate: serializer.fromJson<Uint8List?>(
+      fingerprintTemplate: serializer.fromJson<String>(
         json['fingerprintTemplate'],
       ),
       notes: serializer.fromJson<String?>(json['notes']),
@@ -406,7 +408,7 @@ class Member extends DataClass implements Insertable<Member> {
       'membershipType': serializer.toJson<String>(membershipType),
       'registrationDate': serializer.toJson<DateTime>(registrationDate),
       'lastFeePaymentDate': serializer.toJson<DateTime>(lastFeePaymentDate),
-      'fingerprintTemplate': serializer.toJson<Uint8List?>(fingerprintTemplate),
+      'fingerprintTemplate': serializer.toJson<String>(fingerprintTemplate),
       'notes': serializer.toJson<String?>(notes),
     };
   }
@@ -420,7 +422,7 @@ class Member extends DataClass implements Insertable<Member> {
     String? membershipType,
     DateTime? registrationDate,
     DateTime? lastFeePaymentDate,
-    Value<Uint8List?> fingerprintTemplate = const Value.absent(),
+    String? fingerprintTemplate,
     Value<String?> notes = const Value.absent(),
   }) => Member(
     memberId: memberId ?? this.memberId,
@@ -431,9 +433,7 @@ class Member extends DataClass implements Insertable<Member> {
     membershipType: membershipType ?? this.membershipType,
     registrationDate: registrationDate ?? this.registrationDate,
     lastFeePaymentDate: lastFeePaymentDate ?? this.lastFeePaymentDate,
-    fingerprintTemplate: fingerprintTemplate.present
-        ? fingerprintTemplate.value
-        : this.fingerprintTemplate,
+    fingerprintTemplate: fingerprintTemplate ?? this.fingerprintTemplate,
     notes: notes.present ? notes.value : this.notes,
   );
   Member copyWithCompanion(MembersCompanion data) {
@@ -490,7 +490,7 @@ class Member extends DataClass implements Insertable<Member> {
     membershipType,
     registrationDate,
     lastFeePaymentDate,
-    $driftBlobEquality.hash(fingerprintTemplate),
+    fingerprintTemplate,
     notes,
   );
   @override
@@ -505,10 +505,7 @@ class Member extends DataClass implements Insertable<Member> {
           other.membershipType == this.membershipType &&
           other.registrationDate == this.registrationDate &&
           other.lastFeePaymentDate == this.lastFeePaymentDate &&
-          $driftBlobEquality.equals(
-            other.fingerprintTemplate,
-            this.fingerprintTemplate,
-          ) &&
+          other.fingerprintTemplate == this.fingerprintTemplate &&
           other.notes == this.notes);
 }
 
@@ -521,7 +518,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
   final Value<String> membershipType;
   final Value<DateTime> registrationDate;
   final Value<DateTime> lastFeePaymentDate;
-  final Value<Uint8List?> fingerprintTemplate;
+  final Value<String> fingerprintTemplate;
   final Value<String?> notes;
   const MembersCompanion({
     this.memberId = const Value.absent(),
@@ -544,7 +541,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
     required String membershipType,
     required DateTime registrationDate,
     required DateTime lastFeePaymentDate,
-    this.fingerprintTemplate = const Value.absent(),
+    required String fingerprintTemplate,
     this.notes = const Value.absent(),
   }) : name = Value(name),
        phoneNumber = Value(phoneNumber),
@@ -552,7 +549,8 @@ class MembersCompanion extends UpdateCompanion<Member> {
        gender = Value(gender),
        membershipType = Value(membershipType),
        registrationDate = Value(registrationDate),
-       lastFeePaymentDate = Value(lastFeePaymentDate);
+       lastFeePaymentDate = Value(lastFeePaymentDate),
+       fingerprintTemplate = Value(fingerprintTemplate);
   static Insertable<Member> custom({
     Expression<int>? memberId,
     Expression<String>? name,
@@ -562,7 +560,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
     Expression<String>? membershipType,
     Expression<DateTime>? registrationDate,
     Expression<DateTime>? lastFeePaymentDate,
-    Expression<Uint8List>? fingerprintTemplate,
+    Expression<String>? fingerprintTemplate,
     Expression<String>? notes,
   }) {
     return RawValuesInsertable({
@@ -590,7 +588,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
     Value<String>? membershipType,
     Value<DateTime>? registrationDate,
     Value<DateTime>? lastFeePaymentDate,
-    Value<Uint8List?>? fingerprintTemplate,
+    Value<String>? fingerprintTemplate,
     Value<String?>? notes,
   }) {
     return MembersCompanion(
@@ -639,9 +637,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
       );
     }
     if (fingerprintTemplate.present) {
-      map['fingerprint_template'] = Variable<Uint8List>(
-        fingerprintTemplate.value,
-      );
+      map['fingerprint_template'] = Variable<String>(fingerprintTemplate.value);
     }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
@@ -1100,11 +1096,11 @@ class $FinancialTransactionsTable extends FinancialTransactions
     'relatedMemberId',
   );
   @override
-  late final GeneratedColumn<String> relatedMemberId = GeneratedColumn<String>(
+  late final GeneratedColumn<int> relatedMemberId = GeneratedColumn<int>(
     'related_member_id',
     aliasedName,
     true,
-    type: DriftSqlType.string,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES members (member_id)',
@@ -1211,7 +1207,7 @@ class $FinancialTransactionsTable extends FinancialTransactions
         data['${effectivePrefix}description'],
       )!,
       relatedMemberId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
+        DriftSqlType.int,
         data['${effectivePrefix}related_member_id'],
       ),
     );
@@ -1230,7 +1226,7 @@ class FinancialTransaction extends DataClass
   final double amount;
   final DateTime transactionDate;
   final String description;
-  final String? relatedMemberId;
+  final int? relatedMemberId;
   const FinancialTransaction({
     required this.id,
     required this.type,
@@ -1248,7 +1244,7 @@ class FinancialTransaction extends DataClass
     map['transaction_date'] = Variable<DateTime>(transactionDate);
     map['description'] = Variable<String>(description);
     if (!nullToAbsent || relatedMemberId != null) {
-      map['related_member_id'] = Variable<String>(relatedMemberId);
+      map['related_member_id'] = Variable<int>(relatedMemberId);
     }
     return map;
   }
@@ -1277,7 +1273,7 @@ class FinancialTransaction extends DataClass
       amount: serializer.fromJson<double>(json['amount']),
       transactionDate: serializer.fromJson<DateTime>(json['transactionDate']),
       description: serializer.fromJson<String>(json['description']),
-      relatedMemberId: serializer.fromJson<String?>(json['relatedMemberId']),
+      relatedMemberId: serializer.fromJson<int?>(json['relatedMemberId']),
     );
   }
   @override
@@ -1289,7 +1285,7 @@ class FinancialTransaction extends DataClass
       'amount': serializer.toJson<double>(amount),
       'transactionDate': serializer.toJson<DateTime>(transactionDate),
       'description': serializer.toJson<String>(description),
-      'relatedMemberId': serializer.toJson<String?>(relatedMemberId),
+      'relatedMemberId': serializer.toJson<int?>(relatedMemberId),
     };
   }
 
@@ -1299,7 +1295,7 @@ class FinancialTransaction extends DataClass
     double? amount,
     DateTime? transactionDate,
     String? description,
-    Value<String?> relatedMemberId = const Value.absent(),
+    Value<int?> relatedMemberId = const Value.absent(),
   }) => FinancialTransaction(
     id: id ?? this.id,
     type: type ?? this.type,
@@ -1368,7 +1364,7 @@ class FinancialTransactionsCompanion
   final Value<double> amount;
   final Value<DateTime> transactionDate;
   final Value<String> description;
-  final Value<String?> relatedMemberId;
+  final Value<int?> relatedMemberId;
   const FinancialTransactionsCompanion({
     this.id = const Value.absent(),
     this.type = const Value.absent(),
@@ -1394,7 +1390,7 @@ class FinancialTransactionsCompanion
     Expression<double>? amount,
     Expression<DateTime>? transactionDate,
     Expression<String>? description,
-    Expression<String>? relatedMemberId,
+    Expression<int>? relatedMemberId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1412,7 +1408,7 @@ class FinancialTransactionsCompanion
     Value<double>? amount,
     Value<DateTime>? transactionDate,
     Value<String>? description,
-    Value<String?>? relatedMemberId,
+    Value<int?>? relatedMemberId,
   }) {
     return FinancialTransactionsCompanion(
       id: id ?? this.id,
@@ -1443,7 +1439,7 @@ class FinancialTransactionsCompanion
       map['description'] = Variable<String>(description.value);
     }
     if (relatedMemberId.present) {
-      map['related_member_id'] = Variable<String>(relatedMemberId.value);
+      map['related_member_id'] = Variable<int>(relatedMemberId.value);
     }
     return map;
   }
@@ -1485,11 +1481,11 @@ class $AttendanceRecordsTable extends AttendanceRecords
     'memberId',
   );
   @override
-  late final GeneratedColumn<String> memberId = GeneratedColumn<String>(
+  late final GeneratedColumn<int> memberId = GeneratedColumn<int>(
     'member_id',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES members (member_id)',
@@ -1556,7 +1552,7 @@ class $AttendanceRecordsTable extends AttendanceRecords
         data['${effectivePrefix}id'],
       )!,
       memberId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
+        DriftSqlType.int,
         data['${effectivePrefix}member_id'],
       )!,
       checkInTime: attachedDatabase.typeMapping.read(
@@ -1575,7 +1571,7 @@ class $AttendanceRecordsTable extends AttendanceRecords
 class AttendanceRecord extends DataClass
     implements Insertable<AttendanceRecord> {
   final int id;
-  final String memberId;
+  final int memberId;
   final DateTime checkInTime;
   const AttendanceRecord({
     required this.id,
@@ -1586,7 +1582,7 @@ class AttendanceRecord extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['member_id'] = Variable<String>(memberId);
+    map['member_id'] = Variable<int>(memberId);
     map['check_in_time'] = Variable<DateTime>(checkInTime);
     return map;
   }
@@ -1606,7 +1602,7 @@ class AttendanceRecord extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return AttendanceRecord(
       id: serializer.fromJson<int>(json['id']),
-      memberId: serializer.fromJson<String>(json['memberId']),
+      memberId: serializer.fromJson<int>(json['memberId']),
       checkInTime: serializer.fromJson<DateTime>(json['checkInTime']),
     );
   }
@@ -1615,20 +1611,17 @@ class AttendanceRecord extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'memberId': serializer.toJson<String>(memberId),
+      'memberId': serializer.toJson<int>(memberId),
       'checkInTime': serializer.toJson<DateTime>(checkInTime),
     };
   }
 
-  AttendanceRecord copyWith({
-    int? id,
-    String? memberId,
-    DateTime? checkInTime,
-  }) => AttendanceRecord(
-    id: id ?? this.id,
-    memberId: memberId ?? this.memberId,
-    checkInTime: checkInTime ?? this.checkInTime,
-  );
+  AttendanceRecord copyWith({int? id, int? memberId, DateTime? checkInTime}) =>
+      AttendanceRecord(
+        id: id ?? this.id,
+        memberId: memberId ?? this.memberId,
+        checkInTime: checkInTime ?? this.checkInTime,
+      );
   AttendanceRecord copyWithCompanion(AttendanceRecordsCompanion data) {
     return AttendanceRecord(
       id: data.id.present ? data.id.value : this.id,
@@ -1662,7 +1655,7 @@ class AttendanceRecord extends DataClass
 
 class AttendanceRecordsCompanion extends UpdateCompanion<AttendanceRecord> {
   final Value<int> id;
-  final Value<String> memberId;
+  final Value<int> memberId;
   final Value<DateTime> checkInTime;
   const AttendanceRecordsCompanion({
     this.id = const Value.absent(),
@@ -1671,13 +1664,13 @@ class AttendanceRecordsCompanion extends UpdateCompanion<AttendanceRecord> {
   });
   AttendanceRecordsCompanion.insert({
     this.id = const Value.absent(),
-    required String memberId,
+    required int memberId,
     required DateTime checkInTime,
   }) : memberId = Value(memberId),
        checkInTime = Value(checkInTime);
   static Insertable<AttendanceRecord> custom({
     Expression<int>? id,
-    Expression<String>? memberId,
+    Expression<int>? memberId,
     Expression<DateTime>? checkInTime,
   }) {
     return RawValuesInsertable({
@@ -1689,7 +1682,7 @@ class AttendanceRecordsCompanion extends UpdateCompanion<AttendanceRecord> {
 
   AttendanceRecordsCompanion copyWith({
     Value<int>? id,
-    Value<String>? memberId,
+    Value<int>? memberId,
     Value<DateTime>? checkInTime,
   }) {
     return AttendanceRecordsCompanion(
@@ -1706,7 +1699,7 @@ class AttendanceRecordsCompanion extends UpdateCompanion<AttendanceRecord> {
       map['id'] = Variable<int>(id.value);
     }
     if (memberId.present) {
-      map['member_id'] = Variable<String>(memberId.value);
+      map['member_id'] = Variable<int>(memberId.value);
     }
     if (checkInTime.present) {
       map['check_in_time'] = Variable<DateTime>(checkInTime.value);
@@ -1756,7 +1749,7 @@ typedef $$MembersTableCreateCompanionBuilder =
       required String membershipType,
       required DateTime registrationDate,
       required DateTime lastFeePaymentDate,
-      Value<Uint8List?> fingerprintTemplate,
+      required String fingerprintTemplate,
       Value<String?> notes,
     });
 typedef $$MembersTableUpdateCompanionBuilder =
@@ -1769,9 +1762,74 @@ typedef $$MembersTableUpdateCompanionBuilder =
       Value<String> membershipType,
       Value<DateTime> registrationDate,
       Value<DateTime> lastFeePaymentDate,
-      Value<Uint8List?> fingerprintTemplate,
+      Value<String> fingerprintTemplate,
       Value<String?> notes,
     });
+
+final class $$MembersTableReferences
+    extends BaseReferences<_$DriftClient, $MembersTable, Member> {
+  $$MembersTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<
+    $FinancialTransactionsTable,
+    List<FinancialTransaction>
+  >
+  _financialTransactionsRefsTable(_$DriftClient db) =>
+      MultiTypedResultKey.fromTable(
+        db.financialTransactions,
+        aliasName: $_aliasNameGenerator(
+          db.members.memberId,
+          db.financialTransactions.relatedMemberId,
+        ),
+      );
+
+  $$FinancialTransactionsTableProcessedTableManager
+  get financialTransactionsRefs {
+    final manager =
+        $$FinancialTransactionsTableTableManager(
+          $_db,
+          $_db.financialTransactions,
+        ).filter(
+          (f) => f.relatedMemberId.memberId.sqlEquals(
+            $_itemColumn<int>('member_id')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _financialTransactionsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$AttendanceRecordsTable, List<AttendanceRecord>>
+  _attendanceRecordsRefsTable(_$DriftClient db) =>
+      MultiTypedResultKey.fromTable(
+        db.attendanceRecords,
+        aliasName: $_aliasNameGenerator(
+          db.members.memberId,
+          db.attendanceRecords.memberId,
+        ),
+      );
+
+  $$AttendanceRecordsTableProcessedTableManager get attendanceRecordsRefs {
+    final manager =
+        $$AttendanceRecordsTableTableManager(
+          $_db,
+          $_db.attendanceRecords,
+        ).filter(
+          (f) => f.memberId.memberId.sqlEquals($_itemColumn<int>('member_id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _attendanceRecordsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
 
 class $$MembersTableFilterComposer
     extends Composer<_$DriftClient, $MembersTable> {
@@ -1823,7 +1881,7 @@ class $$MembersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<Uint8List> get fingerprintTemplate => $composableBuilder(
+  ColumnFilters<String> get fingerprintTemplate => $composableBuilder(
     column: $table.fingerprintTemplate,
     builder: (column) => ColumnFilters(column),
   );
@@ -1832,6 +1890,57 @@ class $$MembersTableFilterComposer
     column: $table.notes,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> financialTransactionsRefs(
+    Expression<bool> Function($$FinancialTransactionsTableFilterComposer f) f,
+  ) {
+    final $$FinancialTransactionsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.memberId,
+          referencedTable: $db.financialTransactions,
+          getReferencedColumn: (t) => t.relatedMemberId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$FinancialTransactionsTableFilterComposer(
+                $db: $db,
+                $table: $db.financialTransactions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> attendanceRecordsRefs(
+    Expression<bool> Function($$AttendanceRecordsTableFilterComposer f) f,
+  ) {
+    final $$AttendanceRecordsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.memberId,
+      referencedTable: $db.attendanceRecords,
+      getReferencedColumn: (t) => t.memberId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AttendanceRecordsTableFilterComposer(
+            $db: $db,
+            $table: $db.attendanceRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$MembersTableOrderingComposer
@@ -1883,7 +1992,7 @@ class $$MembersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<Uint8List> get fingerprintTemplate => $composableBuilder(
+  ColumnOrderings<String> get fingerprintTemplate => $composableBuilder(
     column: $table.fingerprintTemplate,
     builder: (column) => ColumnOrderings(column),
   );
@@ -1937,13 +2046,65 @@ class $$MembersTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<Uint8List> get fingerprintTemplate => $composableBuilder(
+  GeneratedColumn<String> get fingerprintTemplate => $composableBuilder(
     column: $table.fingerprintTemplate,
     builder: (column) => column,
   );
 
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  Expression<T> financialTransactionsRefs<T extends Object>(
+    Expression<T> Function($$FinancialTransactionsTableAnnotationComposer a) f,
+  ) {
+    final $$FinancialTransactionsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.memberId,
+          referencedTable: $db.financialTransactions,
+          getReferencedColumn: (t) => t.relatedMemberId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$FinancialTransactionsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.financialTransactions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> attendanceRecordsRefs<T extends Object>(
+    Expression<T> Function($$AttendanceRecordsTableAnnotationComposer a) f,
+  ) {
+    final $$AttendanceRecordsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.memberId,
+          referencedTable: $db.attendanceRecords,
+          getReferencedColumn: (t) => t.memberId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AttendanceRecordsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.attendanceRecords,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$MembersTableTableManager
@@ -1957,9 +2118,12 @@ class $$MembersTableTableManager
           $$MembersTableAnnotationComposer,
           $$MembersTableCreateCompanionBuilder,
           $$MembersTableUpdateCompanionBuilder,
-          (Member, BaseReferences<_$DriftClient, $MembersTable, Member>),
+          (Member, $$MembersTableReferences),
           Member,
-          PrefetchHooks Function()
+          PrefetchHooks Function({
+            bool financialTransactionsRefs,
+            bool attendanceRecordsRefs,
+          })
         > {
   $$MembersTableTableManager(_$DriftClient db, $MembersTable table)
     : super(
@@ -1982,7 +2146,7 @@ class $$MembersTableTableManager
                 Value<String> membershipType = const Value.absent(),
                 Value<DateTime> registrationDate = const Value.absent(),
                 Value<DateTime> lastFeePaymentDate = const Value.absent(),
-                Value<Uint8List?> fingerprintTemplate = const Value.absent(),
+                Value<String> fingerprintTemplate = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
               }) => MembersCompanion(
                 memberId: memberId,
@@ -2006,7 +2170,7 @@ class $$MembersTableTableManager
                 required String membershipType,
                 required DateTime registrationDate,
                 required DateTime lastFeePaymentDate,
-                Value<Uint8List?> fingerprintTemplate = const Value.absent(),
+                required String fingerprintTemplate,
                 Value<String?> notes = const Value.absent(),
               }) => MembersCompanion.insert(
                 memberId: memberId,
@@ -2021,9 +2185,73 @@ class $$MembersTableTableManager
                 notes: notes,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$MembersTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback:
+              ({
+                financialTransactionsRefs = false,
+                attendanceRecordsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (financialTransactionsRefs) db.financialTransactions,
+                    if (attendanceRecordsRefs) db.attendanceRecords,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (financialTransactionsRefs)
+                        await $_getPrefetchedData<
+                          Member,
+                          $MembersTable,
+                          FinancialTransaction
+                        >(
+                          currentTable: table,
+                          referencedTable: $$MembersTableReferences
+                              ._financialTransactionsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$MembersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).financialTransactionsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.relatedMemberId == item.memberId,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (attendanceRecordsRefs)
+                        await $_getPrefetchedData<
+                          Member,
+                          $MembersTable,
+                          AttendanceRecord
+                        >(
+                          currentTable: table,
+                          referencedTable: $$MembersTableReferences
+                              ._attendanceRecordsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$MembersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).attendanceRecordsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.memberId == item.memberId,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
         ),
       );
 }
@@ -2038,9 +2266,12 @@ typedef $$MembersTableProcessedTableManager =
       $$MembersTableAnnotationComposer,
       $$MembersTableCreateCompanionBuilder,
       $$MembersTableUpdateCompanionBuilder,
-      (Member, BaseReferences<_$DriftClient, $MembersTable, Member>),
+      (Member, $$MembersTableReferences),
       Member,
-      PrefetchHooks Function()
+      PrefetchHooks Function({
+        bool financialTransactionsRefs,
+        bool attendanceRecordsRefs,
+      })
     >;
 typedef $$BillExpensesTableCreateCompanionBuilder =
     BillExpensesCompanion Function({
@@ -2245,7 +2476,7 @@ typedef $$FinancialTransactionsTableCreateCompanionBuilder =
       required double amount,
       required DateTime transactionDate,
       required String description,
-      Value<String?> relatedMemberId,
+      Value<int?> relatedMemberId,
     });
 typedef $$FinancialTransactionsTableUpdateCompanionBuilder =
     FinancialTransactionsCompanion Function({
@@ -2254,8 +2485,44 @@ typedef $$FinancialTransactionsTableUpdateCompanionBuilder =
       Value<double> amount,
       Value<DateTime> transactionDate,
       Value<String> description,
-      Value<String?> relatedMemberId,
+      Value<int?> relatedMemberId,
     });
+
+final class $$FinancialTransactionsTableReferences
+    extends
+        BaseReferences<
+          _$DriftClient,
+          $FinancialTransactionsTable,
+          FinancialTransaction
+        > {
+  $$FinancialTransactionsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $MembersTable _relatedMemberIdTable(_$DriftClient db) =>
+      db.members.createAlias(
+        $_aliasNameGenerator(
+          db.financialTransactions.relatedMemberId,
+          db.members.memberId,
+        ),
+      );
+
+  $$MembersTableProcessedTableManager? get relatedMemberId {
+    final $_column = $_itemColumn<int>('related_member_id');
+    if ($_column == null) return null;
+    final manager = $$MembersTableTableManager(
+      $_db,
+      $_db.members,
+    ).filter((f) => f.memberId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_relatedMemberIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
 
 class $$FinancialTransactionsTableFilterComposer
     extends Composer<_$DriftClient, $FinancialTransactionsTable> {
@@ -2290,6 +2557,29 @@ class $$FinancialTransactionsTableFilterComposer
     column: $table.description,
     builder: (column) => ColumnFilters(column),
   );
+
+  $$MembersTableFilterComposer get relatedMemberId {
+    final $$MembersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.relatedMemberId,
+      referencedTable: $db.members,
+      getReferencedColumn: (t) => t.memberId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MembersTableFilterComposer(
+            $db: $db,
+            $table: $db.members,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$FinancialTransactionsTableOrderingComposer
@@ -2325,6 +2615,29 @@ class $$FinancialTransactionsTableOrderingComposer
     column: $table.description,
     builder: (column) => ColumnOrderings(column),
   );
+
+  $$MembersTableOrderingComposer get relatedMemberId {
+    final $$MembersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.relatedMemberId,
+      referencedTable: $db.members,
+      getReferencedColumn: (t) => t.memberId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MembersTableOrderingComposer(
+            $db: $db,
+            $table: $db.members,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$FinancialTransactionsTableAnnotationComposer
@@ -2354,6 +2667,29 @@ class $$FinancialTransactionsTableAnnotationComposer
     column: $table.description,
     builder: (column) => column,
   );
+
+  $$MembersTableAnnotationComposer get relatedMemberId {
+    final $$MembersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.relatedMemberId,
+      referencedTable: $db.members,
+      getReferencedColumn: (t) => t.memberId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MembersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.members,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$FinancialTransactionsTableTableManager
@@ -2367,16 +2703,9 @@ class $$FinancialTransactionsTableTableManager
           $$FinancialTransactionsTableAnnotationComposer,
           $$FinancialTransactionsTableCreateCompanionBuilder,
           $$FinancialTransactionsTableUpdateCompanionBuilder,
-          (
-            FinancialTransaction,
-            BaseReferences<
-              _$DriftClient,
-              $FinancialTransactionsTable,
-              FinancialTransaction
-            >,
-          ),
+          (FinancialTransaction, $$FinancialTransactionsTableReferences),
           FinancialTransaction,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool relatedMemberId})
         > {
   $$FinancialTransactionsTableTableManager(
     _$DriftClient db,
@@ -2407,7 +2736,7 @@ class $$FinancialTransactionsTableTableManager
                 Value<double> amount = const Value.absent(),
                 Value<DateTime> transactionDate = const Value.absent(),
                 Value<String> description = const Value.absent(),
-                Value<String?> relatedMemberId = const Value.absent(),
+                Value<int?> relatedMemberId = const Value.absent(),
               }) => FinancialTransactionsCompanion(
                 id: id,
                 type: type,
@@ -2423,7 +2752,7 @@ class $$FinancialTransactionsTableTableManager
                 required double amount,
                 required DateTime transactionDate,
                 required String description,
-                Value<String?> relatedMemberId = const Value.absent(),
+                Value<int?> relatedMemberId = const Value.absent(),
               }) => FinancialTransactionsCompanion.insert(
                 id: id,
                 type: type,
@@ -2433,9 +2762,56 @@ class $$FinancialTransactionsTableTableManager
                 relatedMemberId: relatedMemberId,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$FinancialTransactionsTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({relatedMemberId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (relatedMemberId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.relatedMemberId,
+                                referencedTable:
+                                    $$FinancialTransactionsTableReferences
+                                        ._relatedMemberIdTable(db),
+                                referencedColumn:
+                                    $$FinancialTransactionsTableReferences
+                                        ._relatedMemberIdTable(db)
+                                        .memberId,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
         ),
       );
 }
@@ -2450,29 +2826,58 @@ typedef $$FinancialTransactionsTableProcessedTableManager =
       $$FinancialTransactionsTableAnnotationComposer,
       $$FinancialTransactionsTableCreateCompanionBuilder,
       $$FinancialTransactionsTableUpdateCompanionBuilder,
-      (
-        FinancialTransaction,
-        BaseReferences<
-          _$DriftClient,
-          $FinancialTransactionsTable,
-          FinancialTransaction
-        >,
-      ),
+      (FinancialTransaction, $$FinancialTransactionsTableReferences),
       FinancialTransaction,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool relatedMemberId})
     >;
 typedef $$AttendanceRecordsTableCreateCompanionBuilder =
     AttendanceRecordsCompanion Function({
       Value<int> id,
-      required String memberId,
+      required int memberId,
       required DateTime checkInTime,
     });
 typedef $$AttendanceRecordsTableUpdateCompanionBuilder =
     AttendanceRecordsCompanion Function({
       Value<int> id,
-      Value<String> memberId,
+      Value<int> memberId,
       Value<DateTime> checkInTime,
     });
+
+final class $$AttendanceRecordsTableReferences
+    extends
+        BaseReferences<
+          _$DriftClient,
+          $AttendanceRecordsTable,
+          AttendanceRecord
+        > {
+  $$AttendanceRecordsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $MembersTable _memberIdTable(_$DriftClient db) =>
+      db.members.createAlias(
+        $_aliasNameGenerator(
+          db.attendanceRecords.memberId,
+          db.members.memberId,
+        ),
+      );
+
+  $$MembersTableProcessedTableManager get memberId {
+    final $_column = $_itemColumn<int>('member_id')!;
+
+    final manager = $$MembersTableTableManager(
+      $_db,
+      $_db.members,
+    ).filter((f) => f.memberId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_memberIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
 
 class $$AttendanceRecordsTableFilterComposer
     extends Composer<_$DriftClient, $AttendanceRecordsTable> {
@@ -2492,6 +2897,29 @@ class $$AttendanceRecordsTableFilterComposer
     column: $table.checkInTime,
     builder: (column) => ColumnFilters(column),
   );
+
+  $$MembersTableFilterComposer get memberId {
+    final $$MembersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.memberId,
+      referencedTable: $db.members,
+      getReferencedColumn: (t) => t.memberId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MembersTableFilterComposer(
+            $db: $db,
+            $table: $db.members,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$AttendanceRecordsTableOrderingComposer
@@ -2512,6 +2940,29 @@ class $$AttendanceRecordsTableOrderingComposer
     column: $table.checkInTime,
     builder: (column) => ColumnOrderings(column),
   );
+
+  $$MembersTableOrderingComposer get memberId {
+    final $$MembersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.memberId,
+      referencedTable: $db.members,
+      getReferencedColumn: (t) => t.memberId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MembersTableOrderingComposer(
+            $db: $db,
+            $table: $db.members,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$AttendanceRecordsTableAnnotationComposer
@@ -2530,6 +2981,29 @@ class $$AttendanceRecordsTableAnnotationComposer
     column: $table.checkInTime,
     builder: (column) => column,
   );
+
+  $$MembersTableAnnotationComposer get memberId {
+    final $$MembersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.memberId,
+      referencedTable: $db.members,
+      getReferencedColumn: (t) => t.memberId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MembersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.members,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$AttendanceRecordsTableTableManager
@@ -2543,16 +3017,9 @@ class $$AttendanceRecordsTableTableManager
           $$AttendanceRecordsTableAnnotationComposer,
           $$AttendanceRecordsTableCreateCompanionBuilder,
           $$AttendanceRecordsTableUpdateCompanionBuilder,
-          (
-            AttendanceRecord,
-            BaseReferences<
-              _$DriftClient,
-              $AttendanceRecordsTable,
-              AttendanceRecord
-            >,
-          ),
+          (AttendanceRecord, $$AttendanceRecordsTableReferences),
           AttendanceRecord,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool memberId})
         > {
   $$AttendanceRecordsTableTableManager(
     _$DriftClient db,
@@ -2573,7 +3040,7 @@ class $$AttendanceRecordsTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<String> memberId = const Value.absent(),
+                Value<int> memberId = const Value.absent(),
                 Value<DateTime> checkInTime = const Value.absent(),
               }) => AttendanceRecordsCompanion(
                 id: id,
@@ -2583,7 +3050,7 @@ class $$AttendanceRecordsTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                required String memberId,
+                required int memberId,
                 required DateTime checkInTime,
               }) => AttendanceRecordsCompanion.insert(
                 id: id,
@@ -2591,9 +3058,56 @@ class $$AttendanceRecordsTableTableManager
                 checkInTime: checkInTime,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$AttendanceRecordsTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({memberId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (memberId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.memberId,
+                                referencedTable:
+                                    $$AttendanceRecordsTableReferences
+                                        ._memberIdTable(db),
+                                referencedColumn:
+                                    $$AttendanceRecordsTableReferences
+                                        ._memberIdTable(db)
+                                        .memberId,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
         ),
       );
 }
@@ -2608,16 +3122,9 @@ typedef $$AttendanceRecordsTableProcessedTableManager =
       $$AttendanceRecordsTableAnnotationComposer,
       $$AttendanceRecordsTableCreateCompanionBuilder,
       $$AttendanceRecordsTableUpdateCompanionBuilder,
-      (
-        AttendanceRecord,
-        BaseReferences<
-          _$DriftClient,
-          $AttendanceRecordsTable,
-          AttendanceRecord
-        >,
-      ),
+      (AttendanceRecord, $$AttendanceRecordsTableReferences),
       AttendanceRecord,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool memberId})
     >;
 
 class $DriftClientManager {
