@@ -6,16 +6,16 @@ import 'package:finger_print_flutter/domain/entities/models/csv.dart';
 
 /// Data class representing a fitness club member.
 class Member implements CsvConvertible {
-  final int? memberId; // Unique ID, possibly generated on registration
-  final String? name;
-  final String? phoneNumber;
-  final String? fatherName;
-  final Gender? gender;
-  final String? membershipType; // e.g., "Fitness Club", "Weightlifting"
-  final DateTime? registrationDate;
-  final DateTime? lastFeePaymentDate;
-  final String? fingerprintTemplate; // Biometric data
-  final String? notes;
+   int? memberId; // Unique ID, possibly generated on registration
+   String? name;
+   String? phoneNumber;
+   String? fatherName;
+   Gender? gender;
+   String? membershipType; // e.g., "Fitness Club", "Weightlifting"
+   DateTime? registrationDate;
+   DateTime? lastFeePaymentDate;
+   String? fingerprintTemplate; // Biometric data
+   String? notes;
 
   Member({
      this.memberId,

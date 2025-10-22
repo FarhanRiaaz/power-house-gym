@@ -6,6 +6,7 @@ import 'package:finger_print_flutter/enrollment_screen.dart';
 import 'package:finger_print_flutter/presentation/auth/login_screen.dart';
 import 'package:finger_print_flutter/presentation/auth/route_manager.dart';
 import 'package:finger_print_flutter/presentation/dashboard/dashboard_screen.dart';
+import 'package:finger_print_flutter/presentation/member/member_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'di/service_locator.dart';
@@ -31,7 +32,7 @@ class FingerprintApp extends StatelessWidget {
   themeMode: ThemeMode.system,
   // initialRoute: RouteManager.dashboard,
   // onGenerateRoute: RouteManager.generateRoute,
-      home: DashboardScreen(),
+      home: ManageMemberScreen(),
     );
   }
 }

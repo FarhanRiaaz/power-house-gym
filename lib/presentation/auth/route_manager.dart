@@ -16,7 +16,7 @@ class RouteManager {
       case dashboard:
         return MaterialPageRoute(builder: (_) => DashboardScreen());
       case members:
-        return MaterialPageRoute(builder: (_) => MembersScreen());
+        return MaterialPageRoute(builder: (_) => ManageMemberScreen());
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

@@ -10,6 +10,7 @@ class AppButton extends StatelessWidget {
   final AppButtonVariant variant;
   final IconData? icon;
   final bool fullWidth;
+  final bool isOutline;
 
   const AppButton({
     super.key,
@@ -18,6 +19,7 @@ class AppButton extends StatelessWidget {
     this.variant = AppButtonVariant.primary,
     this.icon,
     this.fullWidth = true,
+    this.isOutline = false,
   });
 
   Color get backgroundColor {
@@ -46,7 +48,19 @@ class AppButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: fullWidth ? double.infinity : null,
-      child: ElevatedButton.icon(
+      child: isOutline?
+      OutlinedButton.icon(
+        onPressed: onPressed,
+        icon: icon != null ? Icon(icon, size: 18,color: Colors.white,): const SizedBox.shrink(),
+        label: Text(label, style: AppTextStyles.subheading),
+        style: OutlinedButton.styleFrom(
+            foregroundColor: foregroundColor,
+            side: BorderSide(color: backgroundColor, width: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+      ):
+
+      ElevatedButton.icon(
         icon: icon != null ? Icon(icon, size: 18,color: Colors.white,): const SizedBox.shrink(),
         label: Text(label, style: AppTextStyles.subheading),
         onPressed: onPressed,

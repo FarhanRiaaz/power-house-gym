@@ -9,6 +9,7 @@ class AppListTile extends StatelessWidget {
   final Widget? trailing;
   final VoidCallback? onTap;
   final Color? statusColor;
+  final bool isSelected;
 
   const AppListTile({
     super.key,
@@ -18,13 +19,14 @@ class AppListTile extends StatelessWidget {
     this.trailing,
     this.onTap,
     this.statusColor,
+    this.isSelected = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      tileColor: AppColors.surface,
+      tileColor: isSelected?AppColors.primary: AppColors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       leading: leadingIcon != null
           ? CircleAvatar(
