@@ -87,7 +87,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
-  static const double _wideScreenBreakpoint = 900;
+  static const double _wideScreenBreakpoint = 250;
 
   // --- State Management/Filtering Logic ---
 
@@ -177,10 +177,8 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
   }
 
   // --- Widget Builders ---
-
   Widget _buildMemberListView(bool isWide) {
     final filteredList = _filteredMembers;
-
     return Container(
       decoration: BoxDecoration(
         color: AppColors.backgroundDark,
@@ -196,8 +194,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                Expanded(
-                  // 💡 AppTextField for Search
+                Expanded( // Ensures the text field takes up most space
                   child: AppTextField(
                     controller: _searchController,
                     onChanged: _updateSearchQuery,
@@ -207,61 +204,64 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                // 💡 AppButton for Add Member
                 AppButton(
                   label: 'Add Member',
                   icon: Icons.person_add,
                   onPressed: () => _showMemberForm(null, isWide),
                   variant: AppButtonVariant.primary,
+                  fullWidth: false,
                 ),
               ],
             ),
           ),
-          const Divider(height: 1),
-          Expanded(
-            child: filteredList.isEmpty
-            // 💡 AppEmptyState for empty list
-                ? AppEmptyState(
-              message: _searchQuery.isEmpty ? 'No members registered yet.' : 'No members found for "$_searchQuery".',
-              icon: _searchQuery.isEmpty ? Icons.group_off : Icons.search_off,
-              actionLabel: _searchQuery.isEmpty ? 'Enroll New Member' : null,
-              onActionTap: _searchQuery.isEmpty ? () => _showMemberForm(null, isWide) : null,
-            )
-                : ListView.builder(
-              itemCount: filteredList.length,
-              itemBuilder: (context, index) {
-                final member = filteredList[index];
-                final isSelected = member.memberId == _selectedMember?.memberId;
 
-                final isFeeDue = member.lastFeePaymentDate != null &&
-                    DateTime.now().difference(member.lastFeePaymentDate!).inDays > 30;
+           const Divider(height: 1),
+         SizedBox(height: 500,width: double.infinity,
+         child:
+          filteredList.isEmpty
+          // 💡 AppEmptyState for empty list
+              ? AppEmptyState(
+            message: _searchQuery.isEmpty ? 'No members registered yet.' : 'No members found for "$_searchQuery".',
+            icon: _searchQuery.isEmpty ? Icons.group_off : Icons.search_off,
+            actionLabel: _searchQuery.isEmpty ? 'Enroll New Member' : null,
+            onActionTap: _searchQuery.isEmpty ? () => _showMemberForm(null, isWide) : null,
+          )
+              :
+          ListView.builder(
+            itemCount: filteredList.length,
+            itemBuilder: (context, index) {
+              final member = filteredList[index];
+              final isSelected = member.memberId == _selectedMember?.memberId;
 
-                // 💡 AppListTile for each member
-                return AppListTile(
-                  title: member.name!,
-                  subtitle: 'ID: ${member.memberId} | Type: ${member.membershipType}',
-                  leadingIcon: Icons.person,
-                  statusColor: isFeeDue ? AppColors.danger : AppColors.success,
-                  isSelected: isSelected,
-                  trailing: isFeeDue
-                      ? const AppStatusBadge(
-                    label: 'FEE DUE',
-                    color: AppColors.danger,
-                    filled: true,
-                  )
-                      : null,
-                  onTap: () {
-                    setState(() {
-                      _selectedMember = member;
-                    });
-                    if (!isWide) {
-                      _showMemberDetail(member);
-                    }
-                  },
-                );
-              },
-            ),
+              final isFeeDue = member.lastFeePaymentDate != null &&
+                  DateTime.now().difference(member.lastFeePaymentDate!).inDays > 30;
+
+              // 💡 AppListTile for each member
+              return AppListTile(
+                title: member.name!,
+                subtitle: 'ID: ${member.memberId} | Type: ${member.membershipType}',
+                leadingIcon: Icons.person,
+                statusColor: isFeeDue ? AppColors.danger : AppColors.success,
+                isSelected: isSelected,
+                trailing: isFeeDue
+                    ? const AppStatusBadge(
+                  label: 'FEE DUE',
+                  color: AppColors.danger,
+                  filled: true,
+                )
+                    : null,
+                onTap: () {
+                  setState(() {
+                    _selectedMember = member;
+                  });
+                  if (!isWide) {
+                    _showMemberDetail(member);
+                  }
+                },
+              );
+            },
           ),
+         )
         ],
       ),
     );
@@ -430,46 +430,35 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundDark,
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const AppSectionHeader(title: 'Manage Members'),
-            const SizedBox(height: 20),
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final isWideScreen = constraints.maxWidth >= _wideScreenBreakpoint;
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const AppSectionHeader(title: 'Manage Members'),
+              const SizedBox(height: 20),
 
-                  if (isWideScreen) {
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: constraints.maxWidth * 0.4,
-                          child: _buildMemberListView(true),
-                        ),
-                        const SizedBox(width: 24),
-                        Expanded(
-                          child: _selectedMember != null
-                              ? _buildMemberDetailView(_selectedMember!)
-                              : AppEmptyState(
-                            message: 'Select a member to view details and actions.',
-                            icon: Icons.contact_page,
-                          ),
-                        ),
-                      ],
-                    );
-                  } else {
-                    return Text("Hello Brother");
-
-                      _buildMemberListView(false);
-                  }
-                },
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width:MediaQuery.of(context).size.width * 0.4,
+                child: _buildMemberListView(true),
               ),
-            ),
-          ],
+              const SizedBox(width: 24),
+              Expanded(
+                child: _selectedMember != null
+                    ? _buildMemberDetailView(_selectedMember!)
+                    : AppEmptyState(
+                  message: 'Select a member to view details and actions.',
+                  icon: Icons.contact_page,
+                ),
+              ),
+            ],
+          )
+            ],
+          ),
         ),
       ),
     );
