@@ -219,6 +219,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
          SizedBox(height: 500,width: double.infinity,
          child:
           filteredList.isEmpty
+
           // 💡 AppEmptyState for empty list
               ? AppEmptyState(
             message: _searchQuery.isEmpty ? 'No members registered yet.' : 'No members found for "$_searchQuery".',
