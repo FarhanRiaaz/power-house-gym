@@ -1,4 +1,5 @@
 // Global Member List and State Management Mock
+import 'package:finger_print_flutter/core/list_to_csv_converter.dart';
 import 'package:finger_print_flutter/core/style/app_colors.dart';
 import 'package:finger_print_flutter/domain/entities/models/financial_transaction.dart';
 import 'package:finger_print_flutter/presentation/components/app_button.dart';
@@ -8,9 +9,11 @@ import 'package:finger_print_flutter/presentation/components/app_list_tile.dart'
 import 'package:finger_print_flutter/presentation/components/app_section_header.dart';
 import 'package:finger_print_flutter/presentation/components/app_status_bar.dart';
 import 'package:finger_print_flutter/presentation/components/background_wrapper.dart';
+import 'package:finger_print_flutter/presentation/financial/store/financial_store.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../di/service_locator.dart';
 import '../../domain/entities/models/member.dart';
 
 class GlobalState {
@@ -67,7 +70,7 @@ class FinancialTransactionScreen extends StatefulWidget {
 class _FinancialTransactionScreenState extends State<FinancialTransactionScreen> {
   // Use a local state list to trigger rebuilds on deletion
   List<FinancialTransaction> _currentFinancialTransactions = GlobalState.transactions;
-
+  final FinancialStore financialStore = getIt<FinancialStore>();
   void _deleteFinancialTransaction(FinancialTransaction transaction) {
     showDialog(
       context: context,
@@ -111,27 +114,54 @@ class _FinancialTransactionScreenState extends State<FinancialTransactionScreen>
               // 1. Header and Balance Summary
               AppSectionHeader(
                 title: 'Transactions',
-                trailingWidget: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: totalBalance >= 0 ? AppColors.success.withOpacity(0.1) : AppColors.danger.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: totalBalance >= 0 ? AppColors.success : AppColors.danger),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      const Text('NET BALANCE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
-                      Text(
-                        NumberFormat.currency(symbol: 'PKR ').format(totalBalance),
-                        style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            color: totalBalance >= 0 ? AppColors.success : AppColors.warning
-                        ),
+                trailingWidget: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: totalBalance >= 0 ? AppColors.success.withOpacity(0.1) : AppColors.danger.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: totalBalance >= 0 ? AppColors.success : AppColors.danger),
                       ),
-                    ],
-                  ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const Text('NET BALANCE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
+                          Text(
+                            NumberFormat.currency(symbol: 'PKR ').format(totalBalance),
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                                color: totalBalance >= 0 ? AppColors.success : AppColors.warning
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                 
+                       GestureDetector(
+                             onTap: () async {
+                      try {
+                        final filePath = await SimpleCsvConverter().pickExcelFile();
+                    
+                        final csvData = await SimpleCsvConverter().readCsvFile(filePath);
+                        await financialStore.importDataToDatabase(csvData);
+                      } catch (e) {
+                        print('Import failed: $e');
+                        // Optionally show a dialog or snackbar here
+                      }
+                    }
+                    ,
+                    child: Row(children: [
+                      Icon(Icons.import_contacts_outlined),
+                      SizedBox(width: 16,),
+                      Text("Import Attendance")
+                    
+                    ],),
+                                  )
+                    
+
+                  ],
                 ),
               ),
               const SizedBox(height: 16),

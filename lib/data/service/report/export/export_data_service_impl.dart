@@ -4,9 +4,11 @@ import 'package:finger_print_flutter/domain/repository/attendance/attendance_rep
 import 'package:finger_print_flutter/domain/repository/expense/expense_repository.dart';
 import 'package:finger_print_flutter/domain/repository/financial/financial_repository.dart';
 import 'package:finger_print_flutter/domain/repository/member/member_repository.dart';
+import 'package:finger_print_flutter/domain/usecases/export/import_export_usecase.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
+enum CsvImportType { member, attendance, expense, financial }
 /// Concrete implementation for handling file I/O and data formatting.
 /// (The actual file I/O logic would use packages like `csv` or `excel`
 /// and platform-specific file pickers.)
@@ -121,12 +123,30 @@ class DataUtilityServiceImpl implements DataUtilityService {
   Future<List<List<String>>> importNewMembers(String filePath) async {
     return await SimpleCsvConverter().readCsvFile(filePath);
   }
+  
+  @override
+  Future<int> insertBatchFromCsv(ImportDataParams data) async {
+  switch (data.type) {
+    case CsvImportType.member:
+      return await memberRepository.insertBatchFromCsv(data.csvData);
+    case CsvImportType.attendance:
+      return await attendanceRepository.insertBatchFromCsv(data.csvData);
+    case CsvImportType.expense:
+      return await expenseRepository.insertBatchFromCsv(data.csvData);
+    case CsvImportType.financial:
+      return await financialRepository.insertBatchFromCsv(data.csvData);
+  }
+}
+
 }
 
 abstract class DataUtilityService {
   Future<void> exportData();
 
   Future<List<List<String>>> importNewMembers(String filePath);
+
+ Future<int> insertBatchFromCsv(ImportDataParams data);
+
 }
 
 class _ExportTask {

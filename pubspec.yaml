@@ -40,6 +40,7 @@ dependencies:
   mobx: ^2.5.0
   shared_preferences: ^2.5.3
   validators: ^3.0.0
+  file_picker: ^10.3.3
   gif: ^2.3.0
   drift: ^2.25.0
   drift_flutter: ^0.2.4

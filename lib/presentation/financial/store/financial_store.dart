@@ -1,3 +1,5 @@
+import 'package:finger_print_flutter/data/service/report/export/export_data_service_impl.dart';
+import 'package:finger_print_flutter/domain/usecases/export/import_export_usecase.dart';
 import 'package:finger_print_flutter/domain/usecases/financial/financial_usecase.dart';
 import 'package:mobx/mobx.dart';
 
@@ -11,12 +13,14 @@ abstract class _FinancialStore with Store {
   // --- Dependencies (Use Cases) ---
   final RecordFinancialTransactionUseCase _recordTransactionUseCase;
   final WatchAllTransactionsUseCase _watchAllTransactionsUseCase;
+  final ImportDataUseCase _importDataUseCase;
   final GetTransactionsByDateRangeUseCase _getRangeReportUseCase;
   final DeleteTransactionUseCase _deleteTransactionUseCase;
 
   _FinancialStore(
       this._recordTransactionUseCase,
       this._watchAllTransactionsUseCase,
+      this._importDataUseCase,
       this._getRangeReportUseCase,
       this._deleteTransactionUseCase,
       );
@@ -116,7 +120,10 @@ abstract class _FinancialStore with Store {
       throw error;
     }
   }
-
+ @action
+  Future<int> importDataToDatabase(List<List<String>> csvData) async {
+   return await _importDataUseCase.call(params: ImportDataParams(csvData: csvData,type: CsvImportType.financial));
+  }
   /// Fetches a one-time report of transactions for the currently selected date range.
   @action
   Future<void> generateRangeReport() async {

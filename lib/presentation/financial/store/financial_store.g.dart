@@ -169,6 +169,18 @@ mixin _$FinancialStore on _FinancialStore, Store {
     return _$recordTransactionAsyncAction.run(() => super.recordTransaction());
   }
 
+  late final _$importDataToDatabaseAsyncAction = AsyncAction(
+    '_FinancialStore.importDataToDatabase',
+    context: context,
+  );
+
+  @override
+  Future<int> importDataToDatabase(List<List<String>> csvData) {
+    return _$importDataToDatabaseAsyncAction.run(
+      () => super.importDataToDatabase(csvData),
+    );
+  }
+
   late final _$generateRangeReportAsyncAction = AsyncAction(
     '_FinancialStore.generateRangeReport',
     context: context,

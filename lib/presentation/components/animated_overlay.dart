@@ -20,7 +20,7 @@ class _AnimatedOverlayState extends State<AnimatedOverlay> with SingleTickerProv
 
     _colorAnimation = ColorTween(
       begin: Colors.black.withOpacity(0.6),
-      end: const Color.fromARGB(255, 42, 3, 3).withOpacity(0.6),
+      end: const Color.fromARGB(255, 57, 37, 0).withOpacity(0.6),
     ).animate(_controller);
   }
 

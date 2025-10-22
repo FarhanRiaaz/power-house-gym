@@ -81,9 +81,9 @@ class AttendanceRecord  implements CsvConvertible{
   List<String> toCsvHeader() {
     // Defines the friendly column names in the exact order the fields appear
     return [
-      'ID',
-      'Member Id',
-      'checkIn Time',
+      'id',
+      'memberId',
+      'checkInTime',
     ];
   }
   @override
@@ -98,17 +98,25 @@ class AttendanceRecord  implements CsvConvertible{
   /// Assumes the input List<String> contains elements in the order:
   /// [id, memberId, checkInTime (ISO 8601 string)]
   factory AttendanceRecord.fromCsvRow(List<String> row) {
-    if (row.length != 3) {
-      throw FormatException('CSV row must contain exactly 3 fields.');
-    }
-
-    // We assume the ID and Member ID are simple strings and the time is ISO 8601.
-    return AttendanceRecord(
-      id: int.tryParse(row[0])??0,
-      memberId: int.tryParse(row[1])??0,
-      checkInTime: DateTime.parse(row[2]),
-    );
+  if (row.length != 3) {
+    throw FormatException('CSV row must contain exactly 3 fields. Received: ${row.length} → $row');
   }
+
+  final id = int.tryParse(row[0]);
+  final memberId = int.tryParse(row[1]);
+  final checkInTime = DateTime.tryParse(row[2]);
+
+  if (id == null || memberId == null || checkInTime == null) {
+    throw FormatException('Invalid data format in row: $row');
+  }
+
+  return AttendanceRecord(
+    id: id,
+    memberId: memberId,
+    checkInTime: checkInTime,
+  );
+}
+
 
   /// Filter by member
   static List<AttendanceRecord> forMember(

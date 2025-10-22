@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const primary = Color(0xFFFFC107); // Vivid yellow
+  static const primary = Color.fromARGB(255, 193, 151, 3); // Vivid yellow
   static const backgroundDark = Color(0xFF121212); // Deep black
   static const surface = Color(0xFF1E1E1E); // Slightly lighter black
   static const textPrimary = Color(0xFFFFFFFF); // White text on black

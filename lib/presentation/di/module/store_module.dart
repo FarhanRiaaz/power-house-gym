@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:finger_print_flutter/domain/usecases/attendance/log_attendance_usecase.dart';
 import 'package:finger_print_flutter/domain/usecases/auth/auth_usecase.dart';
 import 'package:finger_print_flutter/domain/usecases/bill/bill_usecase.dart';
+import 'package:finger_print_flutter/domain/usecases/export/import_export_usecase.dart';
 import 'package:finger_print_flutter/domain/usecases/financial/financial_usecase.dart';
 import 'package:finger_print_flutter/domain/usecases/member/member_usecase.dart';
 import 'package:finger_print_flutter/presentation/attendance/store/attendance_store.dart';
@@ -35,6 +36,7 @@ mixin StoreModule {
         getIt<LogAttendanceUseCase>(),
         getIt<WatchTodayAttendanceUseCase>(),
         getIt<GetDailyAttendanceReportUseCase>(),
+        getIt<ImportDataUseCase>(),
       ),
     );
 
@@ -43,6 +45,7 @@ mixin StoreModule {
           () => FinancialStore(
         getIt<RecordFinancialTransactionUseCase>(),
         getIt<WatchAllTransactionsUseCase>(),
+          getIt<ImportDataUseCase>(),
         getIt<GetTransactionsByDateRangeUseCase>(),
         getIt<DeleteTransactionUseCase>(),
       ),

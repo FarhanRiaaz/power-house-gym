@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:csv/csv.dart';
+  import 'package:file_picker/file_picker.dart';
 
 /// A simplified class to demonstrate the core logic of converting a
 /// List of Lists (table data) into a single CSV formatted string.
@@ -72,32 +73,23 @@ class SimpleCsvConverter {
   }
 
   Future<List<List<String>>> readCsvFile(String filePath) async {
-    try {
-      // 1. Read the file content as a single string
-      final csvString = await File(filePath).readAsString();
+  final raw = await File(filePath).readAsString(); // UTF-8 by default
+  final rows = const CsvToListConverter(eol: '\n').convert(raw);
 
-      // 2. Initialize the converter (defaults to comma delimiter)
-      const converter = CsvToListConverter();
+  return rows.map((r) => r.map((e) => e.toString()).toList()).toList();
+}
 
-      // The converter returns List<List<dynamic>>. We must correctly type this.
-      final List<List<dynamic>> convertedData = converter.convert(csvString);
+Future<String> pickExcelFile() async {
+  final result = await FilePicker.platform.pickFiles(
+    type: FileType.custom,
+    allowedExtensions: ['csv', 'csv'],
+  );
 
-      // 3. Convert the List<List<dynamic>> structure to the required List<List<String>>
-      // by iterating over the rows and converting every dynamic element to String.
-      final List<List<String>> resultData = convertedData.map((row) {
-        // Map over the inner list (row) and ensure all elements are converted to String
-        return row.map((e) => e.toString()).toList();
-      }).toList();
+  if (result != null && result.files.single.path != null) {
+    final filePath = result.files.single.path!;
+    return filePath; // Pass the path to your handlerfNo valid members found to insert.
+  } else {
+return '';  }
+}
 
-      return resultData;
-    } on FileSystemException catch (e) {
-      // Handle cases where the file doesn't exist or permissions are wrong
-      print('Error: File system exception for path $filePath. Details: $e');
-      return [];
-    } catch (e) {
-      // Catch any other general parsing or reading errors
-      print('An unexpected error occurred while reading the CSV: $e');
-      return [];
-    }
-  }
 }

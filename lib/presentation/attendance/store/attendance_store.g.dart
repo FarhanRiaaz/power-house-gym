@@ -157,6 +157,18 @@ mixin _$AttendanceStore on _AttendanceStore, Store {
     return _$logCheckInAsyncAction.run(() => super.logCheckIn(memberId));
   }
 
+  late final _$importDataToDatabaseAsyncAction = AsyncAction(
+    '_AttendanceStore.importDataToDatabase',
+    context: context,
+  );
+
+  @override
+  Future<int> importDataToDatabase(List<List<String>> csvData) {
+    return _$importDataToDatabaseAsyncAction.run(
+      () => super.importDataToDatabase(csvData),
+    );
+  }
+
   late final _$generateDailyReportAsyncAction = AsyncAction(
     '_AttendanceStore.generateDailyReport',
     context: context,

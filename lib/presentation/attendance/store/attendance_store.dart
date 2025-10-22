@@ -1,4 +1,6 @@
 import 'package:finger_print_flutter/core/enum.dart';
+import 'package:finger_print_flutter/data/service/report/export/export_data_service_impl.dart';
+import 'package:finger_print_flutter/domain/usecases/export/import_export_usecase.dart';
 import 'package:mobx/mobx.dart';
 
 import '../../../domain/entities/models/attendance_record.dart';
@@ -12,12 +14,14 @@ abstract class _AttendanceStore with Store {
   // --- Dependencies (Use Cases) ---
   final LogAttendanceUseCase _logAttendanceUseCase;
   final WatchTodayAttendanceUseCase _watchTodayAttendanceUseCase;
+  final ImportDataUseCase _importDataUseCase;
   final GetDailyAttendanceReportUseCase _getDailyReportUseCase;
 
   _AttendanceStore(
       this._logAttendanceUseCase,
       this._watchTodayAttendanceUseCase,
       this._getDailyReportUseCase,
+      this._importDataUseCase
       );
 
   // --- Store State Variables ---
@@ -89,6 +93,11 @@ abstract class _AttendanceStore with Store {
       lastCheckIn = null;
       throw e;
     }
+  }
+
+  @action
+  Future<int> importDataToDatabase(List<List<String>> csvData) async {
+   return await _importDataUseCase.call(params: ImportDataParams(csvData: csvData,type: CsvImportType.attendance));
   }
 
   /// Fetches a one-time report of attendance for the currently selected date and filter.
