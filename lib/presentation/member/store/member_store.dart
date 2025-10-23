@@ -1,6 +1,8 @@
 import 'dart:typed_data' as typed_data;
 
 import 'package:finger_print_flutter/core/enum.dart';
+import 'package:finger_print_flutter/data/service/report/export/export_data_service_impl.dart';
+import 'package:finger_print_flutter/domain/usecases/export/import_export_usecase.dart';
 import 'package:finger_print_flutter/domain/usecases/member/member_usecase.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mobx/mobx.dart';
@@ -19,6 +21,7 @@ abstract class _MemberStore with Store {
   final DeleteMemberUseCase _deleteMemberUseCase;
   final FindMemberByIdUseCase _findMemberByIdUseCase;
   final FindMemberByFingerprintUseCase _findByFingerprintUseCase;
+  final ImportDataUseCase _importDataUseCase;
 
   _MemberStore(
     this._getAllMembersUseCase,
@@ -27,6 +30,7 @@ abstract class _MemberStore with Store {
     this._deleteMemberUseCase,
     this._findMemberByIdUseCase,
     this._findByFingerprintUseCase,
+      this._importDataUseCase
   );
 
   // --- Store State Variables ---
@@ -105,6 +109,10 @@ abstract class _MemberStore with Store {
           });
           // Do not re-throw here, let the stream handle its own errors or recovery
         });
+  }
+  @action
+  Future<int> importDataToDatabase(List<List<String>> csvData) async {
+    return await _importDataUseCase.call(params: ImportDataParams(csvData: csvData,type: CsvImportType.member));
   }
 
   /// Looks up a member for attendance check-in.

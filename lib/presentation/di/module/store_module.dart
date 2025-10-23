@@ -26,7 +26,8 @@ mixin StoreModule {
         getIt<DeleteMemberUseCase>(),
         getIt<FindMemberByIdUseCase>(),
         getIt<FindMemberByFingerprintUseCase>(),
-       // getIt<EnrollFingerprintUseCase>(), // New Biometric dependency
+            getIt<ImportDataUseCase>(),
+            // getIt<EnrollFingerprintUseCase>(), // New Biometric dependency
       ),
     );
 

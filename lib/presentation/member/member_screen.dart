@@ -1,3 +1,4 @@
+import 'package:finger_print_flutter/core/list_to_csv_converter.dart';
 import 'package:finger_print_flutter/presentation/attendance/store/attendance_store.dart';
 import 'package:finger_print_flutter/presentation/auth/store/auth_store.dart';
 import 'package:finger_print_flutter/presentation/components/app_button.dart';
@@ -32,7 +33,13 @@ class ManageMemberScreen extends StatefulWidget {
 }
 
 class _ManageMemberScreenState extends State<ManageMemberScreen> {
-  List<Member> _members = initialMembers;
+  @override
+  void initState() {
+    super.initState();
+    memberStore.watchMembers();
+  }
+
+  MemberStore memberStore = getIt<MemberStore>();
   Member? _selectedMember;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
@@ -43,10 +50,10 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
 
   List<Member> get _filteredMembers {
     if (_searchQuery.isEmpty) {
-      return _members;
+      return memberStore.memberList;
     }
     final query = _searchQuery.toLowerCase();
-    return _members.where((member) {
+    return memberStore.memberList.where((member) {
       return member.name!.toLowerCase().contains(query) ||
           member.fatherName!.toLowerCase().contains(query);
     }).toList();
@@ -60,11 +67,11 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
 
   void _addOrUpdateMember(Member member) {
     setState(() {
-      if (_members.any((m) => m.memberId == member.memberId)) {
-        final index = _members.indexWhere((m) => m.memberId == member.memberId);
-        _members[index] = member;
+      if (memberStore.memberList.any((m) => m.memberId == member.memberId)) {
+        final index = memberStore.memberList.indexWhere((m) => m.memberId == member.memberId);
+        memberStore.memberList[index] = member;
       } else {
-        _members.add(member);
+        memberStore.memberList.add(member);
       }
       _selectedMember = member;
     });
@@ -75,15 +82,20 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
       context: context,
       builder: (ctx) => AppDialog(
         title: 'Confirm Deletion',
-        message: 'Are you sure you want to remove ${member.name}? This action cannot be undone.',
+        message:
+            'Are you sure you want to remove ${member.name}? This action cannot be undone.',
         type: AppDialogType.warning,
         actions: [
-          AppButton(label: 'Cancel', onPressed: () => Navigator.of(ctx).pop(), variant: AppButtonVariant.secondary),
+          AppButton(
+            label: 'Cancel',
+            onPressed: () => Navigator.of(ctx).pop(),
+            variant: AppButtonVariant.secondary,
+          ),
           AppButton(
             label: 'Remove',
             onPressed: () {
               setState(() {
-                _members.removeWhere((m) => m.memberId == member.memberId);
+                memberStore.memberList.removeWhere((m) => m.memberId == member.memberId);
                 if (_selectedMember?.memberId == member.memberId) {
                   _selectedMember = null;
                 }
@@ -99,16 +111,31 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
 
   void _payFee(Member member) {
     setState(() {
-     // member.payFee();
+      // member.payFee();
     });
-    _showAppDialog(context, 'Payment Successful', 'Fee payment for ${member.name} has been processed.', AppDialogType.success);
+    _showAppDialog(
+      context,
+      'Payment Successful',
+      'Fee payment for ${member.name} has been processed.',
+      AppDialogType.success,
+    );
   }
 
   void _printReceipt(Member member) {
-    _showAppDialog(context, 'Receipt Generated', 'Printing receipt for ${member.name} (ID: ${member.memberId}).', AppDialogType.info);
+    _showAppDialog(
+      context,
+      'Receipt Generated',
+      'Printing receipt for ${member.name} (ID: ${member.memberId}).',
+      AppDialogType.info,
+    );
   }
 
-  void _showAppDialog(BuildContext context, String title, String content, AppDialogType type) {
+  void _showAppDialog(
+    BuildContext context,
+    String title,
+    String content,
+    AppDialogType type,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AppDialog(
@@ -144,7 +171,8 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                Expanded( // Ensures the text field takes up most space
+                Expanded(
+                  // Ensures the text field takes up most space
                   child: AppTextField(
                     controller: _searchController,
                     onChanged: _updateSearchQuery,
@@ -165,54 +193,69 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
             ),
           ),
 
-           const Divider(height: 1),
-         SizedBox(height: 500,width: double.infinity,
-         child:
-          filteredList.isEmpty
+          const Divider(height: 1),
+          SizedBox(
+            height: 500,
+            width: double.infinity,
+            child: filteredList.isEmpty
+                // 💡 AppEmptyState for empty list
+                ? AppEmptyState(
+                    message: _searchQuery.isEmpty
+                        ? 'No members registered yet.'
+                        : 'No members found for "$_searchQuery".',
+                    icon: _searchQuery.isEmpty
+                        ? Icons.group_off
+                        : Icons.search_off,
+                    actionLabel: _searchQuery.isEmpty
+                        ? 'Enroll New Member'
+                        : null,
+                    onActionTap: _searchQuery.isEmpty
+                        ? () => _showMemberForm(null, isWide)
+                        : null,
+                  )
+                : ListView.builder(
+                    itemCount: filteredList.length,
+                    itemBuilder: (context, index) {
+                      final member = filteredList[index];
+                      final isSelected =
+                          member.memberId == _selectedMember?.memberId;
 
-          // 💡 AppEmptyState for empty list
-              ? AppEmptyState(
-            message: _searchQuery.isEmpty ? 'No members registered yet.' : 'No members found for "$_searchQuery".',
-            icon: _searchQuery.isEmpty ? Icons.group_off : Icons.search_off,
-            actionLabel: _searchQuery.isEmpty ? 'Enroll New Member' : null,
-            onActionTap: _searchQuery.isEmpty ? () => _showMemberForm(null, isWide) : null,
-          )
-              :
-          ListView.builder(
-            itemCount: filteredList.length,
-            itemBuilder: (context, index) {
-              final member = filteredList[index];
-              final isSelected = member.memberId == _selectedMember?.memberId;
+                      final isFeeDue =
+                          member.lastFeePaymentDate != null &&
+                          DateTime.now()
+                                  .difference(member.lastFeePaymentDate!)
+                                  .inDays >
+                              30;
 
-              final isFeeDue = member.lastFeePaymentDate != null &&
-                  DateTime.now().difference(member.lastFeePaymentDate!).inDays > 30;
-
-              // 💡 AppListTile for each member
-              return AppListTile(
-                title: member.name!,
-                subtitle: 'ID: ${member.memberId} | Type: ${member.membershipType}',
-                leadingIcon: Icons.person,
-                statusColor: isFeeDue ? AppColors.danger : AppColors.success,
-                isSelected: isSelected,
-                trailing: isFeeDue
-                    ? const AppStatusBadge(
-                  label: 'FEE DUE',
-                  color: AppColors.danger,
-                  filled: true,
-                )
-                    : null,
-                onTap: () {
-                  setState(() {
-                    _selectedMember = member;
-                  });
-                  if (!isWide) {
-                    _showMemberDetail(member);
-                  }
-                },
-              );
-            },
+                      // 💡 AppListTile for each member
+                      return AppListTile(
+                        title: member.name!,
+                        subtitle:
+                            'ID: ${member.memberId} | Type: ${member.membershipType}',
+                        leadingIcon: Icons.person,
+                        statusColor: isFeeDue
+                            ? AppColors.danger
+                            : AppColors.success,
+                        isSelected: isSelected,
+                        trailing: isFeeDue
+                            ? const AppStatusBadge(
+                                label: 'FEE DUE',
+                                color: AppColors.danger,
+                                filled: true,
+                              )
+                            : null,
+                        onTap: () {
+                          setState(() {
+                            _selectedMember = member;
+                          });
+                          if (!isWide) {
+                            _showMemberDetail(member);
+                          }
+                        },
+                      );
+                    },
+                  ),
           ),
-         )
         ],
       ),
     );
@@ -227,7 +270,8 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
         ? DateFormat('MMM dd, yyyy').format(member.registrationDate!)
         : 'N/A';
 
-    final isFeeDue = member.lastFeePaymentDate != null &&
+    final isFeeDue =
+        member.lastFeePaymentDate != null &&
         DateTime.now().difference(member.lastFeePaymentDate!).inDays > 30;
 
     return Container(
@@ -272,16 +316,20 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
 
             // 💡 AppCard for Fee Status
             AppCard(
-              title: isFeeDue ? 'MEMBERSHIP PAYMENT REQUIRED' : 'Membership Status: Current',
+              title: isFeeDue
+                  ? 'MEMBERSHIP PAYMENT REQUIRED'
+                  : 'Membership Status: Current',
               subtitle: 'Last Payment: $lastFeeDate',
               statusColor: isFeeDue ? AppColors.danger : AppColors.success,
               padding: const EdgeInsets.all(16),
               trailing: isFeeDue
                   ? const AppStatusBadge(label: 'DUE', color: AppColors.danger)
-                  : const AppStatusBadge(label: 'PAID', color: AppColors.success),
+                  : const AppStatusBadge(
+                      label: 'PAID',
+                      color: AppColors.success,
+                    ),
             ),
             const SizedBox(height: 20),
-
 
             _buildDetailRow('Member ID', member.memberId.toString()),
             _buildDetailRow('Father Name', member.fatherName!),
@@ -291,9 +339,15 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
             _buildDetailRow('Registered On', registrationDate),
 
             const SizedBox(height: 20),
-            Text('Notes:', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            Text(
+              'Notes:',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
             const SizedBox(height: 8),
-            Text(member.notes ?? 'No notes available.', style: const TextStyle(fontSize: 14)),
+            Text(
+              member.notes ?? 'No notes available.',
+              style: const TextStyle(fontSize: 14),
+            ),
 
             const SizedBox(height: 30),
 
@@ -319,7 +373,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
                   variant: AppButtonVariant.secondary,
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),
@@ -336,7 +390,10 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
             width: 140,
             child: Text(
               '$label:',
-              style: const TextStyle(fontWeight: FontWeight.w500, color: AppColors.textSecondary),
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
           Expanded(
@@ -360,9 +417,12 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
           child: _buildMemberDetailView(member),
         ),
         actions: [
-          AppButton(label: 'Close',
-              fullWidth: false,
-              onPressed: () => Navigator.of(ctx).pop(), variant: AppButtonVariant.secondary),
+          AppButton(
+            label: 'Close',
+            fullWidth: false,
+            onPressed: () => Navigator.of(ctx).pop(),
+            variant: AppButtonVariant.secondary,
+          ),
         ],
       ),
     );
@@ -394,27 +454,52 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const AppSectionHeader(title: 'Manage Members'),
-                const SizedBox(height: 20),
-        
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width:MediaQuery.of(context).size.width * 0.4,
-                  child: _buildMemberListView(true),
-                ),
-                const SizedBox(width: 24),
-                Expanded(
-                  child: _selectedMember != null
-                      ? _buildMemberDetailView(_selectedMember!)
-                      : AppEmptyState(
-                    message: 'Select a member to view details and actions.',
-                    icon: Icons.contact_page,
+                 AppSectionHeader(title: 'Manage Members',
+                  trailingWidget: GestureDetector(
+                    onTap: () async {
+                      try {
+                        final filePath = await SimpleCsvConverter()
+                            .pickExcelFile();
+
+                        final csvData = await SimpleCsvConverter().readCsvFile(
+                          filePath,
+                        );
+                        await memberStore.importDataToDatabase(csvData);
+                      } catch (e) {
+                        print('Import failed: $e');
+                        // Optionally show a dialog or snackbar here
+                      }
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.import_contacts_outlined),
+                        SizedBox(width: 16),
+                        Text("Import Members"),
+                      ],
+                    ),
                   ),
                 ),
-              ],
-            )
+                const SizedBox(height: 20),
+
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      child: _buildMemberListView(true),
+                    ),
+                    const SizedBox(width: 24),
+                    Expanded(
+                      child: _selectedMember != null
+                          ? _buildMemberDetailView(_selectedMember!)
+                          : AppEmptyState(
+                              message:
+                                  'Select a member to view details and actions.',
+                              icon: Icons.contact_page,
+                            ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
