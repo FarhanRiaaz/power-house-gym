@@ -80,7 +80,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   // Helper to handle navigation to the detail screen
   void _viewMemberAttendance(Member member) {
-    attendanceStore.getSingleAttendanceList(member.memberId!??0);
+   attendanceStore.getSingleAttendanceList(member.memberId!??0);
     Navigator.of(context)
         .push(
           MaterialPageRoute(

@@ -12,7 +12,7 @@ class AttendanceStore = _AttendanceStore with _$AttendanceStore;
 
 abstract class _AttendanceStore with Store {
   // --- Dependencies (Use Cases) ---
-  final GetAttendanceRecordUseCase _getAttendanceRecordUseCase;
+ final GetAttendanceRecordUseCase _getAttendanceRecordUseCase;
   final LogAttendanceUseCase _logAttendanceUseCase;
   final WatchTodayAttendanceUseCase _watchTodayAttendanceUseCase;
   final ImportDataUseCase _importDataUseCase;
