@@ -70,7 +70,15 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
         final index = memberStore.memberList.indexWhere(
           (m) => m.memberId == member.memberId,
         );
-        memberStore.selectedMember = member;
+        memberStore.selectedMember!.copyWith(
+          name: member.name,
+          phoneNumber: member.phoneNumber,
+          fatherName: member.fatherName,
+          gender: member.gender,
+          membershipType: member.membershipType,
+          fingerprintTemplate: member.fingerprintTemplate,
+          notes: member.notes,
+        );
         await memberStore.updateMember();
       } else {
         memberStore.newMember!.copyWith(
