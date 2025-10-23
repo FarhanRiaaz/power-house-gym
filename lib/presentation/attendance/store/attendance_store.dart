@@ -156,18 +156,13 @@ abstract class _AttendanceStore with Store {
 
 @action
   Future<void> getAttendanceDetail(int memberId) async {
-    print("We have been called $memberId");
     isLoadingReport = true;
     try {
       final records = await _attendanceByMemberIdRecordUseCase.call(params: memberId);
-    print("We have been called and size is  ${records.length}");
 
       runInAction(() {
         reportAttendanceList = ObservableList.of(records);
       });
-
-    print("We have been called and size isXX  ${reportAttendanceList.length}");
-
 
     } catch (e) {
       print("Error generating daily report: $e");
