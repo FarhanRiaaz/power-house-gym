@@ -59,12 +59,24 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
   }
 
   void _addOrUpdateMember(Member member) {
-    setState(() {
+    setState(() async {
       if (memberStore.memberList.any((m) => m.memberId == member.memberId)) {
-        final index = memberStore.memberList.indexWhere((m) => m.memberId == member.memberId);
-        memberStore.memberList[index] = member;
+        final index = memberStore.memberList.indexWhere(
+          (m) => m.memberId == member.memberId,
+        );
+        memberStore.selectedMember = member;
+        await memberStore.updateMember();
       } else {
-        memberStore.memberList.add(member);
+        memberStore.newMember!.copyWith(
+          name: member.name,
+          phoneNumber: member.phoneNumber,
+          fatherName: member.fatherName,
+          gender: member.gender,
+          membershipType: member.membershipType,
+          fingerprintTemplate: member.fingerprintTemplate,
+          notes: member.notes,
+        );
+      await memberStore.registerMember();
       }
       _selectedMember = member;
     });
@@ -88,7 +100,9 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
             label: 'Remove',
             onPressed: () {
               setState(() {
-                memberStore.memberList.removeWhere((m) => m.memberId == member.memberId);
+                memberStore.memberList.removeWhere(
+                  (m) => m.memberId == member.memberId,
+                );
                 if (_selectedMember?.memberId == member.memberId) {
                   _selectedMember = null;
                 }
@@ -191,7 +205,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
             width: double.infinity,
             child: Observer(
               builder: (context) {
-                    final filteredList = _filteredMembers;
+                final filteredList = _filteredMembers;
 
                 return filteredList.isEmpty
                     // 💡 AppEmptyState for empty list
@@ -215,14 +229,14 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
                           final member = filteredList[index];
                           final isSelected =
                               member.memberId == _selectedMember?.memberId;
-                
+
                           final isFeeDue =
                               member.lastFeePaymentDate != null &&
                               DateTime.now()
                                       .difference(member.lastFeePaymentDate!)
                                       .inDays >
                                   30;
-                
+
                           // 💡 AppListTile for each member
                           return AppListTile(
                             title: member.name!,
@@ -255,7 +269,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
                           );
                         },
                       );
-              }
+              },
             ),
           ),
         ],
@@ -456,29 +470,35 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                 AppSectionHeader(title: 'Manage Members',
-                  trailingWidget: GestureDetector(
-                    onTap: () async {
-                      try {
-                        final filePath = await SimpleCsvConverter()
-                            .pickExcelFile();
+                AppSectionHeader(
+                  title: 'Manage Members',
+                  trailingWidget: Column(
+                    children: [
+                      AppCard(title: "Total Members: ${memberStore.memberList.length}"),
+                      GestureDetector(
+                        onTap: () async {
+                          try {
+                            final filePath = await SimpleCsvConverter()
+                                .pickExcelFile();
 
-                        final csvData = await SimpleCsvConverter().readCsvFile(
-                          filePath,
-                        );
-                        await memberStore.importDataToDatabase(csvData);
-                      } catch (e) {
-                        print('Import failed: $e');
-                        // Optionally show a dialog or snackbar here
-                      }
-                    },
-                    child: Row(
-                      children: [
-                        Icon(Icons.import_contacts_outlined),
-                        SizedBox(width: 16),
-                        Text("Import Members"),
-                      ],
-                    ),
+                            final csvData = await SimpleCsvConverter().readCsvFile(
+                              filePath,
+                            );
+                            await memberStore.importDataToDatabase(csvData);
+                          } catch (e) {
+                            print('Import failed: $e');
+                            // Optionally show a dialog or snackbar here
+                          }
+                        },
+                        child: Row(
+                          children: [
+                            Icon(Icons.import_contacts_outlined),
+                            SizedBox(width: 16),
+                            Text("Import Members"),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 20),

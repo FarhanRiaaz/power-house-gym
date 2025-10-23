@@ -215,6 +215,18 @@ mixin _$AttendanceStore on _AttendanceStore, Store {
     );
   }
 
+  late final _$getAttendanceDetailAsyncAction = AsyncAction(
+    '_AttendanceStore.getAttendanceDetail',
+    context: context,
+  );
+
+  @override
+  Future<void> getAttendanceDetail(int memberId) {
+    return _$getAttendanceDetailAsyncAction.run(
+      () => super.getAttendanceDetail(memberId),
+    );
+  }
+
   late final _$_AttendanceStoreActionController = ActionController(
     name: '_AttendanceStore',
     context: context,
