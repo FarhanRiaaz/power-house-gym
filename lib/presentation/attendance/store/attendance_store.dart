@@ -12,6 +12,7 @@ class AttendanceStore = _AttendanceStore with _$AttendanceStore;
 
 abstract class _AttendanceStore with Store {
   // --- Dependencies (Use Cases) ---
+ final GetAttendanceByMemberIdRecordUseCase _attendanceByMemberIdRecordUseCase;
  final GetAttendanceRecordUseCase _getAttendanceRecordUseCase;
   final LogAttendanceUseCase _logAttendanceUseCase;
   final WatchTodayAttendanceUseCase _watchTodayAttendanceUseCase;
@@ -19,6 +20,7 @@ abstract class _AttendanceStore with Store {
   final GetDailyAttendanceReportUseCase _getDailyReportUseCase;
 
   _AttendanceStore(
+      this._attendanceByMemberIdRecordUseCase,
       this._getAttendanceRecordUseCase,
       this._logAttendanceUseCase,
       this._watchTodayAttendanceUseCase,
@@ -147,6 +149,29 @@ abstract class _AttendanceStore with Store {
     } catch (e) {
       print("Error generating daily report: $e");
       singleAttendanceList = ObservableList();
+    } finally {
+      isLoadingReport = false;
+    }
+  }
+
+@action
+  Future<void> getAttendanceDetail(int memberId) async {
+    print("We have been called $memberId");
+    isLoadingReport = true;
+    try {
+      final records = await _attendanceByMemberIdRecordUseCase.call(params: memberId);
+    print("We have been called and size is  ${records.length}");
+
+      runInAction(() {
+        reportAttendanceList = ObservableList.of(records);
+      });
+
+    print("We have been called and size isXX  ${reportAttendanceList.length}");
+
+
+    } catch (e) {
+      print("Error generating daily report: $e");
+      reportAttendanceList = ObservableList();
     } finally {
       isLoadingReport = false;
     }

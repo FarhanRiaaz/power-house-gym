@@ -34,6 +34,7 @@ mixin StoreModule {
     // Attendance Store
     getIt.registerLazySingleton<AttendanceStore>(
           () => AttendanceStore(
+      getIt<GetAttendanceByMemberIdRecordUseCase>(),
       getIt<GetAttendanceRecordUseCase>(),
         getIt<LogAttendanceUseCase>(),
         getIt<WatchTodayAttendanceUseCase>(),
