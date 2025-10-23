@@ -1,5 +1,7 @@
 import 'package:finger_print_flutter/core/enum.dart';
 import 'package:finger_print_flutter/core/list_to_csv_converter.dart';
+import 'package:finger_print_flutter/core/printing/print_service.dart';
+import 'package:finger_print_flutter/domain/entities/models/financial_transaction.dart';
 import 'package:finger_print_flutter/presentation/components/app_button.dart';
 import 'package:finger_print_flutter/presentation/components/app_card.dart';
 import 'package:finger_print_flutter/presentation/components/app_dialog.dart';
@@ -9,6 +11,7 @@ import 'package:finger_print_flutter/presentation/components/app_section_header.
 import 'package:finger_print_flutter/presentation/components/app_status_bar.dart';
 import 'package:finger_print_flutter/presentation/components/app_text_field.dart';
 import 'package:finger_print_flutter/presentation/components/background_wrapper.dart';
+import 'package:finger_print_flutter/presentation/financial/store/financial_store.dart';
 import 'package:finger_print_flutter/presentation/member/add_member_dialog.dart';
 import 'package:finger_print_flutter/presentation/member/store/member_store.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +36,8 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
   }
 
   MemberStore memberStore = getIt<MemberStore>();
+  ReceiptService receiptService = ReceiptService();
+  FinancialStore financialStore = getIt<FinancialStore>();
   Member? _selectedMember;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
@@ -76,7 +81,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
           fingerprintTemplate: member.fingerprintTemplate,
           notes: member.notes,
         );
-      await memberStore.registerMember();
+        await memberStore.registerMember();
       }
       _selectedMember = member;
     });
@@ -116,24 +121,68 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
     );
   }
 
-  void _payFee(Member member) {
-    setState(() {
-      // member.payFee();
-    });
-    _showAppDialog(
-      context,
-      'Payment Successful',
-      'Fee payment for ${member.name} has been processed.',
-      AppDialogType.success,
+  Future<void> _payFee(Member member) async {
+    financialStore.newTransaction.copyWith(
+      type: "Fee Payment",
+      amount: member.membershipType!.contains("cardio") ? 2500.0 : 1000.0,
+      transactionDate: DateTime.now(),
+      relatedMemberId: member.memberId,
     );
+
+    await processFeePayment(member);
   }
 
-  void _printReceipt(Member member) {
-    _showAppDialog(
-      context,
-      'Receipt Generated',
-      'Printing receipt for ${member.name} (ID: ${member.memberId}).',
-      AppDialogType.info,
+  /// Executes the fee payment process, updates the database, and shows a success dialog.
+  Future<void> processFeePayment(Member member) async {
+    if (member.memberId == null) {
+      _showAppDialog(
+        context,
+        'Error',
+        'Cannot process payment: Member ID is missing.',
+        AppDialogType.error,
+        member,
+      );
+      return;
+    }
+
+    try {
+      // 1. Database/API Call: Execute the transaction record operation.
+      // This is the line you provided:
+      memberStore.selectedMember!.copyWith(lastFeePaymentDate: DateTime.now());
+      await memberStore.updateMember();
+      await financialStore.recordTransaction();
+      // 2. UI Notification: Show the success dialog after the database call completes.
+      // This is the line you provided:
+      _showAppDialog(
+        context,
+        'Payment Successful',
+        'Fee payment for ${member.name ?? 'a member'} has been processed.',
+        AppDialogType.success,
+        member,
+      );
+    } catch (e) {
+      // Handle potential errors during the database transaction
+      _showAppDialog(
+        context,
+        'Payment Failed',
+        'An error occurred while processing the payment for ${member.name}. Error: $e',
+        AppDialogType.error,
+        member,
+      );
+    }
+  }
+
+  Future<void> _printReceipt(Member member) async {
+    await receiptService.generateAndPrintReceipt(
+      params: FinancialTransaction(
+        type: member.membershipType,
+        amount: member.membershipType!.contains('cardio')
+            ? 2500.0
+            : 1000.0,
+        transactionDate: DateTime.now(),
+        description: "Membership renewal",
+        relatedMemberId: member.memberId,
+      ),
     );
   }
 
@@ -142,6 +191,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
     String title,
     String content,
     AppDialogType type,
+    Member member,
   ) {
     showDialog(
       context: context,
@@ -151,9 +201,29 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
         type: type,
         actions: [
           AppButton(
-            label: 'Close',
-            onPressed: () => Navigator.of(ctx).pop(),
-            variant: AppButtonVariant.primary,
+            label: title == "Payment Successful" ? 'Print Receipt' : 'Close',
+            onPressed: () async {
+              if (title == "Payment Successful") {
+                await receiptService.generateAndPrintReceipt(
+                  params: FinancialTransaction(
+                    type: member.membershipType,
+                    amount: member.membershipType!.contains('cardio')
+                        ? 2500.0
+                        : 1000.0,
+                    transactionDate: DateTime.now(),
+                    description: "Membership renewal",
+                    relatedMemberId: member.memberId,
+                  ),
+                );
+                Navigator.of(ctx).pop();
+              } else {
+                Navigator.of(ctx).pop();
+              }
+            },
+            isOutline: true,
+            variant: title == "Payment Successful"
+                ? AppButtonVariant.danger
+                : AppButtonVariant.primary,
           ),
         ],
       ),
@@ -376,7 +446,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
                 AppButton(
                   label: 'PAY FEE NOW',
                   icon: Icons.payment,
-                  onPressed: () => _payFee(member),
+                  onPressed: () async => await _payFee(member),
                   fullWidth: false,
                   variant: AppButtonVariant.primary,
                 ),
@@ -384,7 +454,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
                 AppButton(
                   label: 'Print Receipt',
                   icon: Icons.print,
-                  onPressed: () => _printReceipt(member),
+                  onPressed: ()async => await _printReceipt(member),
                   fullWidth: false,
                   variant: AppButtonVariant.secondary,
                 ),
@@ -474,16 +544,23 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
                   title: 'Manage Members',
                   trailingWidget: Column(
                     children: [
-                      AppCard(title: "Total Members: ${memberStore.memberList.length}"),
+                      AppCard(
+                        leading: Icon(
+                          memberStore.currentGenderFilter?.name == "male"
+                              ? Icons.man_2_outlined
+                              : Icons.woman_2_outlined,
+                        ),
+                        title:
+                            "Total Members: ${memberStore.memberList.length}",
+                      ),
                       GestureDetector(
                         onTap: () async {
                           try {
                             final filePath = await SimpleCsvConverter()
                                 .pickExcelFile();
 
-                            final csvData = await SimpleCsvConverter().readCsvFile(
-                              filePath,
-                            );
+                            final csvData = await SimpleCsvConverter()
+                                .readCsvFile(filePath);
                             await memberStore.importDataToDatabase(csvData);
                           } catch (e) {
                             print('Import failed: $e');
