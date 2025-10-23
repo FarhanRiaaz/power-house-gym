@@ -22,7 +22,7 @@ class AppEmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 48, color: AppColors.textSecondary),
+          Icon(icon, size: 72, color: Colors.white),
           const SizedBox(height: 12),
           Text(message, style: AppTextStyles.body.copyWith(color: AppColors.textSecondary)),
           if (actionLabel != null && onActionTap != null) ...[

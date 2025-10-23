@@ -497,7 +497,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
                           : AppEmptyState(
                               message:
                                   'Select a member to view details and actions.',
-                              icon: Icons.contact_page,
+                              icon: Icons.person_3_outlined,
                             ),
                     ),
                   ],
