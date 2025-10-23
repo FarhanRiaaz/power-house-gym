@@ -67,37 +67,17 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
     });
   }
 
-  void _addOrUpdateMember(Member member) {
-
+  Future<void> _addOrUpdateMember(Member member) async {
+print("i am called ${member.toString()}");
       if (memberStore.memberList.any((m) => m.memberId == member.memberId)) {
         final index = memberStore.memberList.indexWhere(
           (m) => m.memberId == member.memberId,
         );
-        memberStore.selectedMember!.copyWith(
-          name: member.name,
-          phoneNumber: member.phoneNumber,
-          fatherName: member.fatherName,
-          gender: member.gender,
-          membershipType: member.membershipType,
-          fingerprintTemplate: member.fingerprintTemplate,
-          notes: member.notes,
-        );
-         memberStore.updateMember();
-      } else {
-        memberStore.newMember!.copyWith(
-          name: member.name,
-          phoneNumber: member.phoneNumber,
-          fatherName: member.fatherName,
-          gender: member.gender,
-          membershipType: member.membershipType,
-          fingerprintTemplate: member.fingerprintTemplate,
-          notes: member.notes,
-        );
-         memberStore.registerMember();
-      }
-      _selectedMember = member;
 
-  }
+       await  memberStore.updateMember(member);
+      } else {
+        await memberStore.registerMember(member);
+      }}
 
   void _removeMember(Member member) {
     showDialog(
@@ -555,8 +535,8 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
       context: context,
       builder: (ctx) => MemberFormDialog(
         member: member,
-        onSave: (m) async{
-          _addOrUpdateMember(m);
+        onSave: (m) async {
+         await  _addOrUpdateMember(m);
           Navigator.of(ctx).pop();
         },
       ),
