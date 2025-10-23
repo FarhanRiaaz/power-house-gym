@@ -62,7 +62,7 @@ class MemberAttendanceDetailScreen extends StatelessWidget {
                               style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
                             ),
                             Text(
-                              'Total Check-ins: ${attendanceStore.singleAttendanceList.length}',
+                              'Total Check-ins: ${attendanceStore.reportAttendanceList.length}',
                               style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
                             ),
                           ],
@@ -80,12 +80,12 @@ class MemberAttendanceDetailScreen extends StatelessWidget {
         
                   // Historical List
                   Expanded(
-                    child: attendanceStore.singleAttendanceList.isEmpty
+                    child: attendanceStore.reportAttendanceList.isEmpty
                         ? const AppEmptyState(message: 'No historical attendance found.', icon: Icons.history)
                         : ListView.builder(
-                      itemCount: attendanceStore.singleAttendanceList.length,
+                      itemCount: attendanceStore.reportAttendanceList.length,
                       itemBuilder: (context, index) {
-                        final record = attendanceStore.singleAttendanceList[index];
+                        final record = attendanceStore.reportAttendanceList[index];
                         final checkInTime = record.checkInTime!;
                         final isLate = checkInTime.hour >= 9;
                         final statusColor = isLate ? AppColors.warning : AppColors.success;

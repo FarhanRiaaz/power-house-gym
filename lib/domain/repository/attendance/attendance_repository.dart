@@ -10,7 +10,9 @@ abstract class AttendanceRepository {
   Future<AttendanceRecord> logCheckIn(AttendanceRecord memberId);
 
   /// Retrieves the complete attendance history for a single member.
-  Future<List<AttendanceRecord>> getAttendanceHistory(int memberId);
+  Future<List<AttendanceRecord>> getAttendanceHistory();
+
+  Future<List<AttendanceRecord>> getAttendanceById(int memberId);
 
   /// Gets a report of all check-ins for a specific date, optionally filtered by gender.
   Future<List<AttendanceRecord>> getDailyAttendanceReport(DateTime date, Gender? scope);
