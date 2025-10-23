@@ -16,6 +16,7 @@ class MemberDatasource {
 
   // Maps a single Drift Entity to the Domain Model (equivalent to mapSiteEntityToSite)
   Member mapMemberEntityToMember(DriftGen.Member entity) {
+    print("Adding and returning ${entity.toString()}");
     return Member(
       memberId: entity.memberId,
       name: entity.name,

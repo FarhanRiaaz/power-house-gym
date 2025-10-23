@@ -87,9 +87,11 @@ class MemberFormDialogState extends State<MemberFormDialog> {
       _currentMember.phoneNumber = _phoneController.text;
       _currentMember.membershipType = _membershipController.text;
       _currentMember.notes = _notesController.text;
-
+      _currentMember.fingerprintTemplate = "akjshdjahsbdd";
+      _currentMember.lastFeePaymentDate = DateTime.now();
       _currentMember.registrationDate = _tempRegistrationDate;
 
+      print("Current member $_currentMember");
       widget.onSave(_currentMember);
     }
   }

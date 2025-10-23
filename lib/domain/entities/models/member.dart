@@ -134,7 +134,18 @@ class Member implements CsvConvertible {
   /// String representation
   @override
   String toString() {
-    return 'Member($memberId, $name, $membershipType, feePaid: $lastFeePaymentDate)';
+       return 'Member('
+        '\n  memberId: $memberId, '
+        '\n  name: $name, '
+        '\n  phoneNumber: $phoneNumber, '
+        '\n  fatherName: $fatherName, '
+        '\n  gender: ${gender?.name}, ' // Accessing the name property of the enum
+        '\n  membershipType: $membershipType, '
+        '\n  registrationDate: ${registrationDate?.toIso8601String()}, '
+        '\n  lastFeePaymentDate: ${lastFeePaymentDate?.toIso8601String()}, '
+        '\n  fingerprintTemplate: ${fingerprintTemplate != null ? "[Template Present (${fingerprintTemplate!.length} chars)]" : null}, '
+        '\n  notes: $notes'
+        '\n)';
   }
   ///  for excel export things
   @override

@@ -51,7 +51,7 @@ abstract class _MemberStore with Store {
   Member? newMember = Member(); // Used for registration forms
 
   @observable
-  Member? selectedMember; // Used for editing or displaying details
+  Member? selectedMember = Member(); // Used for editing or displaying details
 
   @observable
   Gender? currentGenderFilter; // Filter for UI lists
@@ -160,22 +160,23 @@ abstract class _MemberStore with Store {
 
   /// Inserts a new member into the database.
   @action
-  Future<Member?> registerMember() async {
-    if (newMember == null || newMember!.fingerprintTemplate!.isEmpty) {
+  Future<Member?> registerMember(Member? member) async {
+    print("SomeHOw i am here ${member.toString()}  and ${member.toString()}");
+    if (member == null || member!.fingerprintTemplate!.isEmpty) {
       print("Member data is incomplete.");
       return null;
     }
 
     try {
       // Set timestamps before inserting
-      newMember = newMember!.copyWith(
+      member = member!.copyWith(
         registrationDate: DateTime.now(),
         lastFeePaymentDate:
             DateTime.now(), // Assume first fee paid on registration
       );
 
       final insertedMember = await _insertMemberUseCase.call(
-        params: newMember!,
+        params: member!,
       );
 
       // Update UI list and clear the form model
@@ -191,17 +192,17 @@ abstract class _MemberStore with Store {
 
   /// Updates an existing member record.
   @action
-  Future<void> updateMember() async {
-    if (selectedMember == null || selectedMember!.memberId == null) return;
+  Future<void> updateMember(Member? member) async {
+    if (member == null || member!.memberId == null) return;
 
     try {
-      final memberToUpdate = selectedMember!.copyWith(notes: "Updated");
+      final memberToUpdate = member!.copyWith(notes: "Updated");
 
       await _updateMemberUseCase.call(params: memberToUpdate);
 
       // Refresh the list to reflect changes
-      watchMembers(genderFilter: currentGenderFilter);
-      print("Member ${selectedMember!.memberId} updated.");
+      getAllMembers(currentGenderFilter??Gender.male);
+      print("Member ${member!.memberId} updated.");
     } catch (error) {
       print("Error updating member: $error");
       rethrow;

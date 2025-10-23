@@ -2,7 +2,9 @@ import 'package:finger_print_flutter/core/enum.dart';
 import 'package:finger_print_flutter/core/list_to_csv_converter.dart';
 import 'package:finger_print_flutter/core/printing/print_service.dart';
 import 'package:finger_print_flutter/core/style/app_text_styles.dart';
+import 'package:finger_print_flutter/domain/entities/models/attendance_record.dart';
 import 'package:finger_print_flutter/domain/entities/models/financial_transaction.dart';
+import 'package:finger_print_flutter/presentation/attendance/store/attendance_store.dart';
 import 'package:finger_print_flutter/presentation/components/app_button.dart';
 import 'package:finger_print_flutter/presentation/components/app_card.dart';
 import 'package:finger_print_flutter/presentation/components/app_dialog.dart';
@@ -37,6 +39,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
   }
 
   MemberStore memberStore = getIt<MemberStore>();
+  AttendanceStore attendanceStore = getIt<AttendanceStore>();
   ReceiptService receiptService = ReceiptService();
   FinancialStore financialStore = getIt<FinancialStore>();
   Member? _selectedMember;
@@ -64,37 +67,17 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
     });
   }
 
-  void _addOrUpdateMember(Member member) {
-    setState(() async {
+  Future<void> _addOrUpdateMember(Member member) async {
+print("i am called ${member.toString()}");
       if (memberStore.memberList.any((m) => m.memberId == member.memberId)) {
         final index = memberStore.memberList.indexWhere(
           (m) => m.memberId == member.memberId,
         );
-        memberStore.selectedMember!.copyWith(
-          name: member.name,
-          phoneNumber: member.phoneNumber,
-          fatherName: member.fatherName,
-          gender: member.gender,
-          membershipType: member.membershipType,
-          fingerprintTemplate: member.fingerprintTemplate,
-          notes: member.notes,
-        );
-        await memberStore.updateMember();
+
+       await  memberStore.updateMember(member);
       } else {
-        memberStore.newMember!.copyWith(
-          name: member.name,
-          phoneNumber: member.phoneNumber,
-          fatherName: member.fatherName,
-          gender: member.gender,
-          membershipType: member.membershipType,
-          fingerprintTemplate: member.fingerprintTemplate,
-          notes: member.notes,
-        );
-        await memberStore.registerMember();
-      }
-      _selectedMember = member;
-    });
-  }
+        await memberStore.registerMember(member);
+      }}
 
   void _removeMember(Member member) {
     showDialog(
@@ -167,8 +150,14 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
       // 1. Database/API Call: Execute the transaction record operation.
       // This is the line you provided:
       memberStore.selectedMember!.copyWith(lastFeePaymentDate: DateTime.now());
-      await memberStore.updateMember();
-      await financialStore.recordTransaction();
+      await memberStore.updateMember(member);
+      await financialStore.recordTransaction(FinancialTransaction(
+        type: "Fee Payment",
+        amount: member.membershipType!.contains("cardio") ? 2500.0 : 1000.0,
+        transactionDate: DateTime.now(),
+        description: "Fee Payment",
+        relatedMemberId: member.memberId,
+      ));
       // 2. UI Notification: Show the success dialog after the database call completes.
       // This is the line you provided:
       _showAppDialog(
@@ -199,6 +188,11 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
         description: "Membership renewal",
         relatedMemberId: member.memberId,
       ),
+      percentage: AttendanceRecord.calculateMonthlyAttendancePercentage(
+        attendanceStore.singleAttendanceList,
+        member.memberId!,
+      ),
+      userName: member.name,
     );
   }
 
@@ -230,6 +224,12 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
                     description: "Membership renewal",
                     relatedMemberId: member.memberId,
                   ),
+                  percentage:
+                      AttendanceRecord.calculateMonthlyAttendancePercentage(
+                        attendanceStore.singleAttendanceList,
+                        member.memberId!,
+                      ),
+                  userName: member.name,
                 );
                 Navigator.of(ctx).pop();
               } else {
@@ -535,8 +535,8 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
       context: context,
       builder: (ctx) => MemberFormDialog(
         member: member,
-        onSave: (m) {
-          _addOrUpdateMember(m);
+        onSave: (m) async {
+         await  _addOrUpdateMember(m);
           Navigator.of(ctx).pop();
         },
       ),
