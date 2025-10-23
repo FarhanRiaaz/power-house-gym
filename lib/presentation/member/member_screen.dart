@@ -177,9 +177,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
     await receiptService.generateAndPrintReceipt(
       params: FinancialTransaction(
         type: member.membershipType,
-        amount: member.membershipType!.contains('cardio')
-            ? 2500.0
-            : 1000.0,
+        amount: member.membershipType!.contains('cardio') ? 2500.0 : 1000.0,
         transactionDate: DateTime.now(),
         description: "Membership renewal",
         relatedMemberId: member.memberId,
@@ -455,7 +453,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
                 AppButton(
                   label: 'Print Receipt',
                   icon: Icons.print,
-                  onPressed: ()async => await _printReceipt(member),
+                  onPressed: () async => await _printReceipt(member),
                   fullWidth: false,
                   variant: AppButtonVariant.secondary,
                 ),
@@ -545,8 +543,16 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
                   title: 'Manage Members',
                   trailingWidget: Column(
                     children: [
-                      Text(
-                          "Total Members: ${memberStore.memberList.length}",style:  AppTextStyles.subheading,),
+                      Observer(
+                        builder: (context) {
+                          return memberStore.memberList.isNotEmpty
+                              ? Text(
+                                  "Total Members: ${memberStore.memberList.length}",
+                                  style: AppTextStyles.subheading,
+                                )
+                              : SizedBox.shrink();
+                        },
+                      ),
                       GestureDetector(
                         onTap: () async {
                           try {
