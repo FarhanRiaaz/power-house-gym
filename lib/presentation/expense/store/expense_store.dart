@@ -46,6 +46,7 @@ abstract class _ExpenseStore with Store {
   @observable
   DateTime reportEndDate = DateTime.now();
 
+  @observable
   List<BillExpense> _filteredExpenses = [];
 
   void setFilterAndFetch(DateTimeRange? range) async {
@@ -56,7 +57,6 @@ abstract class _ExpenseStore with Store {
    await generateRangeReport();
   }
 
-  // MobX Observable for the filter range (important for UI update)
   DateTimeRange? _currentFilterRange;
   DateTimeRange? get currentFilterRange => _currentFilterRange;
   // For form input

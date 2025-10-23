@@ -8,6 +8,7 @@ import 'package:finger_print_flutter/presentation/components/app_list_tile.dart'
 import 'package:finger_print_flutter/presentation/components/app_section_header.dart';
 import 'package:finger_print_flutter/presentation/components/app_status_bar.dart';
 import 'package:finger_print_flutter/presentation/components/background_wrapper.dart';
+import 'package:finger_print_flutter/presentation/financial/date_range_widget.dart';
 import 'package:finger_print_flutter/presentation/financial/store/financial_store.dart';
 import 'package:finger_print_flutter/presentation/member/store/member_store.dart';
 import 'package:flutter/material.dart';
@@ -128,6 +129,13 @@ class _FinancialTransactionScreenState extends State<FinancialTransactionScreen>
 
                       ],
                     ),
+                  ),
+
+                  const SizedBox(height: 16),
+                  Observer(
+                      builder: (context) {
+                        return FinanceDateRangeFilterWidget();
+                      }
                   ),
                   const SizedBox(height: 16),
 

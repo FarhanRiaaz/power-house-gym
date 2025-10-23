@@ -1,6 +1,7 @@
 import 'package:finger_print_flutter/data/service/report/export/export_data_service_impl.dart';
 import 'package:finger_print_flutter/domain/usecases/export/import_export_usecase.dart';
 import 'package:finger_print_flutter/domain/usecases/financial/financial_usecase.dart';
+import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 
 import '../../../domain/entities/models/financial_transaction.dart';
@@ -43,6 +44,20 @@ abstract class _FinancialStore with Store {
 
   @observable
   DateTime reportEndDate = DateTime.now();
+
+  @observable
+  List<FinancialTransaction> _filteredExpenses = [];
+
+  void setFilterAndFetch(DateTimeRange? range) async {
+    _currentFilterRange = range;
+    reportStartDate = range?.start?? DateTime.now();
+    reportEndDate = range?.end?? DateTime.now();
+
+    await generateRangeReport();
+  }
+
+  DateTimeRange? _currentFilterRange;
+  DateTimeRange? get currentFilterRange => _currentFilterRange;
 
   // For form input
   @observable
