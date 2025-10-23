@@ -1,4 +1,5 @@
 import 'package:finger_print_flutter/domain/usecases/bill/bill_usecase.dart';
+import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 
 import '../../../domain/entities/models/bill_payment.dart';
@@ -37,12 +38,27 @@ abstract class _ExpenseStore with Store {
   @observable
   ObservableList<BillExpense> reportExpensesList = ObservableList();
 
+
   @observable
   DateTime reportStartDate = DateTime.now().subtract(const Duration(days: 30));
+
 
   @observable
   DateTime reportEndDate = DateTime.now();
 
+  List<BillExpense> _filteredExpenses = [];
+
+  void setFilterAndFetch(DateTimeRange? range) async {
+    _currentFilterRange = range;
+    reportStartDate = range?.start?? DateTime.now();
+    reportEndDate = range?.end?? DateTime.now();
+
+   await generateRangeReport();
+  }
+
+  // MobX Observable for the filter range (important for UI update)
+  DateTimeRange? _currentFilterRange;
+  DateTimeRange? get currentFilterRange => _currentFilterRange;
   // For form input
   @observable
   BillExpense newExpense = BillExpense(
@@ -111,6 +127,8 @@ abstract class _ExpenseStore with Store {
       });
 
       // The allExpensesList is automatically refreshed by the stream listener.
+      await generateRangeReport();
+
       return expense;
     } catch (error) {
       print("Error recording expense: $error");
@@ -133,6 +151,7 @@ abstract class _ExpenseStore with Store {
 
       runInAction(() {
         reportExpensesList = ObservableList.of(records);
+        print("Fetched");
       });
     } catch (e) {
       print("Error generating expense range report: $e");
@@ -149,7 +168,7 @@ abstract class _ExpenseStore with Store {
     try {
       await _updateExpenseUseCase.call(params: expense);
       // Refresh the list to reflect changes
-      generateRangeReport();
+     await generateRangeReport();
       print("Expense ${expense!.id} updated.");
     } catch (error) {
       print("Error updating member: $error");
@@ -165,6 +184,7 @@ abstract class _ExpenseStore with Store {
       await _deleteBillExpenseUseCase.call(params: billId);
       // The deletion will automatically update the allExpensesList stream.
       print("Bill expense $billId deleted.");
+      await   generateRangeReport();
     } catch (e) {
       print("Error deleting bill expense: $e");
       throw e;

@@ -1,5 +1,5 @@
 // NEW: Expense List (Mock Data)
- import 'package:finger_print_flutter/core/style/app_colors.dart';
+import 'package:finger_print_flutter/core/style/app_colors.dart';
 import 'package:finger_print_flutter/data/di/data_layer_injection.dart';
 import 'package:finger_print_flutter/domain/entities/models/bill_payment.dart';
 import 'package:finger_print_flutter/presentation/components/app_card.dart';
@@ -9,6 +9,7 @@ import 'package:finger_print_flutter/presentation/components/app_list_tile.dart'
 import 'package:finger_print_flutter/presentation/components/app_section_header.dart';
 import 'package:finger_print_flutter/presentation/components/app_status_bar.dart';
 import 'package:finger_print_flutter/presentation/components/background_wrapper.dart';
+import 'package:finger_print_flutter/presentation/components/range_filter_expense.dart';
 import 'package:finger_print_flutter/presentation/expense/store/expense_dialog.dart';
 import 'package:finger_print_flutter/presentation/expense/store/expense_store.dart';
 import 'package:flutter/material.dart';
@@ -27,10 +28,8 @@ class ExpenseScreen extends StatefulWidget {
 }
 
 class _ExpenseScreenState extends State<ExpenseScreen> {
-
   @override
   void initState() {
-
     super.initState();
     expenseStore.generateRangeReport();
   }
@@ -56,10 +55,15 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
       context: context,
       builder: (ctx) => AppDialog(
         title: 'Confirm Deletion',
-        message: 'Are you sure you want to delete the expense: ${expense.category} (${NumberFormat.currency(symbol: 'PKR ').format(expense.amount)})?',
+        message:
+            'Are you sure you want to delete the expense: ${expense.category} (${NumberFormat.currency(symbol: 'PKR ').format(expense.amount)})?',
         type: AppDialogType.warning,
         actions: [
-          AppButton(label: 'Cancel', onPressed: () => Navigator.of(ctx).pop(), variant: AppButtonVariant.secondary),
+          AppButton(
+            label: 'Cancel',
+            onPressed: () => Navigator.of(ctx).pop(),
+            variant: AppButtonVariant.secondary,
+          ),
           AppButton(
             label: 'Delete',
             onPressed: () {
@@ -76,7 +80,6 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: BackgroundWrapper(
@@ -105,16 +108,31 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                 statusColor: AppColors.danger,
                 trailing: Observer(
                   builder: (context) {
-                    final totalExpenses = expenseStore.reportExpensesList.fold(0.0, (sum, expense) => sum + expense.amount!);
+                    final totalExpenses = expenseStore.reportExpensesList.fold(
+                      0.0,
+                      (sum, expense) => sum + expense.amount!,
+                    );
 
                     return Text(
-                      NumberFormat.currency(symbol: 'PKR ').format(totalExpenses),
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.danger),
+                      NumberFormat.currency(
+                        symbol: 'PKR ',
+                      ).format(totalExpenses),
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.danger,
+                      ),
                     );
-                  }
+                  },
                 ),
               ),
 
+              const SizedBox(height: 16),
+              Observer(
+                builder: (context) {
+                  return DateRangeFilterWidget();
+                }
+              ),
               const SizedBox(height: 16),
 
               Expanded(
@@ -123,64 +141,100 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                     color: AppColors.surface.withOpacity(0.65),
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
-                      BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 10),
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        blurRadius: 10,
+                      ),
                     ],
                   ),
                   child: Observer(
                     builder: (context) {
                       return expenseStore.reportExpensesList.isEmpty
-                          ? const AppEmptyState(message: 'No expenses have been recorded yet.', icon: Icons.money_off)
+                          ? const AppEmptyState(
+                              message: 'No expenses have been recorded yet.',
+                              icon: Icons.money_off,
+                            )
                           : ListView.builder(
-                        itemCount: expenseStore.reportExpensesList.length,
-                        itemBuilder: (context, index) {
-                          final expense = expenseStore.reportExpensesList[index];
+                              itemCount: expenseStore.reportExpensesList.length,
+                              itemBuilder: (context, index) {
+                                final expense =
+                                    expenseStore.reportExpensesList[index];
 
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: AppColors.primary),
-
-                              ),
-                              child: AppListTile(
-                                title: NumberFormat.currency(symbol: 'PKR ').format(expense.amount),
-                                subtitle: '${expense.category} - ${expense.description}',
-                                leadingIcon: Icons.receipt_long,
-                                statusColor: AppColors.primary,
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                      children: [
-                                        Text(
-                                            DateFormat('MMM dd, yyyy').format(expense.date!),
-                                            style: const TextStyle(fontSize: 12, color: AppColors.textPrimary)
-                                        ),
-                                        AppStatusBadge(label: expense.category!, color: AppColors.textPrimary),
-                                      ],
+                                return Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: Colors.transparent,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: AppColors.primary,
+                                      ),
                                     ),
-                                    const SizedBox(width: 8),
-                                    IconButton(
-                                      icon: const Icon(Icons.edit_off_outlined, color: AppColors.primary, size: 24),
-                                      onPressed: () => _showExpenseForm(expense: expense),
+                                    child: AppListTile(
+                                      title: NumberFormat.currency(
+                                        symbol: 'PKR ',
+                                      ).format(expense.amount),
+                                      subtitle:
+                                          '${expense.category} - ${expense.description}',
+                                      leadingIcon: Icons.receipt_long,
+                                      statusColor: AppColors.primary,
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+                                            children: [
+                                              Text(
+                                                DateFormat(
+                                                  'MMM dd, yyyy',
+                                                ).format(expense.date!),
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  color: AppColors.textPrimary,
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(top: 3.0),
+                                                child: AppStatusBadge(
+                                                  label: expense.category!,
+                                                  color: AppColors.success,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(width: 8),
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.edit_off_outlined,
+                                              color: AppColors.primary,
+                                              size: 24,
+                                            ),
+                                            onPressed: () => _showExpenseForm(
+                                              expense: expense,
+                                            ),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.auto_delete_outlined,
+                                              color: AppColors.danger,
+                                              size: 24,
+                                            ),
+                                            onPressed: () =>
+                                                _deleteExpense(expense),
+                                          ),
+                                        ],
+                                      ),
+                                      onTap: () =>
+                                          _showExpenseForm(expense: expense),
                                     ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete_outline_outlined, color: AppColors.danger, size: 24),
-                                      onPressed: () => _deleteExpense(expense),
-                                    ),
-                                  ],
-                                ),
-                                onTap: () => _showExpenseForm(expense: expense),
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    }
+                                  ),
+                                );
+                              },
+                            );
+                    },
                   ),
                 ),
               ),
@@ -191,14 +245,17 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
     );
   }
 
-   Future<void> addOrUpdateExpense(BillExpense expense) async {
+  Future<void> addOrUpdateExpense(BillExpense expense) async {
     if (expenseStore.reportExpensesList.any((e) => e.id == expense.id)) {
-       await expenseStore.updateExpense(expense);
+      await expenseStore.updateExpense(expense);
+      expenseStore.reportExpensesList.sort(
+        (a, b) => b.date!.compareTo(a.date!),
+      );
     } else {
-     await expenseStore.recordExpense(expense);
+      await expenseStore.recordExpense(expense);
+      expenseStore.reportExpensesList.sort(
+        (a, b) => b.date!.compareTo(a.date!),
+      );
     }
-// Sort by date descending
-     expenseStore.reportExpensesList.sort((a, b) => b.date!.compareTo(a.date!));
   }
-
 }
