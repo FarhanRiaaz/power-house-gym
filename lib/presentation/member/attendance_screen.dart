@@ -1,3 +1,4 @@
+import 'package:finger_print_flutter/core/enum.dart';
 import 'package:finger_print_flutter/core/list_to_csv_converter.dart';
 import 'package:finger_print_flutter/core/style/app_colors.dart';
 import 'package:finger_print_flutter/presentation/attendance/store/attendance_store.dart';
@@ -26,6 +27,13 @@ class AttendanceScreen extends StatefulWidget {
 }
 
 class _AttendanceScreenState extends State<AttendanceScreen> {
+
+  @override
+  void initState() {
+    attendanceStore.watchTodayAttendance(genderFilter: Gender.male);
+    super.initState();
+  }
+
   String _searchQuery = '';
   final AttendanceStore attendanceStore = getIt<AttendanceStore>();
   final MemberStore memberStore = getIt<MemberStore>();

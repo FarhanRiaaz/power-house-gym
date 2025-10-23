@@ -24,6 +24,7 @@ mixin UseCaseModule {
 
     // Attendance Use Cases (depend on AttendanceRepository)
     getIt.registerFactory(() => LogAttendanceUseCase(getIt<AttendanceRepository>()));
+    getIt.registerFactory(() => GetDailyAttendanceReportUseCase(getIt<AttendanceRepository>()));
     getIt.registerFactory(() => WatchTodayAttendanceUseCase(getIt<AttendanceRepository>()));
     getIt.registerFactory(() => GetDailyAttendanceReportUseCase(getIt<AttendanceRepository>()));
    // getIt.registerFactory(() => DeleteAttendanceRecordUseCase(getIt<AttendanceRepository>()));
