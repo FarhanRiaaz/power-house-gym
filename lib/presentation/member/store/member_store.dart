@@ -107,24 +107,24 @@ abstract class _MemberStore with Store {
   @action
   Future<void> watchMembers({Gender? genderFilter}) async{
     currentGenderFilter = genderFilter;
-
-    // Set a custom loading flag before starting the stream process
-    isLoadingMembers = true;
-    print("We are here to get the members");
-  //   // The use case returns a Future<Stream<List<Member>>>
+  //
+  //   // Set a custom loading flag before starting the stream process
+  //   isLoadingMembers = true;
+  //   print("We are here to get the members");
+  // //   // The use case returns a Future<Stream<List<Member>>>
   //  await _getAllMembersUseCase
   //       .call(params: currentGenderFilter)
   //       .then((stream) {
   //         memberListStream = stream;
-
+  //
   //         // We subscribe to the stream manually to populate the observable list
   //         // for easier UI consumption, and manage the loading state.
   //         memberListStream.listen((list) {
   //           runInAction(() {
-              
+  //
   //                 print("We are here to get the membersList ${list.length}");
-
-
+  //
+  //
   //             memberList = ObservableList.of(list);
   //             isLoadingMembers =
   //                 false; // Loading finishes once the first list arrives
@@ -181,7 +181,7 @@ abstract class _MemberStore with Store {
       // Update UI list and clear the form model
       newMember = Member(); // Clear form
       selectedMember = insertedMember;
-      watchMembers(genderFilter: currentGenderFilter); // Refresh list
+      await getAllMembers(currentGenderFilter??Gender.male); // Refresh list
       return insertedMember;
     } catch (error) {
       print("Error registering member: $error");

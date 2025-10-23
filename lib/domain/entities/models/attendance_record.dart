@@ -135,6 +135,51 @@ class AttendanceRecord  implements CsvConvertible{
     return list.where((r) => r.memberId == memberId).length;
   }
 
+  static   double calculateMonthlyAttendancePercentage(
+      List<AttendanceRecord> records,
+      int targetMemberId, {
+        int daysInPeriod = 30,
+      }) {
+    if (records.isEmpty) {
+      return 0.0;
+    }
+
+    final endDate = DateTime.now();
+    // Start date is exactly 'daysInPeriod' days ago.
+    final startDate = endDate.subtract(Duration(days: daysInPeriod));
+
+    // 1. Filter records by member ID and date range.
+    final memberRecordsInPeriod = records
+        .where((r) => r.memberId == targetMemberId)
+        .where((r) {
+      final checkIn = r.checkInTime;
+      // Ensure check-in time is not null and is within the last 30 days.
+      // Note: We check if it's strictly after the start date and on or before today.
+      return checkIn != null &&
+          checkIn.isAfter(startDate.subtract(const Duration(minutes: 1))) &&
+          checkIn.isBefore(endDate.add(const Duration(days: 1)));
+    })
+        .toList();
+
+    // 2. Count unique days attended.
+    // We strip the time component to ensure multiple check-ins on the same day are counted as one day attended.
+    final uniqueAttendanceDays = memberRecordsInPeriod
+        .map((r) => DateTime(r.checkInTime!.year, r.checkInTime!.month, r.checkInTime!.day))
+        .toSet() // Uses a Set to automatically ensure all entries are unique dates.
+        .length;
+
+    // 3. Calculate percentage.
+    // Ensure we don't divide by zero, although daysInPeriod is 30 by default.
+    if (daysInPeriod == 0) {
+      return 0.0;
+    }
+
+    final percentage = (uniqueAttendanceDays / daysInPeriod) * 100.0;
+
+    // Return the result rounded to two decimal places
+    return double.parse(percentage.toStringAsFixed(2));
+  }
+
   /// Group by member
   static Map<int, List<AttendanceRecord>> groupByMember(
       List<AttendanceRecord> list) {
