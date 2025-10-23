@@ -225,6 +225,7 @@ class Member implements CsvConvertible {
   bool get isFeeOverdue {
     final now = DateTime.now();
     final dueDate = lastFeePaymentDate!.add(Duration(days: 30));
+    print("Last ${lastFeePaymentDate?.toIso8601String()}");
     return now.isAfter(dueDate);
   }
 

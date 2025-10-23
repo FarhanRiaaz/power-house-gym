@@ -16,7 +16,6 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import '../../../domain/entities/models/member.dart';
 import '../../core/style/app_colors.dart';
 import '../../di/service_locator.dart';
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class ManageMemberScreen extends StatefulWidget {
@@ -230,17 +229,21 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
                             subtitle:
                                 'ID: ${member.memberId} | Type: ${member.membershipType}',
                             leadingIcon: Icons.person,
-                            statusColor: isFeeDue
+                            statusColor: member.isFeeOverdue
                                 ? AppColors.danger
                                 : AppColors.success,
                             isSelected: isSelected,
-                            trailing: isFeeDue
+                            trailing: member.isFeeOverdue
                                 ? const AppStatusBadge(
                                     label: 'FEE DUE',
                                     color: AppColors.danger,
                                     filled: true,
                                   )
-                                : null,
+                                : const AppStatusBadge(
+                                    label: 'Valid Membership',
+                                    color: AppColors.success,
+                                    filled: false,
+                                  ),
                             onTap: () {
                               setState(() {
                                 _selectedMember = member;
