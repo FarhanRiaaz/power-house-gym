@@ -36,7 +36,7 @@ class FingerprintApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       // initialRoute: RouteManager.dashboard,
       // onGenerateRoute: RouteManager.generateRoute,
-      home: ExpenseScreen(onUpdate:() {
+      home: AttendanceScreen(onUpdate:() {
         
       },),
     );

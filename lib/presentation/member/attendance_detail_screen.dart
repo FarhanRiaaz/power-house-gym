@@ -6,23 +6,18 @@ import 'package:finger_print_flutter/presentation/components/background_wrapper.
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../domain/entities/models/attendance_record.dart';
+import '../../di/service_locator.dart';
 import '../../domain/entities/models/member.dart';
-import 'attendance_screen.dart';
+import '../attendance/store/attendance_store.dart';
 
 class MemberAttendanceDetailScreen extends StatelessWidget {
   final Member member;
 
-  const MemberAttendanceDetailScreen({super.key, required this.member});
-
-  List<AttendanceRecord> get _memberAttendance {
-    return GlobalState.attendanceRecords.where((r) => r.memberId == member.memberId).toList();
-  }
+   MemberAttendanceDetailScreen({super.key, required this.member});
+  final AttendanceStore attendanceStore = getIt<AttendanceStore>();
 
   @override
   Widget build(BuildContext context) {
-    final historicalRecords = _memberAttendance;
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black87,
@@ -67,7 +62,7 @@ class MemberAttendanceDetailScreen extends StatelessWidget {
                               style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
                             ),
                             Text(
-                              'Total Check-ins: ${historicalRecords.length}',
+                              'Total Check-ins: ${attendanceStore.singleAttendanceList.length}',
                               style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
                             ),
                           ],
@@ -85,12 +80,12 @@ class MemberAttendanceDetailScreen extends StatelessWidget {
         
                   // Historical List
                   Expanded(
-                    child: historicalRecords.isEmpty
+                    child: attendanceStore.singleAttendanceList.isEmpty
                         ? const AppEmptyState(message: 'No historical attendance found.', icon: Icons.history)
                         : ListView.builder(
-                      itemCount: historicalRecords.length,
+                      itemCount: attendanceStore.singleAttendanceList.length,
                       itemBuilder: (context, index) {
-                        final record = historicalRecords[index];
+                        final record = attendanceStore.singleAttendanceList[index];
                         final checkInTime = record.checkInTime!;
                         final isLate = checkInTime.hour >= 9;
                         final statusColor = isLate ? AppColors.warning : AppColors.success;
