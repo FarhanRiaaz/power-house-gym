@@ -1,5 +1,6 @@
 // NEW: Expense List (Mock Data)
  import 'package:finger_print_flutter/core/style/app_colors.dart';
+import 'package:finger_print_flutter/data/di/data_layer_injection.dart';
 import 'package:finger_print_flutter/domain/entities/models/bill_payment.dart';
 import 'package:finger_print_flutter/presentation/components/app_card.dart';
 import 'package:finger_print_flutter/presentation/components/app_dialog.dart';
@@ -9,33 +10,12 @@ import 'package:finger_print_flutter/presentation/components/app_section_header.
 import 'package:finger_print_flutter/presentation/components/app_status_bar.dart';
 import 'package:finger_print_flutter/presentation/components/background_wrapper.dart';
 import 'package:finger_print_flutter/presentation/expense/store/expense_dialog.dart';
+import 'package:finger_print_flutter/presentation/expense/store/expense_store.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 
 import '../components/app_button.dart';
-class GlobalState {
-static List<BillExpense> expenses = [
-  BillExpense(id: 2001, category: 'Rent', amount: 50000.00, date: DateTime(2024, 10, 1), description: 'Monthly facility rent'),
-  BillExpense(id: 2002, category: 'Salary', amount: 35000.00, date: DateTime(2024, 10, 25), description: 'Trainer salary - October'),
-  BillExpense(id: 2003, category: 'Utility', amount: 12500.00, date: DateTime(2024, 10, 15), description: 'Electricity and water bill'),
-];
-
-// NEW: Expense CRUD
-static void addOrUpdateExpense(BillExpense expense) {
-if (expenses.any((e) => e.id == expense.id)) {
-final index = expenses.indexWhere((e) => e.id == expense.id);
-expenses[index] = expense;
-} else {
-expenses.add(expense);
-}
-// Sort by date descending
-expenses.sort((a, b) => b.date!.compareTo(a.date!));
-}
-
-static void deleteExpense(int id) {
-expenses.removeWhere((e) => e.id == id);
-}
-}
 
 class ExpenseScreen extends StatefulWidget {
   final VoidCallback onUpdate;
@@ -47,14 +27,15 @@ class ExpenseScreen extends StatefulWidget {
 }
 
 class _ExpenseScreenState extends State<ExpenseScreen> {
+  final ExpenseStore expenseStore = getIt<ExpenseStore>();
 
   void _showExpenseForm({BillExpense? expense}) {
     showDialog(
       context: context,
       builder: (ctx) => ExpenseFormDialog(
         expense: expense,
-        onSave: (e) {
-          GlobalState.addOrUpdateExpense(e);
+        onSave: (e) async {
+          await addOrUpdateExpense(e);
           widget.onUpdate();
           Navigator.of(ctx).pop();
         },
@@ -74,7 +55,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
           AppButton(
             label: 'Delete',
             onPressed: () {
-              GlobalState.deleteExpense(expense.id!);
+              expenseStore.deleteExpense(expense.id!);
               widget.onUpdate();
               Navigator.of(ctx).pop();
             },
@@ -87,7 +68,6 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final totalExpenses = GlobalState.expenses.fold(0.0, (sum, expense) => sum + expense.amount!);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -115,9 +95,15 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                 title: 'Total Recorded Expenses',
                 subtitle: 'From all time records',
                 statusColor: AppColors.danger,
-                trailing: Text(
-                  NumberFormat.currency(symbol: 'PKR ').format(totalExpenses),
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.danger),
+                trailing: Observer(
+                  builder: (context) {
+                    final totalExpenses = expenseStore.reportExpensesList.fold(0.0, (sum, expense) => sum + expense.amount!);
+
+                    return Text(
+                      NumberFormat.currency(symbol: 'PKR ').format(totalExpenses),
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.danger),
+                    );
+                  }
                 ),
               ),
 
@@ -126,64 +112,67 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
               Expanded(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
+                    color: AppColors.surface.withOpacity(0.65),
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 10),
                     ],
                   ),
-                  child: GlobalState.expenses.isEmpty
-                      ? const AppEmptyState(message: 'No expenses have been recorded yet.', icon: Icons.money_off)
-                      : ListView.builder(
-                    itemCount: GlobalState.expenses.length,
-                    itemBuilder: (context, index) {
-                      final expense = GlobalState.expenses[index];
+                  child: Observer(
+                    builder: (context) {
+                      return expenseStore.reportExpensesList.isEmpty
+                          ? const AppEmptyState(message: 'No expenses have been recorded yet.', icon: Icons.money_off)
+                          : ListView.builder(
+                        itemCount: expenseStore.reportExpensesList.length,
+                        itemBuilder: (context, index) {
+                          final expense = expenseStore.reportExpensesList[index];
 
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.primary),
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppColors.primary),
 
-                          ),
-                          child: AppListTile(
-                            title: NumberFormat.currency(symbol: 'PKR ').format(expense.amount),
-                            subtitle: '${expense.category} - ${expense.description}',
-                            leadingIcon: Icons.receipt_long,
-                            statusColor: AppColors.primary,
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
+                              ),
+                              child: AppListTile(
+                                title: NumberFormat.currency(symbol: 'PKR ').format(expense.amount),
+                                subtitle: '${expense.category} - ${expense.description}',
+                                leadingIcon: Icons.receipt_long,
+                                statusColor: AppColors.primary,
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(
-                                        DateFormat('MMM dd, yyyy').format(expense.date!),
-                                        style: const TextStyle(fontSize: 12, color: AppColors.textPrimary)
+                                    Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                            DateFormat('MMM dd, yyyy').format(expense.date!),
+                                            style: const TextStyle(fontSize: 12, color: AppColors.textPrimary)
+                                        ),
+                                        AppStatusBadge(label: expense.category!, color: AppColors.textPrimary),
+                                      ],
                                     ),
-                                    const SizedBox(height: 8),
-                                    AppStatusBadge(label: expense.category!, color: AppColors.textPrimary),
+                                    const SizedBox(width: 8),
+                                    IconButton(
+                                      icon: const Icon(Icons.edit_off_outlined, color: AppColors.primary, size: 24),
+                                      onPressed: () => _showExpenseForm(expense: expense),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline_outlined, color: AppColors.danger, size: 24),
+                                      onPressed: () => _deleteExpense(expense),
+                                    ),
                                   ],
                                 ),
-                                const SizedBox(width: 8),
-                                IconButton(
-                                  icon: const Icon(Icons.edit_off_outlined, color: AppColors.primary, size: 24),
-                                  onPressed: () => _showExpenseForm(expense: expense),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete_outline_outlined, color: AppColors.danger, size: 24),
-                                  onPressed: () => _deleteExpense(expense),
-                                ),
-                              ],
+                                onTap: () => _showExpenseForm(expense: expense),
+                              ),
                             ),
-                            onTap: () => _showExpenseForm(expense: expense),
-                          ),
-                        ),
+                          );
+                        },
                       );
-                    },
+                    }
                   ),
                 ),
               ),
@@ -193,4 +182,17 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
       ),
     );
   }
+
+   Future<void> addOrUpdateExpense(BillExpense expense) async {
+    if (expenseStore.reportExpensesList.any((e) => e.id == expense.id)) {
+      final index = expenseStore.reportExpensesList.indexWhere((e) => e.id == expense.id);
+      expenseStore.reportExpensesList[index] = expense;
+       await expenseStore.updateExpense(expense);
+    } else {
+     await expenseStore.recordExpense(expense);
+    }
+// Sort by date descending
+     expenseStore.reportExpensesList.sort((a, b) => b.date!.compareTo(a.date!));
+  }
+
 }

@@ -19,6 +19,17 @@ class InsertBillExpenseUseCase extends UseCase<BillExpense, BillExpense> {
   }
 }
 
+class UpdateExpenseUseCase extends UseCase<void, BillExpense> {
+  final ExpenseRepository _expenseRepository;
+
+  UpdateExpenseUseCase(this._expenseRepository);
+
+  @override
+  Future<void> call({required BillExpense params}) {
+    return _expenseRepository.update(params);
+  }
+}
+
 /// Fetches a one-time list of bills and expenses within a date range.
 ///
 /// Type: List<BillExpense>

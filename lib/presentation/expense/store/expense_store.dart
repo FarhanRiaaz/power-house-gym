@@ -14,12 +14,14 @@ abstract class _ExpenseStore with Store {
   final WatchAllExpensesUseCase _watchAllExpensesUseCase;
   final GetBillsByDateRangeUseCase _getRangeReportUseCase;
   final DeleteBillExpenseUseCase _deleteBillExpenseUseCase;
+  final UpdateExpenseUseCase _updateExpenseUseCase;
 
   _ExpenseStore(
       this._insertBillExpenseUseCase,
       this._watchAllExpensesUseCase,
       this._getRangeReportUseCase,
       this._deleteBillExpenseUseCase,
+      this._updateExpenseUseCase
       );
 
   // --- Store State Variables ---
@@ -89,7 +91,7 @@ abstract class _ExpenseStore with Store {
 
   /// Records a new bill or expense.
   @action
-  Future<BillExpense?> recordExpense() async {
+  Future<BillExpense?> recordExpense(BillExpense newExpense) async {
     if (newExpense.amount! <= 0.0 || newExpense.category!.isEmpty) {
       print("Expense amount or category is invalid.");
       return null;
@@ -139,6 +141,22 @@ abstract class _ExpenseStore with Store {
       isLoadingReport = false;
     }
   }
+
+  @action
+  Future<void> updateExpense(BillExpense? expense) async {
+    if (expense == null || expense!.id == null) return;
+
+    try {
+      await _updateExpenseUseCase.call(params: expense);
+      // Refresh the list to reflect changes
+      generateRangeReport();
+      print("Expense ${expense!.id} updated.");
+    } catch (error) {
+      print("Error updating member: $error");
+      rethrow;
+    }
+  }
+
 
   /// Deletes a bill expense record.
   @action

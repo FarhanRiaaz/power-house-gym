@@ -154,6 +154,7 @@ abstract class _FinancialStore with Store {
       await _deleteTransactionUseCase.call(params: transactionId);
       // The deletion will automatically update the allTransactionsList stream.
       print("Transaction $transactionId deleted.");
+      await generateRangeReport();
     } catch (e) {
       print("Error deleting transaction: $e");
       throw e;

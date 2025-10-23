@@ -47,7 +47,7 @@ class ExpenseFormDialogState extends State<ExpenseFormDialog> {
       _currentExpense = widget.expense!;
     } else {
       _currentExpense = BillExpense(
-        id: GlobalState.expenses.length + 2000 + 1,
+        id: 0,
         // Simple new ID logic
         category: '',
         amount: 0.0,

@@ -48,6 +48,18 @@ class BillExpenseDatasource {
         )
         .then((rows) => mapBillExpenseEntityToBillExpense(rows));
   }
+  /// Update expenses
+  Future<void> update(BillExpense billExpense) async {
+    await (_driftClient.update(_driftClient.billExpenses)
+      ..where((m) => m.id.equals(billExpense.id??0)))
+        .write(Expenz.BillExpensesCompanion(
+      // Explicitly define updated fields, similar to SiteDatasource
+      category: Value(billExpense.category ?? ""),
+      amount: Value(billExpense.amount ?? 0.0),
+      date: Value(billExpense.date ?? DateTime.now()),
+      description: Value(billExpense.description ?? ""),
+    ));
+  }
 
   // Get Bills/Expenses by Date Range:------------------------------------------
   /// Retrieves all bills and expenses within a specified date range for reporting.

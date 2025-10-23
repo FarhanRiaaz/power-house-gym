@@ -37,6 +37,7 @@ mixin UseCaseModule {
     getIt.registerFactory(() => DeleteTransactionUseCase(getIt<FinancialRepository>()));
 
     // Expense Use Cases (depend on ExpenseRepository)
+    getIt.registerFactory(() => UpdateExpenseUseCase(getIt<ExpenseRepository>()));
     getIt.registerFactory(() => InsertBillExpenseUseCase(getIt<ExpenseRepository>()));
     getIt.registerFactory(() => GetBillsByDateRangeUseCase(getIt<ExpenseRepository>()));
     getIt.registerFactory(() => WatchAllExpensesUseCase(getIt<ExpenseRepository>()));

@@ -157,8 +157,10 @@ mixin _$ExpenseStore on _ExpenseStore, Store {
   );
 
   @override
-  Future<BillExpense?> recordExpense() {
-    return _$recordExpenseAsyncAction.run(() => super.recordExpense());
+  Future<BillExpense?> recordExpense(BillExpense newExpense) {
+    return _$recordExpenseAsyncAction.run(
+      () => super.recordExpense(newExpense),
+    );
   }
 
   late final _$generateRangeReportAsyncAction = AsyncAction(
@@ -171,6 +173,16 @@ mixin _$ExpenseStore on _ExpenseStore, Store {
     return _$generateRangeReportAsyncAction.run(
       () => super.generateRangeReport(),
     );
+  }
+
+  late final _$updateExpenseAsyncAction = AsyncAction(
+    '_ExpenseStore.updateExpense',
+    context: context,
+  );
+
+  @override
+  Future<void> updateExpense(BillExpense? expense) {
+    return _$updateExpenseAsyncAction.run(() => super.updateExpense(expense));
   }
 
   late final _$deleteExpenseAsyncAction = AsyncAction(

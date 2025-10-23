@@ -61,6 +61,7 @@ mixin StoreModule {
         getIt<WatchAllExpensesUseCase>(),
         getIt<GetBillsByDateRangeUseCase>(),
         getIt<DeleteBillExpenseUseCase>(),
+        getIt<UpdateExpenseUseCase>(),
       ),
     );
 
