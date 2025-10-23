@@ -65,7 +65,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
   }
 
   void _addOrUpdateMember(Member member) {
-    setState(() async {
+
       if (memberStore.memberList.any((m) => m.memberId == member.memberId)) {
         final index = memberStore.memberList.indexWhere(
           (m) => m.memberId == member.memberId,
@@ -79,7 +79,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
           fingerprintTemplate: member.fingerprintTemplate,
           notes: member.notes,
         );
-        await memberStore.updateMember();
+         memberStore.updateMember();
       } else {
         memberStore.newMember!.copyWith(
           name: member.name,
@@ -90,10 +90,10 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
           fingerprintTemplate: member.fingerprintTemplate,
           notes: member.notes,
         );
-        await memberStore.registerMember();
+         memberStore.registerMember();
       }
       _selectedMember = member;
-    });
+
   }
 
   void _removeMember(Member member) {
@@ -535,7 +535,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
       context: context,
       builder: (ctx) => MemberFormDialog(
         member: member,
-        onSave: (m) {
+        onSave: (m) async{
           _addOrUpdateMember(m);
           Navigator.of(ctx).pop();
         },
