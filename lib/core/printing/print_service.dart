@@ -33,11 +33,11 @@ class ReceiptService {
     String message = '';
 
     if (percentage >= 80.0) {
-      message = '🏆 ELITE PERFORMANCE! 🏆\n\nYour $roundedPercentage% attendance in the last month is incredible.\nKeep the momentum high, we are proud of you!';
+      message = 'ELITE PERFORMANCE! \n\nYour $roundedPercentage% attendance in the last month is incredible.\nKeep the momentum high, we are proud of you!';
     } else if (percentage >= 50.0) {
-      message = '⭐ GREAT CONSISTENCY! ⭐\n\nYour $roundedPercentage% attendance is strong. Push for that 80% mark next month!';
+      message = 'GREAT CONSISTENCY! \n\nYour $roundedPercentage% attendance is strong. Push for that 80% mark next month!';
     } else {
-      message = '💪 WE MISSED YOU! 💪\n\nYour current attendance is $roundedPercentage%.\nA little progress adds up—let\'s make the next 30 days your strongest yet!';
+      message = 'WE MISSED YOU! \n\nYour current attendance is $roundedPercentage%.\nA little progress adds up—let\'s make the next 30 days your strongest yet!';
     }
 
     // Return as a centered PDF widget
@@ -76,26 +76,14 @@ class ReceiptService {
   }
 
   /// Generates the receipt PDF and sends it to the native printer service.
-  Future<bool> generateAndPrintReceipt({required FinancialTransaction params}) async {
+  Future<bool> generateAndPrintReceipt({required FinancialTransaction params,double? percentage,String? userName}) async {
     try {
-      // 1. Core Business Logic: Determine the base amount (PKR)
-      final String itemType = params.type?.toLowerCase() ?? '';
-
-      final double finalAmount;
-      if (itemType.contains('cardio')) {
-        finalAmount = 2500.00;
-      } else {
-        finalAmount = 1000.00;
-      }
-
       // 2. Calculate financial totals
       const tax = 0.00; // Based on your code setting tax to 0
-      final total = finalAmount + tax;
+      final total = params.amount??1000.0;
       final timestamp = _formatDateTime(DateTime.now());
       // Placeholder attendance percentage for the motivational message
-      const attendancePercentage = 75.5;
-
-      final finalAmountStr = finalAmount.toStringAsFixed(2);
+      final finalAmountStr = params.amount?.toStringAsFixed(2) ??"1000.0";
       final taxStr = tax.toStringAsFixed(2);
       final totalStr = total.toStringAsFixed(2);
 
@@ -115,24 +103,15 @@ class ReceiptService {
             return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                // Header
-                pw.Center(
-                    child: pw.Text(
-                        '*** POWER HOUSE ***',
-                        style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, font: pw.Font.courier())
-                    )
-                ),
-                pw.SizedBox(height: 5),
-
                 // Transaction Details
-                pw.Text('Transaction ID: PWH${params.id}', style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
+                pw.Text('Transaction ID: PWH${DateTime.now().microsecondsSinceEpoch}', style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
                 pw.Text('Date: $timestamp', style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
                 pw.SizedBox(height: 3),
                 pw.Text(dividerText, style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
 
                 // Member Details
                 pw.Text('MEMBER DETAILS:', style: pw.TextStyle(fontSize: 9, font: pw.Font.courier(), fontWeight: pw.FontWeight.bold)),
-                pw.Text('Name: ${"params.memberName"}', style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
+                pw.Text('Name: $userName', style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
                 pw.Text('ID: ${params.relatedMemberId}', style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
                 pw.Text(dividerText, style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
 
@@ -156,12 +135,12 @@ class ReceiptService {
                 pw.Text(dividerText, style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
 
                 // Footer
-                pw.Text('Cashier: PowerHouse Admin', style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
+                pw.Text('Cashier: Power House Admin', style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
                 pw.Text(dividerText, style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
                 pw.SizedBox(height: 10),
 
                 // Motivational Message
-                _generateMotivation(attendancePercentage),
+                _generateMotivation(percentage??50.00),
               ],
             );
           },

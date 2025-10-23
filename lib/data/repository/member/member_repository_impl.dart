@@ -34,6 +34,7 @@ class MemberRepositoryImpl implements MemberRepository {
   @override
   Future<Member> insert(Member member) {
     // Delegates to the new insert method in Datasource
+    print("Passed to rrepo");
     return _memberDataSource.insert(member);
   }
 

@@ -93,9 +93,9 @@ abstract class _FinancialStore with Store {
 
   /// Records a new financial transaction (e.g., a member fee payment).
   @action
-  Future<FinancialTransaction?> recordTransaction() async {
+  Future<FinancialTransaction?> recordTransaction(FinancialTransaction newTransaction) async {
     if (newTransaction.amount! <= 0.0 || newTransaction.type!.isEmpty) {
-      print("Transaction amount or type is invalid.");
+      print("Transaction amount or type is invalid. ${newTransaction.toString()}");
       return null;
     }
 
