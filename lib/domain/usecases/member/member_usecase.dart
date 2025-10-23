@@ -10,17 +10,18 @@ import '../../repository/member/member_repository.dart';
 ///
 /// Type: Stream<List<Member>> (Reactive list)
 /// Params: Gender? (Optional filter)
-class GetAllMembersUseCase extends UseCase<Stream<List<Member>>, Gender?> {
+class GetAllMembersUseCase extends UseCase<List<Member>, Gender?> {
   final MemberRepository _memberRepository;
 
   GetAllMembersUseCase(this._memberRepository);
 
   @override
-  Future<Stream<List<Member>>> call({required Gender? params}) async {
+  Future<List<Member>> call({required Gender? params}) async {
     // The repository returns a Stream, making this use case reactive
-    return _memberRepository.watchMembers(params);
+    return _memberRepository.getMembers(params);
   }
 }
+
 
 
 /// Inserts a new member record into the database.

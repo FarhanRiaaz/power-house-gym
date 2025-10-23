@@ -1,9 +1,7 @@
+import 'package:finger_print_flutter/core/enum.dart';
 import 'package:finger_print_flutter/core/list_to_csv_converter.dart';
-import 'package:finger_print_flutter/presentation/attendance/store/attendance_store.dart';
-import 'package:finger_print_flutter/presentation/auth/store/auth_store.dart';
 import 'package:finger_print_flutter/presentation/components/app_button.dart';
 import 'package:finger_print_flutter/presentation/components/app_card.dart';
-import 'package:finger_print_flutter/presentation/components/app_date_picker.dart';
 import 'package:finger_print_flutter/presentation/components/app_dialog.dart';
 import 'package:finger_print_flutter/presentation/components/app_empty_state.dart';
 import 'package:finger_print_flutter/presentation/components/app_list_tile.dart';
@@ -11,16 +9,12 @@ import 'package:finger_print_flutter/presentation/components/app_section_header.
 import 'package:finger_print_flutter/presentation/components/app_status_bar.dart';
 import 'package:finger_print_flutter/presentation/components/app_text_field.dart';
 import 'package:finger_print_flutter/presentation/components/background_wrapper.dart';
-import 'package:finger_print_flutter/presentation/expense/store/expense_store.dart';
-import 'package:finger_print_flutter/presentation/financial/store/financial_store.dart';
 import 'package:finger_print_flutter/presentation/member/add_member_dialog.dart';
 import 'package:finger_print_flutter/presentation/member/store/member_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import '../../../core/enum.dart';
 import '../../../domain/entities/models/member.dart';
 import '../../core/style/app_colors.dart';
-import '../../core/style/app_text_styles.dart';
 import '../../di/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -36,7 +30,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
   @override
   void initState() {
     super.initState();
-    memberStore.watchMembers();
+    memberStore.getAllMembers(Gender.male);
   }
 
   MemberStore memberStore = getIt<MemberStore>();
@@ -155,7 +149,6 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
 
   // --- Widget Builders ---
   Widget _buildMemberListView(bool isWide) {
-    final filteredList = _filteredMembers;
     return Container(
       decoration: BoxDecoration(
         color: AppColors.backgroundDark,
@@ -197,64 +190,70 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
           SizedBox(
             height: 500,
             width: double.infinity,
-            child: filteredList.isEmpty
-                // 💡 AppEmptyState for empty list
-                ? AppEmptyState(
-                    message: _searchQuery.isEmpty
-                        ? 'No members registered yet.'
-                        : 'No members found for "$_searchQuery".',
-                    icon: _searchQuery.isEmpty
-                        ? Icons.group_off
-                        : Icons.search_off,
-                    actionLabel: _searchQuery.isEmpty
-                        ? 'Enroll New Member'
-                        : null,
-                    onActionTap: _searchQuery.isEmpty
-                        ? () => _showMemberForm(null, isWide)
-                        : null,
-                  )
-                : ListView.builder(
-                    itemCount: filteredList.length,
-                    itemBuilder: (context, index) {
-                      final member = filteredList[index];
-                      final isSelected =
-                          member.memberId == _selectedMember?.memberId;
+            child: Observer(
+              builder: (context) {
+                    final filteredList = _filteredMembers;
 
-                      final isFeeDue =
-                          member.lastFeePaymentDate != null &&
-                          DateTime.now()
-                                  .difference(member.lastFeePaymentDate!)
-                                  .inDays >
-                              30;
-
-                      // 💡 AppListTile for each member
-                      return AppListTile(
-                        title: member.name!,
-                        subtitle:
-                            'ID: ${member.memberId} | Type: ${member.membershipType}',
-                        leadingIcon: Icons.person,
-                        statusColor: isFeeDue
-                            ? AppColors.danger
-                            : AppColors.success,
-                        isSelected: isSelected,
-                        trailing: isFeeDue
-                            ? const AppStatusBadge(
-                                label: 'FEE DUE',
-                                color: AppColors.danger,
-                                filled: true,
-                              )
+                return filteredList.isEmpty
+                    // 💡 AppEmptyState for empty list
+                    ? AppEmptyState(
+                        message: _searchQuery.isEmpty
+                            ? 'No members registered yet.'
+                            : 'No members found for "$_searchQuery".',
+                        icon: _searchQuery.isEmpty
+                            ? Icons.group_off
+                            : Icons.search_off,
+                        actionLabel: _searchQuery.isEmpty
+                            ? 'Enroll New Member'
                             : null,
-                        onTap: () {
-                          setState(() {
-                            _selectedMember = member;
-                          });
-                          if (!isWide) {
-                            _showMemberDetail(member);
-                          }
+                        onActionTap: _searchQuery.isEmpty
+                            ? () => _showMemberForm(null, isWide)
+                            : null,
+                      )
+                    : ListView.builder(
+                        itemCount: filteredList.length,
+                        itemBuilder: (context, index) {
+                          final member = filteredList[index];
+                          final isSelected =
+                              member.memberId == _selectedMember?.memberId;
+                
+                          final isFeeDue =
+                              member.lastFeePaymentDate != null &&
+                              DateTime.now()
+                                      .difference(member.lastFeePaymentDate!)
+                                      .inDays >
+                                  30;
+                
+                          // 💡 AppListTile for each member
+                          return AppListTile(
+                            title: member.name!,
+                            subtitle:
+                                'ID: ${member.memberId} | Type: ${member.membershipType}',
+                            leadingIcon: Icons.person,
+                            statusColor: isFeeDue
+                                ? AppColors.danger
+                                : AppColors.success,
+                            isSelected: isSelected,
+                            trailing: isFeeDue
+                                ? const AppStatusBadge(
+                                    label: 'FEE DUE',
+                                    color: AppColors.danger,
+                                    filled: true,
+                                  )
+                                : null,
+                            onTap: () {
+                              setState(() {
+                                _selectedMember = member;
+                              });
+                              if (!isWide) {
+                                _showMemberDetail(member);
+                              }
+                            },
+                          );
                         },
                       );
-                    },
-                  ),
+              }
+            ),
           ),
         ],
       ),

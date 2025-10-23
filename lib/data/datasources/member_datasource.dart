@@ -1,24 +1,28 @@
 import 'dart:typed_data';
 import 'package:drift/drift.dart';
-import 'package:finger_print_flutter/core/data/drift/drift_client.dart' as Memberz;
+// Note: Changed import alias to 'DriftGen' for clarity, as 'Memberz' might be confusing
+import 'package:finger_print_flutter/core/data/drift/drift_client.dart' as DriftGen;
 import 'package:finger_print_flutter/core/enum.dart';
 import 'package:finger_print_flutter/core/list_to_csv_converter.dart';
 import 'package:finger_print_flutter/domain/entities/models/fmd_model.dart';
-
 import '../../domain/entities/models/member.dart' ;
 
 class MemberDatasource {
-  final Memberz.DriftClient _driftClient;
+  final DriftGen.DriftClient _driftClient;
 
   MemberDatasource(this._driftClient);
 
-  Member mapEntityToModel(Memberz.Member entity) {
+  // --- MAPPING FUNCTIONS (Aligned with SiteDatasource Naming) ---
+
+  // Maps a single Drift Entity to the Domain Model (equivalent to mapSiteEntityToSite)
+  Member mapMemberEntityToMember(DriftGen.Member entity) {
     return Member(
       memberId: entity.memberId,
       name: entity.name,
       phoneNumber: entity.phoneNumber,
       fatherName: entity.fatherName,
-      gender: Gender.values.firstWhere((g) => g.name == entity.gender),
+      // Ensure enum mapping is safe
+      gender: Gender.values.firstWhere((g) => g.name == entity.gender, orElse: () => Gender.male),
       membershipType: entity.membershipType,
       registrationDate: entity.registrationDate,
       lastFeePaymentDate: entity.lastFeePaymentDate,
@@ -27,9 +31,18 @@ class MemberDatasource {
     );
   }
 
+  // Maps a list of Drift Entities to a list of Domain Models (equivalent to mapSiteEntityListToSiteList)
+  List<Member> mapMemberEntityListToMemberList(List<DriftGen.Member> entities) {
+    return entities.map(mapMemberEntityToMember).toList();
+  }
+
+  // ------------------------------------------------------------------------------------------------
+
   Future<Member> insert(Member member) async {
     final inserted = await _driftClient.into(_driftClient.members).insertReturning(
-      Memberz.MembersCompanion.insert(
+      DriftGen.MembersCompanion.insert(
+        // Note: Using Value(T) for fields where the companion expects it,
+        // and using the Dart default value for non-nullable fields.
         memberId: Value(member.memberId??0),
         name: member.name ??"",
         phoneNumber: member.phoneNumber??"",
@@ -39,24 +52,27 @@ class MemberDatasource {
         registrationDate: member.registrationDate??DateTime.now(),
         lastFeePaymentDate: member.lastFeePaymentDate??DateTime.now(),
         fingerprintTemplate: member.fingerprintTemplate ?? "",
-        notes: Value(member.notes),
+        notes: Value(member.notes), // Notes is nullable, so we use Value(T)
       ),
     );
-    return mapEntityToModel(inserted);
+    // Use the renamed mapping function
+    return mapMemberEntityToMember(inserted);
   }
 
   Future<Member?> getById(int memberId) async {
     final entity = await (_driftClient.select(_driftClient.members)
-          ..where((m) => m.memberId.equals(memberId)))
+      ..where((m) => m.memberId.equals(memberId)))
         .getSingleOrNull();
-    return entity != null ? mapEntityToModel(entity) : null;
+    // Use the renamed mapping function
+    return entity != null ? mapMemberEntityToMember(entity) : null;
   }
 
   Future<Member?> getByFingerprint(String template) async {
     final entity = await (_driftClient.select(_driftClient.members)
-          ..where((m) => m.fingerprintTemplate.equals(template)))
+      ..where((m) => m.fingerprintTemplate.equals(template)))
         .getSingleOrNull();
-    return entity != null ? mapEntityToModel(entity) : null;
+    // Use the renamed mapping function
+    return entity != null ? mapMemberEntityToMember(entity) : null;
   }
 
   Future<List<Member>> getAll({Gender? genderFilter}) async {
@@ -65,13 +81,15 @@ class MemberDatasource {
       query.where((m) => m.gender.equals(genderFilter.name));
     }
     final entities = await query.get();
-    return entities.map(mapEntityToModel).toList();
+    // Use the explicit list mapping function
+    return mapMemberEntityListToMemberList(entities);
   }
 
   Future<void> update(Member member) async {
     await (_driftClient.update(_driftClient.members)
-          ..where((m) => m.memberId.equals(member.memberId??0)))
-        .write(Memberz.MembersCompanion(
+      ..where((m) => m.memberId.equals(member.memberId??0)))
+        .write(DriftGen.MembersCompanion(
+      // Explicitly define updated fields, similar to SiteDatasource
       name: Value(member.name??""),
       phoneNumber: Value(member.phoneNumber??""),
       fatherName: Value(member.fatherName??""),
@@ -89,10 +107,8 @@ class MemberDatasource {
       query.where((m) => m.gender.equals(genderFilter.name));
     }
 
-    // Use .watch() to get a stream of query results
-    return query.watch().map((entities) {
-      return entities.map(mapEntityToModel).toList();
-    });
+    // Use the explicit list mapping function
+    return query.watch().map((entities) => mapMemberEntityListToMemberList(entities));
   }
 
 // 2. Reactive stream for watching a single member by ID
@@ -100,12 +116,13 @@ class MemberDatasource {
     return (_driftClient.select(_driftClient.members)
       ..where((m) => m.memberId.equals(memberId)))
         .watchSingleOrNull()
-        .map((entity) => entity != null ? mapEntityToModel(entity) : null);
+    // Use the renamed mapping function
+        .map((entity) => entity != null ? mapMemberEntityToMember(entity) : null);
   }
 
   Future<void> delete(int memberId) async {
     await (_driftClient.delete(_driftClient.members)
-          ..where((m) => m.memberId.equals(memberId)))
+      ..where((m) => m.memberId.equals(memberId)))
         .go();
   }
 
@@ -127,6 +144,8 @@ class MemberDatasource {
     // 1. Convert CSV rows to Member objects (Validation and Mapping)
     for (final row in csvData) {
       try {
+        // Assuming Member.fromCsvRow exists and handles validation
+        // Since we don't have the Member class definition, we keep this as is
         final member = Member.fromCsvRow(row);
         membersToInsert.add(member);
       } on FormatException catch (e) {
@@ -148,9 +167,8 @@ class MemberDatasource {
         for (final member in membersToInsert) {
           // IMPORTANT: Convert the Member model back into a Drift Companion
           // (or map/entity) format before inserting.
-          // This mock uses a simplified insert call for demonstration.
           await _driftClient.into(_driftClient.members).insertReturning(
-            Memberz.MembersCompanion.insert(
+            DriftGen.MembersCompanion.insert(
               memberId: Value(member.memberId??0),
               name: member.name ??"",
               phoneNumber: member.phoneNumber??"",

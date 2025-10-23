@@ -31,7 +31,12 @@ abstract class _MemberStore with Store {
     this._findMemberByIdUseCase,
     this._findByFingerprintUseCase,
       this._importDataUseCase
-  );
+  ) {
+       print("Doing this hereXX");
+
+   getAllMembers(Gender.male);
+   print("Doing this here");
+  }
 
   // --- Store State Variables ---
 
@@ -75,40 +80,64 @@ abstract class _MemberStore with Store {
 
   /// Fetches or watches all members based on the current filter.
   /// We assume the UseCase returns a Stream for reactive updates.
+  
   @action
-  void watchMembers({Gender? genderFilter}) {
+  Future<void> getAllMembers(Gender gender) async {
+    print("We have been called $gender");
+    isLoadingMembers = true;
+    try {
+      final records = await _getAllMembersUseCase.call(params: gender);
+    print("We have been called and size is  ${records.length}");
+
+      runInAction(() {
+        memberList = ObservableList.of(records);
+      });
+
+    print("We have been called and size isXX  ${memberList.length}");
+
+
+    } catch (e) {
+      print("Error generating daily report: $e");
+      memberList = ObservableList();
+    } finally {
+      isLoadingMembers = false;
+    }
+  }
+
+  @action
+  Future<void> watchMembers({Gender? genderFilter}) async{
     currentGenderFilter = genderFilter;
 
     // Set a custom loading flag before starting the stream process
     isLoadingMembers = true;
     print("We are here to get the members");
-    // The use case returns a Future<Stream<List<Member>>>
-    _getAllMembersUseCase
-        .call(params: currentGenderFilter)
-        .then((stream) {
-          memberListStream = stream;
+  //   // The use case returns a Future<Stream<List<Member>>>
+  //  await _getAllMembersUseCase
+  //       .call(params: currentGenderFilter)
+  //       .then((stream) {
+  //         memberListStream = stream;
 
-          // We subscribe to the stream manually to populate the observable list
-          // for easier UI consumption, and manage the loading state.
-          memberListStream.listen((list) {
-            runInAction(() {
+  //         // We subscribe to the stream manually to populate the observable list
+  //         // for easier UI consumption, and manage the loading state.
+  //         memberListStream.listen((list) {
+  //           runInAction(() {
               
-                  print("We are here to get the membersList ${list.length}");
+  //                 print("We are here to get the membersList ${list.length}");
 
 
-              memberList = ObservableList.of(list);
-              isLoadingMembers =
-                  false; // Loading finishes once the first list arrives
-            });
-          });
-        })
-        .catchError((error) {
-          runInAction(() {
-            print("Error setting up member stream: $error");
-            isLoadingMembers = false;
-          });
-          // Do not re-throw here, let the stream handle its own errors or recovery
-        });
+  //             memberList = ObservableList.of(list);
+  //             isLoadingMembers =
+  //                 false; // Loading finishes once the first list arrives
+  //           });
+  //         });
+  //       })
+  //       .catchError((error) {
+  //         runInAction(() {
+  //           print("Error setting up member stream: $error");
+  //           isLoadingMembers = false;
+  //         });
+  //         // Do not re-throw here, let the stream handle its own errors or recovery
+  //       });
   }
   @action
   Future<int> importDataToDatabase(List<List<String>> csvData) async {

@@ -165,6 +165,40 @@ mixin _$MemberStore on _MemberStore, Store {
     });
   }
 
+  late final _$getAllMembersAsyncAction = AsyncAction(
+    '_MemberStore.getAllMembers',
+    context: context,
+  );
+
+  @override
+  Future<void> getAllMembers(Gender gender) {
+    return _$getAllMembersAsyncAction.run(() => super.getAllMembers(gender));
+  }
+
+  late final _$watchMembersAsyncAction = AsyncAction(
+    '_MemberStore.watchMembers',
+    context: context,
+  );
+
+  @override
+  Future<void> watchMembers({Gender? genderFilter}) {
+    return _$watchMembersAsyncAction.run(
+      () => super.watchMembers(genderFilter: genderFilter),
+    );
+  }
+
+  late final _$importDataToDatabaseAsyncAction = AsyncAction(
+    '_MemberStore.importDataToDatabase',
+    context: context,
+  );
+
+  @override
+  Future<int> importDataToDatabase(List<List<String>> csvData) {
+    return _$importDataToDatabaseAsyncAction.run(
+      () => super.importDataToDatabase(csvData),
+    );
+  }
+
   late final _$findMemberByFingerprintAsyncAction = AsyncAction(
     '_MemberStore.findMemberByFingerprint',
     context: context,
@@ -205,23 +239,6 @@ mixin _$MemberStore on _MemberStore, Store {
   @override
   Future<void> deleteMember(Member member) {
     return _$deleteMemberAsyncAction.run(() => super.deleteMember(member));
-  }
-
-  late final _$_MemberStoreActionController = ActionController(
-    name: '_MemberStore',
-    context: context,
-  );
-
-  @override
-  void watchMembers({Gender? genderFilter}) {
-    final _$actionInfo = _$_MemberStoreActionController.startAction(
-      name: '_MemberStore.watchMembers',
-    );
-    try {
-      return super.watchMembers(genderFilter: genderFilter);
-    } finally {
-      _$_MemberStoreActionController.endAction(_$actionInfo);
-    }
   }
 
   @override
