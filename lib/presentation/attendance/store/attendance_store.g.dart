@@ -75,6 +75,28 @@ mixin _$AttendanceStore on _AttendanceStore, Store {
     );
   }
 
+  late final _$singleAttendanceListAtom = Atom(
+    name: '_AttendanceStore.singleAttendanceList',
+    context: context,
+  );
+
+  @override
+  ObservableList<AttendanceRecord> get singleAttendanceList {
+    _$singleAttendanceListAtom.reportRead();
+    return super.singleAttendanceList;
+  }
+
+  @override
+  set singleAttendanceList(ObservableList<AttendanceRecord> value) {
+    _$singleAttendanceListAtom.reportWrite(
+      value,
+      super.singleAttendanceList,
+      () {
+        super.singleAttendanceList = value;
+      },
+    );
+  }
+
   late final _$reportSelectedDateAtom = Atom(
     name: '_AttendanceStore.reportSelectedDate',
     context: context,
@@ -181,6 +203,18 @@ mixin _$AttendanceStore on _AttendanceStore, Store {
     );
   }
 
+  late final _$getSingleAttendanceListAsyncAction = AsyncAction(
+    '_AttendanceStore.getSingleAttendanceList',
+    context: context,
+  );
+
+  @override
+  Future<void> getSingleAttendanceList(int memberId) {
+    return _$getSingleAttendanceListAsyncAction.run(
+      () => super.getSingleAttendanceList(memberId),
+    );
+  }
+
   late final _$_AttendanceStoreActionController = ActionController(
     name: '_AttendanceStore',
     context: context,
@@ -204,6 +238,7 @@ mixin _$AttendanceStore on _AttendanceStore, Store {
 todayRecordsStream: ${todayRecordsStream},
 todayAttendanceList: ${todayAttendanceList},
 reportAttendanceList: ${reportAttendanceList},
+singleAttendanceList: ${singleAttendanceList},
 reportSelectedDate: ${reportSelectedDate},
 currentReportFilter: ${currentReportFilter},
 isLoadingReport: ${isLoadingReport},

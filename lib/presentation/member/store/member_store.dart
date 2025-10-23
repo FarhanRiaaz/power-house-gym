@@ -77,7 +77,7 @@ abstract class _MemberStore with Store {
 
     // Set a custom loading flag before starting the stream process
     isLoadingMembers = true;
-
+    print("We are here to get the members");
     // The use case returns a Future<Stream<List<Member>>>
     _getAllMembersUseCase
         .call(params: currentGenderFilter)
@@ -88,6 +88,10 @@ abstract class _MemberStore with Store {
           // for easier UI consumption, and manage the loading state.
           memberListStream.listen((list) {
             runInAction(() {
+              
+                  print("We are here to get the membersList ${list.length}");
+
+
               memberList = ObservableList.of(list);
               isLoadingMembers =
                   false; // Loading finishes once the first list arrives

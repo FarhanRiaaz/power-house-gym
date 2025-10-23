@@ -9,6 +9,7 @@ import 'package:finger_print_flutter/presentation/components/app_status_bar.dart
 import 'package:finger_print_flutter/presentation/components/background_wrapper.dart';
 import 'package:finger_print_flutter/presentation/member/store/member_store.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 
 import '../../di/service_locator.dart';
@@ -30,7 +31,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   @override
   void initState() {
-    attendanceStore.watchTodayAttendance(genderFilter: Gender.male);
+    attendanceStore.getSingleAttendanceList(0);
+    memberStore.watchMembers();
     super.initState();
   }
 
@@ -42,13 +44,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   List<AttendanceRecord> get _filteredRecords {
     if (_searchQuery.isEmpty) {
       // Group records by day for better viewing in the main list
-      return attendanceStore.todayAttendanceList;
+      return attendanceStore.singleAttendanceList;
     }
 
     final query = _searchQuery.toLowerCase();
 
     // Filter records based on member name or father name
-    return attendanceStore.todayAttendanceList.where((record) {
+    return attendanceStore.singleAttendanceList.where((record) {
       final member = getMemberById(record.memberId);
       if (member == null) return false;
 
@@ -63,6 +65,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Map<DateTime, List<AttendanceRecord>> _getRecordsGroupedByDay(
     List<AttendanceRecord> records,
   ) {
+    print("We are also invoked and got  ${records.length}");
     Map<DateTime, List<AttendanceRecord>> grouped = {};
     for (var record in records) {
       final date = DateTime(
@@ -95,9 +98,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final groupedRecords = _getRecordsGroupedByDay(_filteredRecords);
-    final sortedDates = groupedRecords.keys.toList()
-      ..sort((a, b) => b.compareTo(a));
+
 
     return Scaffold(
       body: BackgroundWrapper(
@@ -167,7 +168,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
+                    color: AppColors.surface.withOpacity(0.7),
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
@@ -177,127 +178,135 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                       ),
                     ],
                   ),
-                  child: sortedDates.isEmpty
-                      ? const AppEmptyState(
-                          message: 'No attendance records found.',
-                          icon: Icons.watch_later_outlined,
-                        )
-                      : ListView.builder(
-                          itemCount: sortedDates.length,
-                          itemBuilder: (context, dateIndex) {
-                            final date = sortedDates[dateIndex];
-                            final recordsForDay = groupedRecords[date]!;
-
-                            // Determine the header text (Today, Yesterday, or Date)
-                            String headerText;
-                            final now = DateTime.now();
-                            final today = DateTime(
-                              now.year,
-                              now.month,
-                              now.day,
-                            );
-                            final yesterday = today.subtract(
-                              const Duration(days: 1),
-                            );
-
-                            if (date.isAtSameMomentAs(today)) {
-                              headerText = 'Today';
-                            } else if (date.isAtSameMomentAs(yesterday)) {
-                              headerText = 'Yesterday';
-                            } else {
-                              headerText = DateFormat(
-                                'EEEE, MMM dd',
-                              ).format(date);
-                            }
-
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    24,
-                                    16,
-                                    16,
-                                    8,
-                                  ),
-                                  child: Text(
-                                    headerText,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                ),
-                                ...recordsForDay.map((record) {
-                                  final member = getMemberById(record.memberId);
-                                  if (member == null) {
-                                    return const SizedBox.shrink(); // Skip if no member data
-                                  }
-
-                                  final checkInTime = record.checkInTime!;
-                                  final isLate =
-                                      checkInTime.hour >=
-                                      9; // Mock rule: check-in after 9 AM is late
-                                  final statusColor = isLate
-                                      ? AppColors.warning
-                                      : AppColors.success;
-
-                                  return Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: DecoratedBox(
-                                      decoration: BoxDecoration(
-                                        color: Colors.transparent,
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
+                  child: Observer(
+                    builder: (context) {
+                          final groupedRecords = _getRecordsGroupedByDay(_filteredRecords);
+    final sortedDates = groupedRecords.keys.toList()
+      ..sort((a, b) => b.compareTo(a));
+      print("Sorted Dates $sortedDates");
+                      return sortedDates.isEmpty
+                          ? const AppEmptyState(
+                              message: 'No attendance records found.',
+                              icon: Icons.watch_later_outlined,
+                            )
+                          : ListView.builder(
+                              itemCount: sortedDates.length,
+                              itemBuilder: (context, dateIndex) {
+                                final date = sortedDates[dateIndex];
+                                final recordsForDay = groupedRecords[date]!;
+                      
+                                // Determine the header text (Today, Yesterday, or Date)
+                                String headerText;
+                                final now = DateTime.now();
+                                final today = DateTime(
+                                  now.year,
+                                  now.month,
+                                  now.day,
+                                );
+                                final yesterday = today.subtract(
+                                  const Duration(days: 1),
+                                );
+                      
+                                if (date.isAtSameMomentAs(today)) {
+                                  headerText = 'Today';
+                                } else if (date.isAtSameMomentAs(yesterday)) {
+                                  headerText = 'Yesterday';
+                                } else {
+                                  headerText = DateFormat(
+                                    'EEEE, MMM dd',
+                                  ).format(date);
+                                }
+                      
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        24,
+                                        16,
+                                        16,
+                                        8,
+                                      ),
+                                      child: Text(
+                                        headerText,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
                                           color: AppColors.primary,
                                         ),
                                       ),
-                                      child: AppListTile(
-                                        onTap: () =>
-                                            _viewMemberAttendance(member),
-                                        title: member.name!,
-                                        subtitle: 'S/O: ${member.fatherName}',
-                                        leadingIcon:
-                                            Icons.person_pin_circle_outlined,
-                                        statusColor: statusColor,
-                                        trailing: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          children: [
-                                            Text(
-                                              DateFormat(
-                                                'hh:mm a',
-                                              ).format(checkInTime),
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: isLate
-                                                    ? AppColors.warning
-                                                    : AppColors.success,
-                                              ),
-                                            ),
-                                            // const SizedBox(height: 4),
-                                            AppStatusBadge(
-                                              label: isLate
-                                                  ? 'LATE'
-                                                  : 'ON TIME',
-                                              color: isLate
-                                                  ? AppColors.warning
-                                                  : AppColors.success,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
                                     ),
-                                  );
-                                }).toList(),
-                              ],
+                                    ...recordsForDay.map((record) {
+                                      final member = getMemberById(record.memberId);
+                                      if (member == null) {
+                                        return const SizedBox.shrink(); // Skip if no member data
+                                      }
+                      
+                                      final checkInTime = record.checkInTime!;
+                                      final isLate =
+                                          checkInTime.hour >=
+                                          9; // Mock rule: check-in after 9 AM is late
+                                      final statusColor = isLate
+                                          ? AppColors.warning
+                                          : AppColors.success;
+                      
+                                      return Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: DecoratedBox(
+                                          decoration: BoxDecoration(
+                                            color: Colors.transparent,
+                                            borderRadius: BorderRadius.circular(12),
+                                            border: Border.all(
+                                              color: AppColors.primary,
+                                            ),
+                                          ),
+                                          child: AppListTile(
+                                            onTap: () =>
+                                                _viewMemberAttendance(member),
+                                            title: member.name!,
+                                            subtitle: 'S/O: ${member.fatherName}',
+                                            leadingIcon:
+                                                Icons.person_pin_circle_outlined,
+                                            statusColor: statusColor,
+                                            trailing: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.end,
+                                              children: [
+                                                Text(
+                                                  DateFormat(
+                                                    'hh:mm a',
+                                                  ).format(checkInTime),
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: isLate
+                                                        ? AppColors.warning
+                                                        : AppColors.success,
+                                                  ),
+                                                ),
+                                                // const SizedBox(height: 4),
+                                                AppStatusBadge(
+                                                  label: isLate
+                                                      ? 'LATE'
+                                                      : 'ON TIME',
+                                                  color: isLate
+                                                      ? AppColors.warning
+                                                      : AppColors.success,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ],
+                                );
+                              },
                             );
-                          },
-                        ),
+                    }
+                  ),
                 ),
               ),
             ],
@@ -308,7 +317,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   List<AttendanceRecord> get attendanceRecords =>
-      attendanceStore.todayAttendanceList;
+      attendanceStore.singleAttendanceList;
 
   // UPDATED: Central member getter
   Member? getMemberById(int? id) {

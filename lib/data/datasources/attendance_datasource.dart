@@ -76,6 +76,7 @@ class AttendanceRecordDatasource {
     return entities.map(mapEntityToModel).toList();
   }
 
+
   /// Watches all check-in records for the current day, with optional gender filtering,
   /// for real-time updates.
   Stream<List<AttendanceRecord>> watchTodayRecords({Gender? genderFilter}) {

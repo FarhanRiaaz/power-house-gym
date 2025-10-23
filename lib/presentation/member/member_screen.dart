@@ -24,57 +24,6 @@ import '../../di/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-
-
-List<Member> initialMembers = [
-  Member(
-    memberId: 1001,
-    name: 'Ahmed Khan',
-    phoneNumber: '03001234567',
-    fatherName: 'Irfan Khan',
-    gender: Gender.male,
-    membershipType: 'Gold 12 Months',
-    registrationDate: DateTime(2023, 1, 15),
-    lastFeePaymentDate: DateTime(2024, 10, 1),
-    notes: 'Renewed in Oct. Target: Cardio.',
-  ),
-  Member(
-    memberId: 1002,
-    name: 'Fatima Ali',
-    phoneNumber: '03337654321',
-    fatherName: 'Javed Ali',
-    gender: Gender.female,
-    membershipType: 'Silver 6 Months',
-    registrationDate: DateTime(2024, 3, 20),
-    lastFeePaymentDate: DateTime(2024, 9, 20),
-    notes: 'Fee due soon!',
-  ),
-  Member(
-    memberId: 1003,
-    name: 'Usman Sharif',
-    phoneNumber: '03219876543',
-    fatherName: 'Khalid Sharif',
-    gender: Gender.male,
-    membershipType: 'Platinum 3 Months',
-    registrationDate: DateTime(2024, 8, 1),
-    lastFeePaymentDate: DateTime(2024, 10, 1),
-    notes: 'New joiner. Needs intro session.',
-  ),
-  Member(
-    memberId: 1004,
-    name: 'Zainab Qureshi',
-    phoneNumber: '03451122334',
-    fatherName: 'Tariq Qureshi',
-    gender: Gender.female,
-    membershipType: 'Bronze 1 Month',
-    registrationDate: DateTime(2024, 10, 10),
-    lastFeePaymentDate: DateTime(2024, 11, 10),
-    notes: 'First month trial.',
-  ),
-];
-
-// --- Manage Member Screen Widget ---
-
 class ManageMemberScreen extends StatefulWidget {
   const ManageMemberScreen({super.key});
 
