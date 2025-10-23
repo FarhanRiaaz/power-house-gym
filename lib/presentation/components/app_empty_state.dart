@@ -22,8 +22,10 @@ class AppEmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 72, color: Colors.white),
-          const SizedBox(height: 12),
+        
+          SizedBox(
+            width: MediaQuery.of(context).size.width*0.35,
+            child: Image.asset("assets/images/illus.png",fit: BoxFit.fitHeight,color: Colors.white60,)),
           Text(message, style: AppTextStyles.body.copyWith(color: AppColors.textSecondary)),
           if (actionLabel != null && onActionTap != null) ...[
             const SizedBox(height: 16),
