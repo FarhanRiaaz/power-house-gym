@@ -1,6 +1,7 @@
 import 'package:finger_print_flutter/core/enum.dart';
 import 'package:finger_print_flutter/core/list_to_csv_converter.dart';
 import 'package:finger_print_flutter/core/printing/print_service.dart';
+import 'package:finger_print_flutter/core/style/app_text_styles.dart';
 import 'package:finger_print_flutter/domain/entities/models/financial_transaction.dart';
 import 'package:finger_print_flutter/presentation/components/app_button.dart';
 import 'package:finger_print_flutter/presentation/components/app_card.dart';
@@ -544,20 +545,8 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
                   title: 'Manage Members',
                   trailingWidget: Column(
                     children: [
-                      AppCard(
-                        padding: const EdgeInsets.all(16),
-                        trailing: Icon(
-                          memberStore.currentGenderFilter?.name == "male"
-                              ? Icons.man_2_outlined
-                              : Icons.woman_2_outlined,
-                        ),
-                        title:
-                            "Total Members: ${memberStore.memberList.length}",
-                        statusColor:  memberStore.currentGenderFilter?.name == "male"
-                            ? AppColors.success
-                            : AppColors.danger ,
-
-                      ),
+                      Text(
+                          "Total Members: ${memberStore.memberList.length}",style:  AppTextStyles.subheading,),
                       GestureDetector(
                         onTap: () async {
                           try {
