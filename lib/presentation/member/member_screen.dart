@@ -545,13 +545,18 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
                   trailingWidget: Column(
                     children: [
                       AppCard(
-                        leading: Icon(
+                        padding: const EdgeInsets.all(16),
+                        trailing: Icon(
                           memberStore.currentGenderFilter?.name == "male"
                               ? Icons.man_2_outlined
                               : Icons.woman_2_outlined,
                         ),
                         title:
                             "Total Members: ${memberStore.memberList.length}",
+                        statusColor:  memberStore.currentGenderFilter?.name == "male"
+                            ? AppColors.success
+                            : AppColors.danger ,
+
                       ),
                       GestureDetector(
                         onTap: () async {
