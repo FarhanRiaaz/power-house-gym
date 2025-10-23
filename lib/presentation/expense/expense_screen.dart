@@ -27,6 +27,14 @@ class ExpenseScreen extends StatefulWidget {
 }
 
 class _ExpenseScreenState extends State<ExpenseScreen> {
+
+  @override
+  void initState() {
+
+    super.initState();
+    expenseStore.generateRangeReport();
+  }
+
   final ExpenseStore expenseStore = getIt<ExpenseStore>();
 
   void _showExpenseForm({BillExpense? expense}) {
@@ -185,8 +193,6 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
 
    Future<void> addOrUpdateExpense(BillExpense expense) async {
     if (expenseStore.reportExpensesList.any((e) => e.id == expense.id)) {
-      final index = expenseStore.reportExpensesList.indexWhere((e) => e.id == expense.id);
-      expenseStore.reportExpensesList[index] = expense;
        await expenseStore.updateExpense(expense);
     } else {
      await expenseStore.recordExpense(expense);
