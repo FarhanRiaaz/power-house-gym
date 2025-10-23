@@ -131,6 +131,15 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
   }
 
   Future<void> _payFee(Member member) async {
+    memberStore.selectedMember!.copyWith(
+      name: member.name,
+      phoneNumber: member.phoneNumber,
+      fatherName: member.fatherName,
+      gender: member.gender,
+      membershipType: member.membershipType,
+      fingerprintTemplate: member.fingerprintTemplate,
+      notes: member.notes,
+    );
     financialStore.newTransaction.copyWith(
       type: "Fee Payment",
       amount: member.membershipType!.contains("cardio") ? 2500.0 : 1000.0,
