@@ -196,7 +196,7 @@ abstract class _MemberStore with Store {
     if (member == null || member!.memberId == null) return;
 
     try {
-      final memberToUpdate = member!.copyWith(notes: "Updated");
+      final memberToUpdate = member!.copyWith(notes: "Updated",lastFeePaymentDate: DateTime.now());
 
       await _updateMemberUseCase.call(params: memberToUpdate);
 

@@ -217,8 +217,8 @@ mixin _$MemberStore on _MemberStore, Store {
   );
 
   @override
-  Future<Member?> registerMember() {
-    return _$registerMemberAsyncAction.run(() => super.registerMember());
+  Future<Member?> registerMember(Member? member) {
+    return _$registerMemberAsyncAction.run(() => super.registerMember(member));
   }
 
   late final _$updateMemberAsyncAction = AsyncAction(
@@ -227,8 +227,8 @@ mixin _$MemberStore on _MemberStore, Store {
   );
 
   @override
-  Future<void> updateMember() {
-    return _$updateMemberAsyncAction.run(() => super.updateMember());
+  Future<void> updateMember(Member? member) {
+    return _$updateMemberAsyncAction.run(() => super.updateMember(member));
   }
 
   late final _$deleteMemberAsyncAction = AsyncAction(

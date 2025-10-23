@@ -165,8 +165,12 @@ mixin _$FinancialStore on _FinancialStore, Store {
   );
 
   @override
-  Future<FinancialTransaction?> recordTransaction() {
-    return _$recordTransactionAsyncAction.run(() => super.recordTransaction());
+  Future<FinancialTransaction?> recordTransaction(
+    FinancialTransaction newTransaction,
+  ) {
+    return _$recordTransactionAsyncAction.run(
+      () => super.recordTransaction(newTransaction),
+    );
   }
 
   late final _$importDataToDatabaseAsyncAction = AsyncAction(

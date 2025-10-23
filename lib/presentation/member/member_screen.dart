@@ -119,6 +119,7 @@ print("i am called ${member.toString()}");
       phoneNumber: member.phoneNumber,
       fatherName: member.fatherName,
       gender: member.gender,
+      lastFeePaymentDate: DateTime.now(),
       membershipType: member.membershipType,
       fingerprintTemplate: member.fingerprintTemplate,
       notes: member.notes,

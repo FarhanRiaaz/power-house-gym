@@ -22,9 +22,9 @@ class AppEmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-        
           SizedBox(
             width: MediaQuery.of(context).size.width*0.35,
+            height: MediaQuery.of(context).size.height*0.40 ,
             child: Image.asset("assets/images/illus.png",fit: BoxFit.fitHeight,color: Colors.white60,)),
           Text(message, style: AppTextStyles.body.copyWith(color: AppColors.textSecondary)),
           if (actionLabel != null && onActionTap != null) ...[

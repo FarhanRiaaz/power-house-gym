@@ -42,6 +42,7 @@ class AppTextField extends StatelessWidget {
       maxLines: maxLines,
       validator: validator,
       onChanged: onChanged,
+      maxLength: 35,
       onSaved: onSaved,
       inputFormatters: inputFormatters,
       style: AppTextStyles.body,
