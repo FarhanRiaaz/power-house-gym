@@ -16,43 +16,9 @@ import 'package:intl/intl.dart';
 import '../../di/service_locator.dart';
 import '../../domain/entities/models/member.dart';
 
-class GlobalState {
-  // Mock Members (Needed to resolve relatedMemberId)
-  static List<Member> members = [
-    Member(memberId: 1001, name: 'Ahmed Khan'),
-    Member(memberId: 1002, name: 'Fatima Ali'),
-    Member(memberId: 1003, name: 'Usman Sharif'),
-  ];
 
-  // Internal Mock FinancialTransaction Source (Ensuring at least 7 transactions)
-  static final List<FinancialTransaction> _mockFinancialTransactions = [
-    // Income/Fee Payments (Positive amount)
-    FinancialTransaction(id: 3001, type: 'Fee Payment', amount: 5000.00, transactionDate: DateTime(2024, 10, 15), description: 'Monthly fee paid by Ahmed Khan', relatedMemberId: 1001),
-    FinancialTransaction(id: 3002, type: 'Fee Payment', amount: 7500.00, transactionDate: DateTime(2024, 10, 21), description: 'Annual membership fee', relatedMemberId: 1003),
-    FinancialTransaction(id: 3003, type: 'Fee Payment', amount: 55000.00, transactionDate: DateTime(2024, 9, 28), description: 'September fee - Fatima Ali', relatedMemberId: 1002),
 
-    // Expenses (Negative amount)
-    FinancialTransaction(id: 3004, type: 'Expense', amount: 50000.00, transactionDate: DateTime(2024, 10, 1), description: 'Monthly facility rent'),
-    FinancialTransaction(id: 3005, type: 'Expense', amount: 35000.00, transactionDate: DateTime(2024, 10, 25), description: 'Trainer salary - October'),
-    FinancialTransaction(id: 3006, type: 'Bill', amount: -12500.00, transactionDate: DateTime(2024, 10, 10), description: 'Electricity and water bill'),
-    FinancialTransaction(id: 3007, type: 'Expense', amount: -5000.00, transactionDate: DateTime(2024, 10, 20), description: 'New set of weights'),
-  ];
-
-  static List<FinancialTransaction> get transactions {
-    // Sort transactions by date descending before returning
-    _mockFinancialTransactions.sort((a, b) => b.transactionDate!.compareTo(a.transactionDate!));
-    return _mockFinancialTransactions;
-  }
-
-  static void deleteFinancialTransaction(int id) {
-    _mockFinancialTransactions.removeWhere((t) => t.id == id);
-  }
-
-  static String? getMemberNameById(int? id) {
-    if (id == null) return null;
-    return members.firstWhereOrNull((m) => m.memberId == id)?.name;
-  }
-}
+  
 
 // -----------------------------------------------------------------------------
 // TRANSACTION SCREEN IMPLEMENTATION
@@ -248,5 +214,19 @@ class _FinancialTransactionScreenState extends State<FinancialTransactionScreen>
         ),
       ),
     );
+  }
+  static List<FinancialTransaction> get transactions {
+    // Sort transactions by date descending before returning
+    _mockFinancialTransactions.sort((a, b) => b.transactionDate!.compareTo(a.transactionDate!));
+    return _mockFinancialTransactions;
+  }
+
+  static void deleteFinancialTransaction(int id) {
+    _mockFinancialTransactions.removeWhere((t) => t.id == id);
+  }
+
+  static String? getMemberNameById(int? id) {
+    if (id == null) return null;
+    return members.firstWhereOrNull((m) => m.memberId == id)?.name;
   }
 }
