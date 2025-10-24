@@ -26,7 +26,9 @@ abstract class _AttendanceStore with Store {
       this._watchTodayAttendanceUseCase,
       this._getDailyReportUseCase,
       this._importDataUseCase
-      );
+      ) {
+    generateDailyReport();
+  }
 
   // --- Store State Variables ---
 

@@ -257,3 +257,7 @@ class Member implements CsvConvertible {
     return list.firstWhere((m) => m.memberId == id, orElse: () => Member());
   }
 }
+class Table {
+  final String tableName;
+  Table(this.tableName);
+}

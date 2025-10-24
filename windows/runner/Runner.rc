@@ -95,7 +95,7 @@ BEGIN
             VALUE "InternalName", "finger_print_flutter" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
             VALUE "OriginalFilename", "finger_print_flutter.exe" "\0"
-            VALUE "ProductName", "finger_print_flutter" "\0"
+            VALUE "ProductName", "Power House Management" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

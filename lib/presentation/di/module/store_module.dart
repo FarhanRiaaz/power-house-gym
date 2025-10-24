@@ -7,11 +7,11 @@ import 'package:finger_print_flutter/domain/usecases/financial/financial_usecase
 import 'package:finger_print_flutter/domain/usecases/member/member_usecase.dart';
 import 'package:finger_print_flutter/presentation/attendance/store/attendance_store.dart';
 import 'package:finger_print_flutter/presentation/auth/store/auth_store.dart';
+import 'package:finger_print_flutter/presentation/dashboard/store/dashboard_store.dart';
 import 'package:finger_print_flutter/presentation/expense/store/expense_store.dart';
 import 'package:finger_print_flutter/presentation/financial/store/financial_store.dart';
 import 'package:finger_print_flutter/presentation/member/store/member_store.dart';
 import 'package:get_it/get_it.dart';
-
 
 // this contain most of injection part for stores
 final getIt = GetIt.instance;
@@ -20,22 +20,35 @@ mixin StoreModule {
     // Stores are registered as Singletons (Lazy/Eager) as they manage application state.
     // Member Store
     getIt.registerLazySingleton<MemberStore>(
-          () => MemberStore(
-        getIt<GetAllMembersUseCase>(),getIt<UpdateMemberUseCase>(),
+      () => MemberStore(
+        getIt<GetAllMembersUseCase>(),
+        getIt<UpdateMemberUseCase>(),
         getIt<InsertMemberUseCase>(),
         getIt<DeleteMemberUseCase>(),
         getIt<FindMemberByIdUseCase>(),
         getIt<FindMemberByFingerprintUseCase>(),
-            getIt<ImportDataUseCase>(),
-            // getIt<EnrollFingerprintUseCase>(), // New Biometric dependency
+        getIt<ImportDataUseCase>(),
+        // getIt<EnrollFingerprintUseCase>(), // New Biometric dependency
+      ),
+    );
+
+    getIt.registerLazySingleton<DashboardStore>(
+      () => DashboardStore(
+        getIt<GetBillsByDateRangeUseCase>(),
+
+        getIt<GetAttendanceRecordUseCase>(),
+
+        getIt<GetTransactionsByDateRangeUseCase>(),
+
+        getIt<GetAllMembersUseCase>(),
       ),
     );
 
     // Attendance Store
     getIt.registerLazySingleton<AttendanceStore>(
-          () => AttendanceStore(
-      getIt<GetAttendanceByMemberIdRecordUseCase>(),
-      getIt<GetAttendanceRecordUseCase>(),
+      () => AttendanceStore(
+        getIt<GetAttendanceByMemberIdRecordUseCase>(),
+        getIt<GetAttendanceRecordUseCase>(),
         getIt<LogAttendanceUseCase>(),
         getIt<WatchTodayAttendanceUseCase>(),
         getIt<GetDailyAttendanceReportUseCase>(),
@@ -45,10 +58,10 @@ mixin StoreModule {
 
     // Financial Store
     getIt.registerLazySingleton<FinancialStore>(
-          () => FinancialStore(
+      () => FinancialStore(
         getIt<RecordFinancialTransactionUseCase>(),
         getIt<WatchAllTransactionsUseCase>(),
-          getIt<ImportDataUseCase>(),
+        getIt<ImportDataUseCase>(),
         getIt<GetTransactionsByDateRangeUseCase>(),
         getIt<DeleteTransactionUseCase>(),
       ),
@@ -56,7 +69,7 @@ mixin StoreModule {
 
     // Expense Store
     getIt.registerLazySingleton<ExpenseStore>(
-          () => ExpenseStore(
+      () => ExpenseStore(
         getIt<InsertBillExpenseUseCase>(),
         getIt<WatchAllExpensesUseCase>(),
         getIt<GetBillsByDateRangeUseCase>(),
@@ -67,7 +80,7 @@ mixin StoreModule {
 
     // --- Auth Store ---
     getIt.registerLazySingleton<AuthStore>(
-          () => AuthStore(
+      () => AuthStore(
         getIt<LoginUseCase>(),
         getIt<LogoutUseCase>(),
         getIt<ChangePasswordUseCase>(),

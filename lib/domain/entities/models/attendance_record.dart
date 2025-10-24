@@ -190,3 +190,7 @@ class AttendanceRecord  implements CsvConvertible{
     return grouped;
   }
 }
+extension DateTimeExtensions on DateTime {
+  DateTime endOfDay() => DateTime(year, month, day, 23, 59, 59, 999);
+  bool isBetween(DateTime start, DateTime end) => isAfter(start) && isBefore(end);
+}
