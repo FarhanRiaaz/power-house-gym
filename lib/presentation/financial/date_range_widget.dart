@@ -26,7 +26,7 @@ class FinanceDateRangeFilterWidget extends StatelessWidget {
       lastDate: lastDate,
       // Use the current range or default to a one-month range
       initialDateRange:
-      financialStore.currentFilterRange ??
+          financialStore.currentFilterRange ??
           DateTimeRange(start: DateTime(now.year, now.month, 10), end: now),
       helpText: 'Select Transaction Date Range',
       fieldStartHintText: 'Start Date',
@@ -42,7 +42,7 @@ class FinanceDateRangeFilterWidget extends StatelessWidget {
               primaryContainer: AppColors.backgroundDark,
               onSurface: AppColors.textPrimary,
             ),
-            dialogBackgroundColor: Colors.transparent,
+            dialogTheme: DialogThemeData(backgroundColor: Colors.transparent),
           ),
           child: child!,
         );

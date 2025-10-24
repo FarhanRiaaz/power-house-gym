@@ -40,8 +40,7 @@ class DateRangeFilterWidget extends StatelessWidget {
               primaryContainer: AppColors.backgroundDark,
               tertiary: AppColors.warning,
               onSurface: AppColors.textPrimary,
-            ),
-            dialogBackgroundColor: Colors.transparent,
+            ), dialogTheme: DialogThemeData(backgroundColor: Colors.transparent),
           ),
           child: child!,
         );

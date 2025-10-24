@@ -330,3 +330,11 @@ class _FingerprintHomeState extends State<FingerprintHome> {
     );
   }
 }
+//set navigation
+//set dashboard
+//set fingerprint
+
+
+//set flow
+//test compelte app
+//change name
