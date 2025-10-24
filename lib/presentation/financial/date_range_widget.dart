@@ -38,6 +38,7 @@ class FinanceDateRangeFilterWidget extends StatelessWidget {
             colorScheme: ColorScheme.dark(
               primary: AppColors.primary,
               onPrimary: AppColors.surface,
+              tertiary: AppColors.warning,
               primaryContainer: AppColors.backgroundDark,
               onSurface: AppColors.textPrimary,
             ),
