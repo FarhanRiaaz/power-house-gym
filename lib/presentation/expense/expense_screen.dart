@@ -128,10 +128,9 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
               ),
 
               const SizedBox(height: 16),
-              Observer(
-                builder: (context) {
-                  return DateRangeFilterWidget();
-                }
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.35,
+                child: DateRangeFilterWidget(),
               ),
               const SizedBox(height: 16),
 
@@ -143,7 +142,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey.withOpacity(0.1),
-                        blurRadius: 10,
+                        blurRadius: 8,
                       ),
                     ],
                   ),
@@ -197,7 +196,9 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                                                 ),
                                               ),
                                               Padding(
-                                                padding: const EdgeInsets.only(top: 3.0),
+                                                padding: const EdgeInsets.only(
+                                                  top: 3.0,
+                                                ),
                                                 child: AppStatusBadge(
                                                   label: expense.category!,
                                                   color: AppColors.success,

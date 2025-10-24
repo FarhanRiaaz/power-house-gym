@@ -193,6 +193,26 @@ class MemberFormDialogState extends State<MemberFormDialog> {
 
                 const    SizedBox(height: 16,),
                 // 💡 AppTextField for Membership Type - Now passes required controller
+                DropdownButtonFormField<MemberShipType>(
+                  value: _currentMember.membershipType,
+                  decoration: const InputDecoration(
+                    labelText: 'Membership Type',
+                    border: OutlineInputBorder(),
+                  ),
+                  dropdownColor: AppColors.backgroundDark,
+                  items: MemberShipType.values.map((MemberShipType gender) {
+                    return DropdownMenuItem<MemberShipType>(
+                      value: gender,
+
+                      child: Text(gender.name.toUpperCase(),),
+                    );
+                  }).toList(),
+                  onChanged: (MemberShipType? newValue) {
+                    setState(() {
+                      _currentMember.membershipType = newValue!.name;
+                    });
+                  },
+                ),
                 AppTextField(
                   label: 'Membership Type',
                   controller: _membershipController,

@@ -22,7 +22,7 @@ class DateRangeFilterWidget extends StatelessWidget {
       initialEntryMode: DatePickerEntryMode.calendarOnly,
       firstDate: firstDate,
       lastDate: lastDate,
-      initialDateRange: DateTimeRange(start: dashboardStore.currentFilterRange!.start, end: dashboardStore.currentFilterRange!.end),
+      initialDateRange: DateTimeRange(start: dashboardStore.currentFilterRange?.start ??DateTime.now(), end: dashboardStore.currentFilterRange?.end??DateTime.now()),
       helpText: 'Select Data Range',
       fieldStartHintText: 'Start Date',
       fieldEndHintText: 'End Date',
@@ -37,15 +37,25 @@ class DateRangeFilterWidget extends StatelessWidget {
               primaryContainer: AppColors.backgroundDark,
               tertiary: AppColors.warning,
               onSurface: AppColors.textPrimary,
-            ), dialogTheme: DialogThemeData(backgroundColor: Colors.transparent),
+            ),
+            datePickerTheme: DatePickerThemeData(
+              rangeSelectionBackgroundColor: AppColors.primary,
+                rangeSelectionOverlayColor:
+                WidgetStateProperty.all(
+                  AppColors.warning.withOpacity(0.25),
           ),
+          rangePickerBackgroundColor: AppColors.backgroundDark,
+            ),
+            dialogTheme: DialogThemeData(backgroundColor: Colors.transparent,),
+          ),
+
           child: child!,
         );
       },
     );
 
     if (picked != null) {
-      dashboardStore.setFilterAndFetch(DateRangeParams(start: picked.start, end: picked.end));
+      dashboardStore.setFilterAndFetch(DateRangeParams(start: picked.start??DateTime.now(), end: picked.end??DateTime.now()));
     }
   }
 
@@ -57,7 +67,7 @@ class DateRangeFilterWidget extends StatelessWidget {
     if (range == null) {
       return 'Showing All Records (No date filter applied)';
     }
-    final start = DateFormat('MMM dd, yyyy').format(range.start);
+    final start = DateFormat('MMM dd, yyyy').format(range.start??DateTime.now());
     final end = DateFormat('MMM dd, yyyy').format(range.end);
     return 'Filtered: $start to $end';
   }
@@ -98,7 +108,7 @@ class DateRangeFilterWidget extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              _getRangeText(DateTimeRange(start: range!.start, end: range.end)),
+              _getRangeText(DateTimeRange(start: range?.start ??DateTime.now(), end: range?.end ??DateTime.now())),
               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppColors.textPrimary),
             ),
             const SizedBox(height: 16),

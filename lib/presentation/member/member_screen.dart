@@ -68,16 +68,17 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
   }
 
   Future<void> _addOrUpdateMember(Member member) async {
-print("i am called ${member.toString()}");
-      if (memberStore.memberList.any((m) => m.memberId == member.memberId)) {
-        final index = memberStore.memberList.indexWhere(
-          (m) => m.memberId == member.memberId,
-        );
+    print("i am called ${member.toString()}");
+    if (memberStore.memberList.any((m) => m.memberId == member.memberId)) {
+      final index = memberStore.memberList.indexWhere(
+        (m) => m.memberId == member.memberId,
+      );
 
-       await  memberStore.updateMember(member);
-      } else {
-        await memberStore.registerMember(member);
-      }}
+      await memberStore.updateMember(member);
+    } else {
+      await memberStore.registerMember(member);
+    }
+  }
 
   void _removeMember(Member member) {
     showDialog(
@@ -152,13 +153,15 @@ print("i am called ${member.toString()}");
       // This is the line you provided:
       memberStore.selectedMember!.copyWith(lastFeePaymentDate: DateTime.now());
       await memberStore.updateMember(member);
-      await financialStore.recordTransaction(FinancialTransaction(
-        type: "Fee Payment",
-        amount: member.membershipType!.contains("cardio") ? 2500.0 : 1000.0,
-        transactionDate: DateTime.now(),
-        description: "Fee Payment",
-        relatedMemberId: member.memberId,
-      ));
+      await financialStore.recordTransaction(
+        FinancialTransaction(
+          type: "Fee Payment",
+          amount: member.membershipType!.contains("cardio") ? 2500.0 : 1000.0,
+          transactionDate: DateTime.now(),
+          description: "Fee Payment",
+          relatedMemberId: member.memberId,
+        ),
+      );
       // 2. UI Notification: Show the success dialog after the database call completes.
       // This is the line you provided:
       _showAppDialog(
@@ -439,6 +442,13 @@ print("i am called ${member.toString()}");
             _buildDetailRow('Phone Number', member.phoneNumber!),
             _buildDetailRow('Gender', member.gender?.name ?? 'N/A'),
             _buildDetailRow('Membership Type', member.membershipType!),
+            _buildDetailRow(
+              'Attendance %',
+              AttendanceRecord.calculateMonthlyAttendancePercentage(
+                attendanceStore.singleAttendanceList,
+                member.memberId!,
+              ).toString(),
+            ),
             _buildDetailRow('Registered On', registrationDate),
 
             const SizedBox(height: 20),
@@ -537,7 +547,7 @@ print("i am called ${member.toString()}");
       builder: (ctx) => MemberFormDialog(
         member: member,
         onSave: (m) async {
-         await  _addOrUpdateMember(m);
+          await _addOrUpdateMember(m);
           Navigator.of(ctx).pop();
         },
       ),

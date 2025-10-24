@@ -16,6 +16,11 @@ enum Gender {
   female,
 }
 
+enum MemberShipType{
+  cardio,
+  muscle
+}
+
 /// Defines the payment status of a member.
 enum FeesStatus {
   paid,

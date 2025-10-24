@@ -81,16 +81,7 @@ class _FinancialTransactionScreenState extends State<FinancialTransactionScreen>
                   AppSectionHeader(
                     title: 'Transactions',
                     trailingWidget: Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: totalBalance >= 0 ? AppColors.success.withOpacity(0.1) : AppColors.danger.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: totalBalance >= 0 ? AppColors.success : AppColors.danger),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text('NET BALANCE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
                               Text(
@@ -101,9 +92,7 @@ class _FinancialTransactionScreenState extends State<FinancialTransactionScreen>
                                     color: totalBalance >= 0 ? AppColors.success : AppColors.warning
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
+
 
                            GestureDetector(
                                  onTap: () async {
@@ -132,21 +121,21 @@ class _FinancialTransactionScreenState extends State<FinancialTransactionScreen>
                   ),
 
                   const SizedBox(height: 16),
-                  Observer(
-                      builder: (context) {
-                        return FinanceDateRangeFilterWidget();
-                      }
-                  ),
+                  SizedBox(width: MediaQuery.of(context).size.width*0.35,child:
+                  FinanceDateRangeFilterWidget(),),
                   const SizedBox(height: 16),
 
                   // 2. FinancialTransaction List Container
                   Expanded(
-                    child: Container(
+                    child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: AppColors.backgroundDark,
+                        color: AppColors.surface.withOpacity(0.65),
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
-                          BoxShadow(color: Colors.grey.withOpacity(0.15), blurRadius: 10, offset: const Offset(0, 4)),
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.1),
+                            blurRadius: 8,
+                          ),
                         ],
                       ),
                       child: Observer(

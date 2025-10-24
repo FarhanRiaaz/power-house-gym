@@ -40,7 +40,16 @@ class DateRangeFilterWidget extends StatelessWidget {
               primaryContainer: AppColors.backgroundDark,
               tertiary: AppColors.warning,
               onSurface: AppColors.textPrimary,
-            ), dialogTheme: DialogThemeData(backgroundColor: Colors.transparent),
+            ),
+            datePickerTheme: DatePickerThemeData(
+              rangeSelectionBackgroundColor: AppColors.primary,
+              rangeSelectionOverlayColor:
+              WidgetStateProperty.all(
+                AppColors.warning.withOpacity(0.25),
+              ),
+              rangePickerBackgroundColor: AppColors.backgroundDark,
+            ),
+            dialogTheme: DialogThemeData(backgroundColor: Colors.transparent),
           ),
           child: child!,
         );

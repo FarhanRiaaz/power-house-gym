@@ -28,7 +28,6 @@ class AttendanceScreen extends StatefulWidget {
 }
 
 class _AttendanceScreenState extends State<AttendanceScreen> {
-
   @override
   void initState() {
     attendanceStore.getSingleAttendanceList(0);
@@ -83,7 +82,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   // Helper to handle navigation to the detail screen
   void _viewMemberAttendance(Member member) {
-   attendanceStore.getAttendanceDetail(member.memberId!??0);
+    attendanceStore.getAttendanceDetail(member.memberId! ?? 0);
     Navigator.of(context)
         .push(
           MaterialPageRoute(
@@ -98,8 +97,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   @override
   Widget build(BuildContext context) {
-
-
     return Scaffold(
       body: BackgroundWrapper(
         child: Padding(
@@ -166,24 +163,25 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
               // Attendance List
               Expanded(
-                child: Container(
+                child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: AppColors.surface.withOpacity(0.7),
+                    color: AppColors.surface.withOpacity(0.65),
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.15),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: Colors.grey.withOpacity(0.1),
+                        blurRadius: 8,
                       ),
                     ],
                   ),
                   child: Observer(
                     builder: (context) {
-                          final groupedRecords = _getRecordsGroupedByDay(_filteredRecords);
-    final sortedDates = groupedRecords.keys.toList()
-      ..sort((a, b) => b.compareTo(a));
-      print("Sorted Dates $sortedDates");
+                      final groupedRecords = _getRecordsGroupedByDay(
+                        _filteredRecords,
+                      );
+                      final sortedDates = groupedRecords.keys.toList()
+                        ..sort((a, b) => b.compareTo(a));
+                      print("Sorted Dates $sortedDates");
                       return sortedDates.isEmpty
                           ? const AppEmptyState(
                               message: 'No attendance records found.',
@@ -194,7 +192,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                               itemBuilder: (context, dateIndex) {
                                 final date = sortedDates[dateIndex];
                                 final recordsForDay = groupedRecords[date]!;
-                      
+
                                 // Determine the header text (Today, Yesterday, or Date)
                                 String headerText;
                                 final now = DateTime.now();
@@ -206,7 +204,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                                 final yesterday = today.subtract(
                                   const Duration(days: 1),
                                 );
-                      
+
                                 if (date.isAtSameMomentAs(today)) {
                                   headerText = 'Today';
                                 } else if (date.isAtSameMomentAs(yesterday)) {
@@ -216,7 +214,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                                     'EEEE, MMM dd',
                                   ).format(date);
                                 }
-                      
+
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -237,11 +235,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                                       ),
                                     ),
                                     ...recordsForDay.map((record) {
-                                      final member = getMemberById(record.memberId);
+                                      final member = getMemberById(
+                                        record.memberId,
+                                      );
                                       if (member == null) {
                                         return const SizedBox.shrink(); // Skip if no member data
                                       }
-                      
+
                                       final checkInTime = record.checkInTime!;
                                       final isLate =
                                           checkInTime.hour >=
@@ -249,13 +249,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                                       final statusColor = isLate
                                           ? AppColors.warning
                                           : AppColors.success;
-                      
+
                                       return Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: DecoratedBox(
                                           decoration: BoxDecoration(
                                             color: Colors.transparent,
-                                            borderRadius: BorderRadius.circular(12),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                             border: Border.all(
                                               color: AppColors.primary,
                                             ),
@@ -264,9 +266,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                                             onTap: () =>
                                                 _viewMemberAttendance(member),
                                             title: member.name!,
-                                            subtitle: 'S/O: ${member.fatherName}',
-                                            leadingIcon:
-                                                Icons.person_pin_circle_outlined,
+                                            subtitle:
+                                                'S/O: ${member.fatherName}',
+                                            leadingIcon: Icons
+                                                .person_pin_circle_outlined,
                                             statusColor: statusColor,
                                             trailing: Column(
                                               mainAxisAlignment:
@@ -305,7 +308,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                                 );
                               },
                             );
-                    }
+                    },
                   ),
                 ),
               ),

@@ -11,7 +11,7 @@ class Member implements CsvConvertible {
    String? phoneNumber;
    String? fatherName;
    Gender? gender;
-   String? membershipType; // e.g., "Fitness Club", "Weightlifting"
+   MemberShipType? membershipType; // e.g., "Fitness Club", "Weightlifting"
    DateTime? registrationDate;
    DateTime? lastFeePaymentDate;
    String? fingerprintTemplate; // Biometric data
@@ -72,7 +72,7 @@ class Member implements CsvConvertible {
     String? phoneNumber,
     String? fatherName,
     Gender? gender,
-    String? membershipType,
+    MemberShipType? membershipType,
     DateTime? registrationDate,
     DateTime? lastFeePaymentDate,
     String? fingerprintTemplate,
@@ -140,7 +140,7 @@ class Member implements CsvConvertible {
         '\n  phoneNumber: $phoneNumber, '
         '\n  fatherName: $fatherName, '
         '\n  gender: ${gender?.name}, ' // Accessing the name property of the enum
-        '\n  membershipType: $membershipType, '
+        '\n  membershipType: ${membershipType?.name}'
         '\n  registrationDate: ${registrationDate?.toIso8601String()}, '
         '\n  lastFeePaymentDate: ${lastFeePaymentDate?.toIso8601String()}, '
         '\n  fingerprintTemplate: ${fingerprintTemplate != null ? "[Template Present (${fingerprintTemplate!.length} chars)]" : null}, '
@@ -175,7 +175,7 @@ class Member implements CsvConvertible {
       phoneNumber??"",
       fatherName??"",
       gender?.name ?? '', // Use enum name, default to empty string if null
-      membershipType??"",
+      membershipType.toString()??"",
       registrationDate?.toIso8601String() ?? '',
       lastFeePaymentDate?.toIso8601String() ?? '',
       fingerprintTemplate ?? '',
@@ -211,6 +211,14 @@ class Member implements CsvConvertible {
           orElse: () => throw FormatException("Invalid gender value: $value")
       );
     }
+    MemberShipType? parseMembership(String? value) {
+      if (value == null || value.isEmpty) return null;
+      final String normalizedValue = value.toLowerCase();
+      return MemberShipType.values.firstWhere(
+              (g) => g.name == normalizedValue,
+          orElse: () => throw FormatException("Invalid MemberShipType value: $value")
+      );
+    }
 
     // Convert ID, expecting it to be the first element (Index 0)
     final parsedId = int.tryParse(row[0]);
@@ -224,7 +232,7 @@ class Member implements CsvConvertible {
       phoneNumber: row[2],
       fatherName: row[3],
       gender: parseGender(row[4]),
-      membershipType: row[5],
+      membershipType: parseMembership(row[5]),
       registrationDate: parseDateTime(row[6]),
       lastFeePaymentDate: parseDateTime(row[7]),
       fingerprintTemplate: row[8].isEmpty ? null : row[8],
@@ -242,7 +250,7 @@ class Member implements CsvConvertible {
   /// Filter by membership type
   static List<Member> filterByType(List<Member> list, String type) {
     return list
-        .where((m) => m.membershipType?.toLowerCase() == type.toLowerCase())
+        .where((m) => m.membershipType?.name.toLowerCase() == type.toLowerCase())
         .toList();
   }
 

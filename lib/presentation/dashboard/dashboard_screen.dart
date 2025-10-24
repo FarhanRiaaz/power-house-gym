@@ -6,6 +6,7 @@ import 'package:finger_print_flutter/presentation/attendance/store/attendance_st
 import 'package:finger_print_flutter/presentation/auth/store/auth_store.dart';
 import 'package:finger_print_flutter/presentation/components/app_button.dart';
 import 'package:finger_print_flutter/presentation/components/app_card.dart';
+import 'package:finger_print_flutter/presentation/components/app_empty_state.dart';
 import 'package:finger_print_flutter/presentation/components/app_section_header.dart';
 import 'package:finger_print_flutter/presentation/components/app_status_bar.dart';
 import 'package:finger_print_flutter/presentation/components/app_toggle.dart';
@@ -19,6 +20,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 
 import '../../di/service_locator.dart';
+import '../components/metric_card.dart';
 import 'dashboard_range_dialog.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -76,26 +78,6 @@ class DashboardScreen extends StatelessWidget {
       );
     }
   }
-
-  final NumberFormat currencyFormat = NumberFormat.currency(symbol: 'Rs. ');
-
-  TextSpan _formatChange(double change) {
-    final symbol = change > 0 ? '▲' : (change < 0 ? '▼' : '');
-    final color = change > 0
-        ? AppColors.success
-        : (change < 0 ? AppColors.danger : AppColors.textPrimary);
-
-    return TextSpan(
-      children: [
-        TextSpan(
-          text: '$symbol${change.abs().toStringAsFixed(1)}%',
-          style: TextStyle(color: color, fontWeight: FontWeight.bold),
-        ),
-        const TextSpan(text: ' vs Last Period'),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,9 +89,12 @@ class DashboardScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+
                 AppSectionHeader(title: 'Dashboard'),
                 const SizedBox(height: 24),
-                DateRangeFilterWidget(),
+                SizedBox(
+                    width: MediaQuery.of(context).size.width*0.35,
+                    child: DateRangeFilterWidget()),
                 Observer(
                   builder: (_) {
                     if (dashboardStore.isLoading) {
@@ -118,24 +103,21 @@ class DashboardScreen extends StatelessWidget {
                     return LayoutBuilder(
                       builder: (context, constraints) {
                         final cards = [
-                          Expanded(
-                            child: Observer(
-                              builder: (_) => AppStatusBadge(
-                                label:
-                                    authStore.currentUser?.role.name
-                                        .toUpperCase() ??
-                                    'Super Admin',
-                                color: AppColors.primary,
-                              ),
+                          Observer(
+                            builder: (_) => AppStatusBadge(
+                              label:
+                                  authStore.currentUser?.role.name
+                                      .toUpperCase() ??
+                                  'Super Admin',
+                              color: AppColors.primary,
                             ),
                           ),
                           Spacer(),
-                          Expanded(
-                            child: AppButton(
-                              label: 'Logout',
-                              icon: Icons.logout,
-                              onPressed: () => authStore.logout(),
-                            ),
+                          AppButton(
+                            fullWidth: false,
+                            label: 'Logout',
+                            icon: Icons.logout,
+                            onPressed: () => authStore.logout(),
                           ),
                         ];
                         return Row(children: cards);
@@ -170,96 +152,75 @@ class DashboardScreen extends StatelessWidget {
 
                 const SizedBox(height: 32),
                 Observer(
-                  builder: (_) => LayoutBuilder(
-                    builder: (context, constraints) {
-                      final cards = <Widget>[
-                        // KPI 1: Active Check-Ins (Operational)
-                        AppCard(
-                          title: 'Hot Time 🔥',
-                          subtitle: 'Occupied Hours',
-                          leading: Icon(
-                            Icons.fitness_center_outlined,
-                            size: 36,
-                            color: AppColors.success,
-                          ),
-                          trailing: Text(
-                            dashboardStore.data?.occupiedHours.toString() ?? "",
-                            style: AppTextStyles.heading.copyWith(
+                  builder: (_) {
+                    final currency = NumberFormat.currency(
+                        locale: 'en_PK', symbol: 'PKR ');
+                    final data = dashboardStore.data;
+                    return dashboardStore.data != null ?
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final cards = <Widget>[
+                          // KPI 1: Active Check-Ins (Operational)
+                          if (hasValue(data?.occupiedHours))
+                            MetricCard(
+                              title: 'Hot Time 🔥',
+                              subtitle: 'Occupied Hours',
+                              icon: Icons.fitness_center_outlined,
+                              iconColor: AppColors.success,
+                              trailingText: data!.occupiedHours!,
+                              trailingColor: AppColors.success,
                               fontSize: 16,
-                              color: AppColors.success,
                             ),
-                          ),
-                        ),
-                        AppCard(
-                          title: 'Active Check-Ins',
-                          subtitle: 'Currently in Gym',
-                          leading: Icon(
-                            Icons.fitness_center,
-                            size: 36,
-                            color: AppColors.success,
-                          ),
-                          trailing: Text(
-                            dashboardStore.data?.activeCheckIns.toString() ??
-                                "",
-                            style: AppTextStyles.heading.copyWith(
+
+                          // Active Check-Ins
+                          if (hasValue(data?.activeCheckIns))
+                            MetricCard(
+                              title: 'Active Check-Ins',
+                              subtitle: 'Currently in Gym',
+                              icon: Icons.fitness_center,
+                              iconColor: AppColors.success,
+                              trailingText: '${data?.activeCheckIns}',
+                              trailingColor: AppColors.success,
                               fontSize: 32,
-                              color: AppColors.success,
                             ),
-                          ),
-                        ),
-                        // KPI 2: Today's Revenue (Financial)
-                        AppCard(
-                          title: 'Finance',
-                          subtitle:
-                              'Change: ${dashboardStore.data?.todayRevenueChange ?? 0.0}%',
-                          leading: Icon(
-                            Icons.attach_money,
-                            size: 36,
-                            color: AppColors.primary,
-                          ),
-                          trailing: Text(
-                            NumberFormat.currency(
-                              locale: 'en_PK',
-                              symbol: 'PKR ',
-                            ).format(dashboardStore.data?.todayRevenue),
-                            style: AppTextStyles.heading.copyWith(
-                              fontSize: 20,
-                              color:
-                                  dashboardStore.data?.todayRevenueChange
-                                          as double >=
-                                      0
+
+                          // Finance (Today’s Revenue)
+                          if (hasValue(data?.todayRevenueChange))
+                            MetricCard(
+                              title: 'Finance',
+                              subtitle: 'Change: ${data?.todayRevenueChange?.toStringAsFixed(2)}%',
+                              icon: Icons.attach_money,
+                              iconColor: AppColors.primary,
+                              trailingText: currency.format(data?.todayRevenue),
+                              trailingColor: (data?.todayRevenueChange ?? 0) >= 0
                                   ? AppColors.success
                                   : AppColors.danger,
+                              fontSize: 20,
                             ),
-                          ),
-                        ),
-                        // KPI 3: Active Members (Membership)
-                        AppCard(
-                          title: 'Active Members',
-                          subtitle: 'Total Registered & Current',
-                          leading: Icon(
-                            Icons.group,
-                            size: 36,
-                            color: AppColors.textPrimary,
-                          ),
-                          trailing: Text(
-                            dashboardStore.data?.activeMemberCount.toString() ??
-                                "",
-                            style: AppTextStyles.heading.copyWith(
+
+                          // Active Members
+                          if (hasValue(data?.activeMemberCount))
+                            MetricCard(
+                              title: 'Active Members',
+                              subtitle: 'Total Registered & Current',
+                              icon: Icons.group,
+                              iconColor: AppColors.textPrimary,
+                              trailingText: '${data?.activeMemberCount}',
+                              trailingColor: AppColors.textSecondary,
                               fontSize: 32,
-                              color: AppColors.textSecondary,
                             ),
-                          ),
-                        ),
-                      ];
-                      return _buildKpiRow(
-                        context: context,
-                        constraints: constraints,
-                        cards: cards,
-                      );
-                    },
-                  ),
-                ),
+
+
+
+                        ];
+                        return _buildKpiRow(
+                          context: context,
+                          constraints: constraints,
+                          cards: cards,
+                        );
+                      },
+                    ) : AppEmptyState(message: 'No data to show here',);
+                  }),
 
                 const SizedBox(height: 32),
 
@@ -268,85 +229,58 @@ class DashboardScreen extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 Observer(
-                  builder: (_) => LayoutBuilder(
+                  builder: (_) {
+                    final currency = NumberFormat.currency(locale: 'en_PK', symbol: 'PKR ');
+                    final data = dashboardStore.data;
+                     return dashboardStore.data!=null?
+                     LayoutBuilder(
                     builder: (context, constraints) {
                       final cards = <Widget>[
-                        AppCard(
-                          title: 'Expense',
-                          subtitle:
-                              'Change: ${dashboardStore.data?.todayRevenueChange ?? 0.0}%',
-                          leading: Icon(
-                            Icons.attach_money,
-                            size: 36,
-                            color: AppColors.primary,
+
+                        if (hasValue(data?.todayRevenueChange))
+                          MetricCard(
+                            title: 'Expense',
+                            subtitle: 'Change: ${data?.todayRevenueChange?.toStringAsFixed(2)}%',
+                            icon: Icons.attach_money,
+                            iconColor: AppColors.primary,
+                            trailingText: currency.format(data?.expense),
+                            trailingColor: (data?.todayRevenueChange ?? 0) >= 0
+                                ? AppColors.success
+                                : AppColors.danger,
                           ),
-                          trailing: Text(
-                            NumberFormat.currency(
-                              locale: 'en_PK',
-                              symbol: 'PKR ',
-                            ).format(dashboardStore.data?.expense ?? 0.0),
-                            style: AppTextStyles.heading.copyWith(
-                              fontSize: 20,
-                              color:
-                                  dashboardStore.data?.todayRevenueChange
-                                          as double >=
-                                      0
-                                  ? AppColors.success
-                                  : AppColors.danger,
-                            ),
+
+                        if (hasValue(data?.expiringMembers))
+                          MetricCard(
+                            title: 'Expiring Members',
+                            subtitle: 'Contracts due in 7 days',
+                            icon: Icons.person_off,
+                            iconColor: AppColors.danger,
+                            trailingText: '${data?.expiringMembers}',
+                            trailingColor: AppColors.danger,
                           ),
-                        ),
-                        AppCard(
-                          title: 'Expiring Members',
-                          subtitle: 'Contracts due in 7 days',
-                          leading: const Icon(
-                            Icons.person_off,
-                            color: AppColors.danger,
+
+                        if (hasValue(data?.newMembersThisWeek))
+                          MetricCard(
+                            title: 'New Members',
+                            subtitle: 'Signed up this week',
+                            icon: Icons.celebration,
+                            iconColor: AppColors.success,
+                            trailingText: '${data?.newMembersThisWeek}',
+                            trailingColor: AppColors.success,
                           ),
-                          trailing: Text(
-                            dashboardStore.data?.expiringMembers.toString() ??
-                                "0",
-                            style: AppTextStyles.subheading.copyWith(
-                              color: AppColors.danger,
-                            ),
+
+                        if (hasValue(data?.attendanceRate))
+                          MetricCard(
+                            title: 'Attendance Rate',
+                            subtitle: 'Last 30 Days Average',
+                            icon: Icons.calendar_month,
+                            iconColor: AppColors.primary,
+                            trailingText: '${data?.attendanceRate?.toStringAsFixed(1)}%',
+                            trailingColor: (data?.attendanceRate ?? 0) >= 70
+                                ? AppColors.success
+                                : AppColors.warning,
                           ),
-                        ),
-                        // Metric 4: New Members (Growth)
-                        AppCard(
-                          title: 'New Members',
-                          subtitle: 'Signed up this week',
-                          leading: const Icon(
-                            Icons.celebration,
-                            color: AppColors.success,
-                          ),
-                          trailing: Text(
-                            dashboardStore.data?.newMembersThisWeek
-                                    .toString() ??
-                                "0",
-                            style: AppTextStyles.subheading.copyWith(
-                              color: AppColors.success,
-                            ),
-                          ),
-                        ),
-                        AppCard(
-                          title: 'Attendance Rate',
-                          subtitle: 'Last 30 Days Average',
-                          leading: const Icon(
-                            Icons.calendar_month,
-                            color: AppColors.primary,
-                          ),
-                          trailing: Text(
-                            '${dashboardStore.data?.attendanceRate ?? 0}%',
-                            style: AppTextStyles.subheading.copyWith(
-                              color:
-                                  dashboardStore.data?.attendanceRate
-                                          as double >=
-                                      70.0
-                                  ? AppColors.success
-                                  : AppColors.warning,
-                            ),
-                          ),
-                        ),
+
                       ];
                       return _buildKpiRow(
                         context: context,
@@ -354,10 +288,12 @@ class DashboardScreen extends StatelessWidget {
                         cards: cards,
                       );
                     },
-                  ),
+                  ):
+                    AppEmptyState(message: 'No data to show here',);
+                  }
                 ),
                const SizedBox(height: 32),
-                 attendanceStore.reportAttendanceList.isNotEmpty? const AppSectionHeader(title: 'Attendance'): const SizedBox.shrink(),
+                const AppSectionHeader(title: 'Attendance'),
 
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 400),
@@ -372,31 +308,29 @@ class DashboardScreen extends StatelessWidget {
                             attendanceStore.reportAttendanceList[index],
                           );
                         },
-                      ): const SizedBox.shrink();
+                      ): AppEmptyState(message: "No attendance records found");
                     }
                   ),
                 ),
                const AppSectionHeader(title: 'Device Status'),
                 const SizedBox(height: 16),
-                Observer(
-                  builder: (_) => AppCard(
-                    title: 'Fingerprint Scanner Status',
-                    subtitle: 'Last scan result: 10:15 AM',
-                    leading: const Icon(Icons.fingerprint),
-                    trailing: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        const AppStatusBadge(
-                          label: "MATCH SUCCESSFUL",
-                          color: AppColors.success,
-                        ),
-                        const SizedBox(height: 8),
-                       const Text(
-                          'Device connected and ready.',
-                          style: AppTextStyles.body,
-                        ),
-                      ],
-                    ),
+                AppCard(
+                  title: 'Fingerprint Scanner Status',
+                  subtitle: 'Last scan result: 10:15 AM',
+                  leading: const Icon(Icons.fingerprint),
+                  trailing: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      const AppStatusBadge(
+                        label: "MATCH SUCCESSFUL",
+                        color: AppColors.success,
+                      ),
+                      const SizedBox(height: 8),
+                     const Text(
+                        'Device connected and ready.',
+                        style: AppTextStyles.body,
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -440,5 +374,11 @@ class DashboardScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+  bool hasValue(dynamic value) {
+    if (value == null) return false;
+    if (value is num) return true; // Numbers are always considered valid
+    if (value is String) return value.trim().isNotEmpty;
+    return false;
   }
 }

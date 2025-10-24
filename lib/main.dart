@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:finger_print_flutter/core/style/app_colors.dart';
+import 'package:finger_print_flutter/core/style/app_text_styles.dart';
 import 'package:finger_print_flutter/core/style/app_theme.dart';
 import 'package:finger_print_flutter/enrollment_screen.dart';
 import 'package:finger_print_flutter/presentation/auth/login_screen.dart';
@@ -23,8 +25,24 @@ Future<void> main() async {
   }, (error, stackTrace) {});
 }
 
-class FingerprintApp extends StatelessWidget {
-  const FingerprintApp({super.key});
+class FingerprintApp extends StatefulWidget {
+  FingerprintApp({super.key});
+
+  @override
+  State<FingerprintApp> createState() => _FingerprintAppState();
+}
+
+class _FingerprintAppState extends State<FingerprintApp> {
+  int _selectedIndex = 0;
+
+  // 2. A list of all your screen widgets
+  final List<Widget> _screens = [
+    DashboardScreen(),
+    AttendanceScreen(onUpdate: () {}),
+    ManageMemberScreen(),
+    FinancialTransactionScreen(onUpdate: () {}),
+    ExpenseScreen(onUpdate: () {}),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +54,123 @@ class FingerprintApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       // initialRoute: RouteManager.dashboard,
       // onGenerateRoute: RouteManager.generateRoute,
-      home: DashboardScreen(),
+      home: Scaffold(
+        body: Row(
+          children: <Widget>[
+            // 3. The NavigationRail Widget
+            NavigationRail(
+              // Use Material 3 standard colors and shape
+              backgroundColor: AppColors.backgroundDark,
+              elevation: 4,
+              minWidth: 72,
+              // Standard min width
+
+              // The index of the selected item, driven by the state variable
+              selectedIndex: _selectedIndex,
+
+              // This is how the state updates when a destination is clicked
+              onDestinationSelected: (int index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
+
+              // We want the labels (text) to always show below the icons
+              labelType: NavigationRailLabelType.all,
+
+              // Define the items (destinations) in the rail
+              destinations: <NavigationRailDestination>[
+                NavigationRailDestination(
+                  icon: Icon(Icons.dashboard_outlined),
+                  selectedIcon: Icon(Icons.dashboard, color: AppColors.primary),
+                  indicatorColor: AppColors.primary,
+                  label: Text(
+                    'Dashboard',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.fitness_center_outlined),
+                  selectedIcon: Icon(
+                    Icons.fitness_center,
+                    color: AppColors.primary,
+                  ),
+                  label: Text(
+                    'Attendance',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.person_2_outlined),
+                  selectedIcon: Icon(
+                    Icons.person_2,
+                    color: AppColors.primary,
+                  ),
+                  label: Text(
+                    'Members',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.monetization_on_outlined),
+                  selectedIcon: Icon(
+                    Icons.monetization_on,
+                    color: AppColors.primary,
+                  ),
+                  label: Text(
+                    'Payments',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.show_chart_outlined),
+                  selectedIcon: Icon(
+                    Icons.show_chart,
+                    color: AppColors.primary,
+                  ),
+                  label: Text(
+                    'Expenses',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ],
+
+              // Optional: Header content (e.g., a logo or menu button)
+              leading: Padding(
+                padding: const EdgeInsets.only(top: 8.0, bottom: 20.0),
+                child: SizedBox(
+                    height: 48,
+                    width: 48,
+                    child: Icon(Icons.flutter_dash_outlined,size: 48,color: AppColors.textPrimary,)),
+
+              ),
+            ),
+
+            // A separator line for visual clarity
+            const VerticalDivider(thickness: 1, width: 1),
+
+            // 4. The main content area (Expanded)
+            // It takes up all remaining horizontal space.
+            Expanded(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                // Display the screen widget corresponding to the selected index
+                child: _screens[_selectedIndex],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -330,18 +464,20 @@ class _FingerprintHomeState extends State<FingerprintHome> {
     );
   }
 }
-//set navigation
-//set dashboard
 
-//set flow
-//test compelte app
+// todo add membership type
 
+// Login screen login check with actual credentials
+// Dashboard all access to super admin and limited for other admins
+// Logout should take you to login screen
+// Try importing all data and try testing export function try checking what should be the signature for csv creation => the print has been tested and pay fees is also tested
 
+/// HIGH PRIORITY ITEMS
 
+// *** Fingerprint should be save in the database and its should be test with good presense
+// *** Do work with biometric device couple of times and test again and again
+// *** Mark Attendance check database after that and update the app completely
 
-//set fingerprint
-
-
-
-
-
+// Active and InActive biometric scenes
+// Contact hassan and ask about deploying app using the thing he is saying and then deploy the app and test all things
+// There should be an option to clear database then test import and export functions
