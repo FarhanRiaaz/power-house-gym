@@ -335,7 +335,7 @@ class _FingerprintHomeState extends State<FingerprintHome> {
 
 //set flow
 //test compelte app
-//change name
+
 
 
 
