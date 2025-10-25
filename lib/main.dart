@@ -468,14 +468,13 @@ class _FingerprintHomeState extends State<FingerprintHome> {
   }
 }
 
-// todo add membership type
 
 // Login screen login check with actual credentials
 // Dashboard all access to super admin and limited for other admins
 // Logout should take you to login screen
 // Try importing all data and try testing export function try checking what should be the signature for csv creation => the print has been tested and pay fees is also tested
 
-/// HIGH PRIORITY ITEMS
+/// TODO HIGH PRIORITY ITEMS
 
 // *** Fingerprint should be save in the database and its should be test with good presense
 // *** Do work with biometric device couple of times and test again and again
