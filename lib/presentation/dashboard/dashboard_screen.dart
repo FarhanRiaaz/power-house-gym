@@ -66,6 +66,7 @@ class DashboardScreen extends StatelessWidget {
       backgroundColor: Colors.transparent,
       body: BackgroundWrapper(
         child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -295,6 +296,7 @@ class DashboardScreen extends StatelessWidget {
                       return attendanceStore.reportAttendanceList.isNotEmpty? ListView.builder(
                         shrinkWrap: true,
                         itemCount: attendanceStore.reportAttendanceList.length,
+                        physics: const ClampingScrollPhysics(),
                         itemBuilder: (context, index) {
                           // 💡 Calling the new tile builder
                           return _buildAttendanceLogTile(

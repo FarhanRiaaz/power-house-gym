@@ -155,6 +155,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                             )
                           : ListView.builder(
                               itemCount: expenseStore.reportExpensesList.length,
+                              physics: const ClampingScrollPhysics(),
                               itemBuilder: (context, index) {
                                 final expense =
                                     expenseStore.reportExpensesList[index];

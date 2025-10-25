@@ -3,16 +3,27 @@ import 'dart:convert' show jsonEncode;
 import 'package:finger_print_flutter/data/service/biometric/biometric_service.dart';
 import 'package:finger_print_flutter/domain/repository/member/member_repository.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:mobx/mobx.dart';
 
 /// Concrete implementation using external process execution.
 class BiometricServiceImpl implements BiometricService {
   final MemberRepository _memberRepository;
+  final isScanning = Observable<bool>(false);
 
   // NOTE: In a real app, these would point to your EXE and shared JSON file.
   static const String _exePath = 'C:\\FingerprintApp.exe';
   static const String _jsonPath = 'C:\\fmd_data.json';
-
   BiometricServiceImpl(this._memberRepository);
+
+  // BiometricServiceImpl(this.memberStore, this.attendanceStore, this.customWidgets) {
+  //   // Start scanning loop immediately if required by a MobX state change
+  //   reaction((_) => isScanning.value, (bool scanning) {
+  //     if (scanning) {
+  //       // Start the continuous scanning loop when the observable changes to true
+  //       _startScanningLoop();
+  //     }
+  //   });
+  // }
 
   /// MOCK of the real dart:io Process.run
   Future<String> _mockExecuteApp(String command, [String? filePath]) async {

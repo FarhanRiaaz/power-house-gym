@@ -127,7 +127,11 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
     );
     financialStore.newTransaction.copyWith(
       type: "Fee Payment",
-      amount: member.membershipType!.name.contains("cardio") ||member.membershipType!.name.contains("CARDIO") ? 2500.0 : 1000.0,
+      amount:
+          member.membershipType!.name.contains("cardio") ||
+              member.membershipType!.name.contains("CARDIO")
+          ? 2500.0
+          : 1000.0,
       transactionDate: DateTime.now(),
       relatedMemberId: member.memberId,
     );
@@ -156,7 +160,11 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
       await financialStore.recordTransaction(
         FinancialTransaction(
           type: "Fee Payment",
-          amount: member.membershipType!.name.contains("cardio")|| member.membershipType!.name.contains("CARDIO") ? 2500.0 : 1000.0,
+          amount:
+              member.membershipType!.name.contains("cardio") ||
+                  member.membershipType!.name.contains("CARDIO")
+              ? 2500.0
+              : 1000.0,
           transactionDate: DateTime.now(),
           description: "Fee Payment",
           relatedMemberId: member.memberId,
@@ -187,7 +195,11 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
     await receiptService.generateAndPrintReceipt(
       params: FinancialTransaction(
         type: member.membershipType!.name,
-        amount: member.membershipType!.name.contains('cardio')|| member.membershipType!.name.contains("CARDIO") ? 2500.0 : 1000.0,
+        amount:
+            member.membershipType!.name.contains('cardio') ||
+                member.membershipType!.name.contains("CARDIO")
+            ? 2500.0
+            : 1000.0,
         transactionDate: DateTime.now(),
         description: "Membership renewal",
         relatedMemberId: member.memberId,
@@ -221,7 +233,9 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
                 await receiptService.generateAndPrintReceipt(
                   params: FinancialTransaction(
                     type: member.membershipType!.name,
-                    amount: member.membershipType!.name.contains('cardio') || member.membershipType!.name.contains("CARDIO")
+                    amount:
+                        member.membershipType!.name.contains('cardio') ||
+                            member.membershipType!.name.contains("CARDIO")
                         ? 2500.0
                         : 1000.0,
                     transactionDate: DateTime.now(),
@@ -315,6 +329,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
                       )
                     : ListView.builder(
                         itemCount: filteredList.length,
+                        physics: const ClampingScrollPhysics(),
                         itemBuilder: (context, index) {
                           final member = filteredList[index];
                           final isSelected =
@@ -441,7 +456,10 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
             _buildDetailRow('Father Name', member.fatherName!),
             _buildDetailRow('Phone Number', member.phoneNumber!),
             _buildDetailRow('Gender', member.gender?.name ?? 'N/A'),
-            _buildDetailRow('Membership Type', member.membershipType?.name.toUpperCase() ?? 'N/A'),
+            _buildDetailRow(
+              'Membership Type',
+              member.membershipType?.name.toUpperCase() ?? 'N/A',
+            ),
             _buildDetailRow(
               'Attendance %',
               AttendanceRecord.calculateMonthlyAttendancePercentage(

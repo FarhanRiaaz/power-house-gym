@@ -84,6 +84,7 @@ class MemberAttendanceDetailScreen extends StatelessWidget {
                         ? const AppEmptyState(message: 'No historical attendance found.', icon: Icons.history)
                         : ListView.builder(
                       itemCount: attendanceStore.reportAttendanceList.length,
+                      physics: const ClampingScrollPhysics(),
                       itemBuilder: (context, index) {
                         final record = attendanceStore.reportAttendanceList[index];
                         final checkInTime = record.checkInTime!;

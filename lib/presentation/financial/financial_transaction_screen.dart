@@ -144,6 +144,7 @@ class _FinancialTransactionScreenState extends State<FinancialTransactionScreen>
                               ? const AppEmptyState(message: 'No transactions recorded.', icon: Icons.money_off_csred)
                               : ListView.builder(
                             itemCount: financialStore.reportTransactionsList.length,
+                            physics: const ClampingScrollPhysics(),
                             itemBuilder: (context, index) {
                               final transaction = financialStore.reportTransactionsList[index];
                               final isIncome = transaction.amount! > 0;

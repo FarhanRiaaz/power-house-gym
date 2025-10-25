@@ -189,7 +189,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                             )
                           : ListView.builder(
                               itemCount: sortedDates.length,
-                              itemBuilder: (context, dateIndex) {
+                        physics: const ClampingScrollPhysics(),
+
+                        itemBuilder: (context, dateIndex) {
                                 final date = sortedDates[dateIndex];
                                 final recordsForDay = groupedRecords[date]!;
 
