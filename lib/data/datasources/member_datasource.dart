@@ -16,6 +16,7 @@ class MemberDatasource {
 
   // Maps a single Drift Entity to the Domain Model (equivalent to mapSiteEntityToSite)
   Member mapMemberEntityToMember(DriftGen.Member entity) {
+
     print("Adding and returning ${entity.toString()}");
     return Member(
       memberId: entity.memberId,
@@ -78,6 +79,11 @@ class MemberDatasource {
 
   Future<List<Member>> getAll({Gender? genderFilter}) async {
     print("we got query fro getl All ${genderFilter?.name}");
+    _driftClient.members.deleteAll();
+    _driftClient.financialTransactions.deleteAll();
+    _driftClient.attendanceRecords.deleteAll();
+    _driftClient.billExpenses.deleteAll();
+
     final query = _driftClient.select(_driftClient.members);
     if (genderFilter != null) {
       query.where((m) => m.gender.equals(genderFilter.name));

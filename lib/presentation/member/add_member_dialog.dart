@@ -1,4 +1,5 @@
 import 'package:finger_print_flutter/core/style/app_colors.dart';
+import 'package:finger_print_flutter/data/service/biometric/biometric_service_impl.dart';
 import 'package:finger_print_flutter/presentation/components/app_button.dart';
 import 'package:finger_print_flutter/presentation/components/app_date_picker.dart';
 import 'package:finger_print_flutter/presentation/components/app_dialog.dart';
@@ -28,6 +29,7 @@ class MemberFormDialogState extends State<MemberFormDialog> {
   late TextEditingController _fatherNameController;
   late TextEditingController _phoneController;
   late TextEditingController _notesController;
+  final BiometricServiceImpl biometricServiceImpl = BiometricServiceImpl();
 
   @override
   void initState() {
@@ -82,7 +84,7 @@ class MemberFormDialogState extends State<MemberFormDialog> {
       _currentMember.fatherName = _fatherNameController.text;
       _currentMember.phoneNumber = _phoneController.text;
       _currentMember.notes = _notesController.text;
-      _currentMember.fingerprintTemplate = "akjshdjahsbdd";
+      _currentMember.fingerprintTemplate = "";
       _currentMember.lastFeePaymentDate = DateTime.now();
       _currentMember.registrationDate = _tempRegistrationDate;
 
@@ -220,7 +222,7 @@ class MemberFormDialogState extends State<MemberFormDialog> {
                 widget.member == null?   AppButton(
                   label: 'Register Fingerprint',
                   icon: Icons.fingerprint,
-                  onPressed: _showFingerprintDialog,
+                  onPressed:()=> startFingerprintProcess(context),
                   variant: AppButtonVariant.secondary,
                   fullWidth: true, // Make it span the width of the dialog
                 ):SizedBox.shrink(),
@@ -248,4 +250,74 @@ class MemberFormDialogState extends State<MemberFormDialog> {
       ],
     );
   }
+
+  Future<void> startFingerprintProcess(BuildContext context) async {
+    _showFingerprintDialog();
+
+    biometricServiceImpl.toggleScanning(false);
+    // Close the initial info dialog before showing result
+    if (Navigator.canPop(context)) Navigator.pop(context);
+
+    await handleEnrollment(context);
+  }
+
+
+  Future<void> handleEnrollment(BuildContext context) async {
+    final result = await biometricServiceImpl.enrollUser();
+
+    String title = '';
+    String message = '';
+    AppDialogType dialogType = AppDialogType.info;
+    bool isSuccess = false;
+
+    if (result == "ID-1") {
+      title = "No Fingerprint Detected";
+      message = "No fingerprint detected. Please place your finger and try again.";
+      dialogType = AppDialogType.error;
+    } else if (result == "ID-2") {
+      title = "Enrollment Failed";
+      message = "The enrollment process failed. Please restart the process.";
+      dialogType = AppDialogType.warning;
+    } else if (result == "ID-3") {
+      title = "Invalid Fingerprint Data";
+      message = "No fingerprint data was received. Please try again.";
+      dialogType = AppDialogType.error;
+    } else {
+      title = "Scan Successful 🎉";
+      message = "Fingerprint successfully captured. You can now save the user.";
+      dialogType = AppDialogType.success;
+      isSuccess = true;
+    }
+
+    // Use your custom AppDialog here 👇
+    showDialog(
+      context: context,
+      builder: (ctx) => AppDialog(
+        title: title,
+        message: message,
+        type: dialogType,
+        actions: [
+          AppButton(
+            label: isSuccess ? 'Save User' : 'Retry',
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              if (isSuccess) {
+                _currentMember.fingerprintTemplate=result; // result is valid Base64 fingerprint data
+                print("Setting the fingerprint in it! $result");
+                biometricServiceImpl.toggleScanning(true);
+              } else {
+                biometricServiceImpl.toggleScanning(false); // stop or reset process
+              }
+            },
+            variant: isSuccess
+                ? AppButtonVariant.primary
+                : AppButtonVariant.secondary,
+            icon: isSuccess ? Icons.check_circle : Icons.refresh,
+          ),
+        ],
+      ),
+    );
+  }
+
+
 }
