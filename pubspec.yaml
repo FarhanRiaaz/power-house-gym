@@ -81,6 +81,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/FingerprintApp.exe
+    - assets/temp_fmd_data.json
     - assets/members.json
     - assets/images/login_bg.png
     - assets/images/logo.png

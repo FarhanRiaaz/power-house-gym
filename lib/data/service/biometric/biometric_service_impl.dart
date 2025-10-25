@@ -16,6 +16,7 @@ import '../../../domain/entities/models/attendance_record.dart';
 class BiometricServiceImpl implements BiometricService {
   // NOTE: In a real app, these would point to your EXE and shared JSON file.
   static const String _exePath = 'assets/FingerprintApp.exe';
+  static const String _jsonPath = 'assets/temp_fmd_data.json';
   final MemberStore memberStore;
   final AttendanceStore attendanceStore;
 
@@ -75,14 +76,12 @@ class BiometricServiceImpl implements BiometricService {
   Future<String> getTempFile(List<FmdData> fmdList) async {
     print("Finding the tempList ${fmdList.toString()}");
     final fmdJson = jsonEncode({'members': fmdList});
-    final tempFileName = 'temp_fmd_data.json';
-    final tempFilePath =
-        File(_exePath).parent.path + Platform.pathSeparator + tempFileName;
-    final tempFile = File(tempFilePath);
+
+    final tempFile = File(_jsonPath);
     try {
       // Write the large JSON data to the temporary file
       await tempFile.writeAsString(fmdJson);
-      return tempFilePath;
+      return _jsonPath;
     } catch (e) {
       debugPrint("Error writing temp FMD file: $e");
       return "";
@@ -113,7 +112,7 @@ class BiometricServiceImpl implements BiometricService {
   Future<Map<String, dynamic>> _performSingleScanAndMatch() async {
     final processResult = await Process.run(_exePath, [
       'match',
-      "${File(_exePath).parent.path}${Platform.pathSeparator}temp_fmd_data.json",
+      "$_jsonPath",
     ], workingDirectory: File(_exePath).parent.path);
               print("Got results aksjlhdajksd");
 
