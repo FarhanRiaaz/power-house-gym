@@ -3,6 +3,7 @@ import 'package:finger_print_flutter/core/style/app_text_styles.dart';
 import 'package:finger_print_flutter/data/service/biometric/biometric_service_impl.dart';
 import 'package:finger_print_flutter/domain/entities/models/attendance_record.dart';
 import 'package:finger_print_flutter/domain/entities/models/financial_transaction.dart';
+import 'package:finger_print_flutter/domain/entities/models/scan_status.dart';
 import 'package:finger_print_flutter/presentation/attendance/store/attendance_store.dart';
 import 'package:finger_print_flutter/presentation/auth/store/auth_store.dart';
 import 'package:finger_print_flutter/presentation/components/app_button.dart';
@@ -19,21 +20,137 @@ import 'package:finger_print_flutter/presentation/member/store/member_store.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
+import 'package:mobx/mobx.dart';
 
 import '../../di/service_locator.dart';
 import '../components/metric_card.dart';
 import 'dashboard_range_dialog.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
+
+  DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  bool _isDialogVisible = false;
+
+  @override
+  void initState() {
+
+    reaction((_) => biometricServiceImpl.lastScanResult.value, (result) {
+      if (result != null && result['status'] != ScanStatus.noFinger) {
+        _handleScanResult(result);
+      }
+    });
+    super.initState();
+  }
+
+    @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // MobX Reaction: This runs every time lastScanResult changes and is not null.
+    // This is the ideal place to trigger UI changes based on service results.
+    reaction((_) => biometricServiceImpl.lastScanResult.value, (result) {
+      if (result != null && result['status'] != ScanStatus.noFinger) {
+        _handleScanResult(result);
+      }
+    });
+  }
+
+    void _handleScanResult(Map<String, dynamic> result) {
+    if (_isDialogVisible) return; // Prevent multiple popups
+
+    String title = "Scan Result";
+    String message = "Unknown error occurred.";
+    bool isEnrollment = false;
+    Function? onConfirm;
+
+    switch (result['status']) {
+      case ScanStatus.matchSuccess:
+        title = "Welcome!";
+        message = "Attendance marked for ${result['name']}.";
+        break;
+        
+      case ScanStatus.matchFeeOverdue:
+        title = "Fee Overdue";
+        message = "Welcome ${result['name']}! Your fee is overdue. Please pay.";
+        break;
+        
+      case ScanStatus.notRecognized:
+        title = "Unrecognized Fingerprint";
+        message = "Fingerprint not recognized. Register this user?";
+        isEnrollment = true;
+        // The data field contains the FMD template (Base64 string)
+        final fmdBase64 = result['data'] as String;
+        onConfirm = () {
+          // Navigate to enrollment screen using the FMD data
+          debugPrint('Navigating to Enrollment with FMD: $fmdBase64');
+          // Example: Navigator.of(context).push(MaterialPageRoute(...))
+        };
+        break;
+
+      case ScanStatus.errorIntegrity:
+        title = "System Error";
+        message = "Matched ID found by device, but not in database. Check data integrity.";
+        break;
+
+      default:
+        return; // Ignore other non-critical statuses like NO_FINGER
+    }
+
+    _isDialogVisible = true;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              child: const Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() => _isDialogVisible = false);
+              },
+            ),
+            if (isEnrollment)
+              ElevatedButton(
+                child: const Text("Register"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  setState(() => _isDialogVisible = false);
+                  onConfirm!(); // Trigger enrollment navigation
+                },
+              ),
+          ],
+        );
+      },
+    ).then((_) {
+       // Ensure state is reset if dismissed via barrier or back button
+       if (_isDialogVisible) {
+          setState(() => _isDialogVisible = false);
+       }
+    });
+  }
   // Assume stores are accessible via getIt
   final AuthStore authStore = getIt<AuthStore>();
+
   final MemberStore memberStore = getIt<MemberStore>();
+
   final AttendanceStore attendanceStore = getIt<AttendanceStore>();
+
   final FinancialStore financeStore = getIt<FinancialStore>();
+
   final ExpenseStore expenseStore = getIt<ExpenseStore>();
+
   final DashboardStore dashboardStore = getIt<DashboardStore>();
+
   final BiometricServiceImpl biometricServiceImpl = BiometricServiceImpl();
-  DashboardScreen({super.key});
 
   /// Builds a KPI card with responsiveness based on constraints.
   Widget _buildKpiRow({
@@ -74,6 +191,19 @@ class DashboardScreen extends StatelessWidget {
               children: [
                 AppSectionHeader(title: 'Dashboard'),
                 const SizedBox(height: 24),
+
+ Observer(
+              builder: (_) {
+                final status = biometricServiceImpl.lastScanResult.value?['status'] ?? ScanStatus.noFinger;
+                return Text(
+                  biometricServiceImpl.isScanning.value 
+                      ? "Scanning: ${status.split('_').last}" 
+                      : "Scanning Stopped",
+                  style: Theme.of(context).textTheme.headlineMedium,
+                );
+              },
+            ),
+
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.35,
                   child: DateRangeFilterWidget(),
