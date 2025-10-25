@@ -39,7 +39,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   void initState() {
-    attendanceStore.currentReportFilter = authStore.currentUser!.role.toString().contains("female")?Gender.female:Gender.male;
+    HomeScreen.currentReportFilter = authStore.currentUser!.role.toString().contains("female")?Gender.female:Gender.male;
     super.initState();
     _initBiometricTempFile();
   }

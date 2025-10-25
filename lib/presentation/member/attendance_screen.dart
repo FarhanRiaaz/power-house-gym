@@ -63,7 +63,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Map<DateTime, List<AttendanceRecord>> _getRecordsGroupedByDay(
     List<AttendanceRecord> records,
   ) {
-    print("We are also invoked and got  ${records.length}");
     Map<DateTime, List<AttendanceRecord>> grouped = {};
     for (var record in records) {
       final date = DateTime(

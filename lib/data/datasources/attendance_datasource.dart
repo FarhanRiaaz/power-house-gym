@@ -30,12 +30,23 @@ class AttendanceRecordDatasource {
     return mapEntityToModel(inserted);
   }
 
-  Future<List<AttendanceRecord>> getAll() async {
-    final entities = await _driftClient
-        .select(_driftClient.attendanceRecords)
-        .get();
-    return entities.map(mapEntityToModel).toList();
-  }
+ Future<List<AttendanceRecord>> getAll(Gender gender) async {
+  final query = _driftClient.select(_driftClient.attendanceRecords).join([
+    innerJoin(
+      _driftClient.members,
+      _driftClient.members.memberId.equalsExp(_driftClient.attendanceRecords.memberId),
+    ),
+  ])
+  ..where(_driftClient.members.gender.equals(gender.name.toLowerCase()));
+
+  final rows = await query.get();
+
+  return rows.map((row) {
+    final attendance = row.readTable(_driftClient.attendanceRecords);
+    return mapEntityToModel(attendance);
+  }).toList();
+}
+
 
   Future<List<AttendanceRecord>> getByMember(int memberId) async {
     final query = _driftClient.select(_driftClient.attendanceRecords)
@@ -51,30 +62,35 @@ class AttendanceRecordDatasource {
   }
 
   /// Retrieves all check-in records for a specific date, with optional gender filtering.
-  Future<List<AttendanceRecord>> getDailyRecords(
-    DateTime date, {
-    Gender? genderFilter,
-  }) async {
-    // Normalize the start and end of the target day
-    final startOfDay = DateTime(date.year, date.month, date.day);
-    final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
+Future<List<AttendanceRecord>> getDailyRecords(
+  DateTime date, {
+  Gender? genderFilter,
+}) async {
+  final startOfDay = DateTime(date.year, date.month, date.day);
+  final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
 
-    final query = _driftClient.select(_driftClient.attendanceRecords)
-      ..where(
-        (t) => t.checkInTime.isBetween(
-          Variable.withDateTime(startOfDay),
-          Variable.withDateTime(endOfDay),
-        ),
-      );
+  final query = _driftClient.select(_driftClient.attendanceRecords).join([
+    innerJoin(
+      _driftClient.members,
+      _driftClient.members.memberId.equalsExp(_driftClient.attendanceRecords.memberId),
+    ),
+  ])
+  ..where(_driftClient.attendanceRecords.checkInTime.isBetween(
+    Variable.withDateTime(startOfDay),
+    Variable.withDateTime(endOfDay),
+  ));
 
-    // Apply gender filtering if provided (assuming the table has a linked member ID
-    // and we'd join to the Members table if needed, but for simplicity here,
-    // we'll assume a direct filter if a future database change adds it,
-    // or focus purely on time-based filtering for now).
-
-    final entities = await query.get();
-    return entities.map(mapEntityToModel).toList();
+  if (genderFilter != null) {
+    query.where(_driftClient.members.gender.equals(genderFilter.name.toLowerCase()));
   }
+
+  final rows = await query.get();
+
+  return rows.map((row) {
+    final attendance = row.readTable(_driftClient.attendanceRecords);
+    return mapEntityToModel(attendance);
+  }).toList();
+}
 
 
   /// Watches all check-in records for the current day, with optional gender filtering,

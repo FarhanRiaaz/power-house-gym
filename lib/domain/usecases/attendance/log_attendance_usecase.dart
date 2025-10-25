@@ -19,14 +19,14 @@ class LogAttendanceUseCase extends UseCase<AttendanceRecord, AttendanceRecord> {
   }
 }
 
-class GetAttendanceRecordUseCase extends UseCase<List<AttendanceRecord>, void> {
+class GetAttendanceRecordUseCase extends UseCase<List<AttendanceRecord>, Gender> {
   final AttendanceRepository _attendanceRepository;
 
   GetAttendanceRecordUseCase(this._attendanceRepository);
 
   @override
-  Future<List<AttendanceRecord>> call({required void params}) {
-    return _attendanceRepository.getAttendanceHistory();
+  Future<List<AttendanceRecord>> call({required Gender params}) {
+    return _attendanceRepository.getAttendanceHistory(params);
   }
 }
 

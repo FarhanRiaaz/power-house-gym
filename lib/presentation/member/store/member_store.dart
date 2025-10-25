@@ -57,6 +57,9 @@ abstract class _MemberStore with Store {
   Member? findMember = Member();
 
   @observable
+  Set<int?> genderMap = <int>{};
+
+  @observable
   Member? selectedMember = Member(); // Used for editing or displaying details
 
   @observable
@@ -92,7 +95,11 @@ abstract class _MemberStore with Store {
 
       runInAction(() {
         memberList = ObservableList.of(records);
+        
       });
+
+  genderMap = memberList.map((m) => m.memberId).toSet();
+ 
     } catch (e) {
       print("Error generating daily report: $e");
       memberList = ObservableList();

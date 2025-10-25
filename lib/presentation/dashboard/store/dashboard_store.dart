@@ -104,7 +104,7 @@ abstract class _DashboardStore with Store {
       return filteredExpenses as List<T>;
     } else if (table is AttendanceRecord) {
       final filteredRecords = await _getAttendanceRecordUseCase.call(
-        params: null,
+        params: HomeScreen.currentReportFilter,
       );
       filteredRecords.where((a) {
         if (range == null) return true;

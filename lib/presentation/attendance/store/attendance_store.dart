@@ -1,6 +1,7 @@
 import 'package:finger_print_flutter/core/enum.dart';
 import 'package:finger_print_flutter/data/service/report/export/export_data_service_impl.dart';
 import 'package:finger_print_flutter/domain/usecases/export/import_export_usecase.dart';
+import 'package:finger_print_flutter/presentation/dashboard/home.dart';
 import 'package:mobx/mobx.dart';
 
 import '../../../domain/entities/models/attendance_record.dart';
@@ -137,7 +138,7 @@ abstract class _AttendanceStore with Store {
   Future<void> getSingleAttendanceList(int memberId) async {
     isLoadingReport = true;
     try {
-      final records = await _getAttendanceRecordUseCase.call(params: memberId);
+      final records = await _getAttendanceRecordUseCase.call(params: HomeScreen.currentReportFilter);
       runInAction(() {
         singleAttendanceList = ObservableList.of(records);
       });

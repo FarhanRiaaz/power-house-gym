@@ -16,8 +16,8 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
   }
 
   @override
-  Future<List<AttendanceRecord>> getAttendanceHistory() {
-    return _attendanceDatasource.getAll();
+  Future<List<AttendanceRecord>> getAttendanceHistory(Gender gender) {
+    return _attendanceDatasource.getAll(gender);
   }
 
   @override
