@@ -2,6 +2,7 @@ import 'dart:typed_data' as typed_data;
 
 import 'package:finger_print_flutter/core/enum.dart';
 import 'package:finger_print_flutter/data/service/report/export/export_data_service_impl.dart';
+import 'package:finger_print_flutter/domain/entities/models/fmd_model.dart';
 import 'package:finger_print_flutter/domain/usecases/export/import_export_usecase.dart';
 import 'package:finger_print_flutter/domain/usecases/member/member_usecase.dart';
 import 'package:flutter/foundation.dart';
@@ -20,7 +21,7 @@ abstract class _MemberStore with Store {
   final InsertMemberUseCase _insertMemberUseCase;
   final DeleteMemberUseCase _deleteMemberUseCase;
   final FindMemberByIdUseCase _findMemberByIdUseCase;
-  final FindMemberByFingerprintUseCase _findByFingerprintUseCase;
+  final GetAllStoredFMDS _getAllStoredFMDS;
   final ImportDataUseCase _importDataUseCase;
 
   _MemberStore(
@@ -29,13 +30,13 @@ abstract class _MemberStore with Store {
     this._insertMemberUseCase,
     this._deleteMemberUseCase,
     this._findMemberByIdUseCase,
-    this._findByFingerprintUseCase,
-      this._importDataUseCase
+    this._getAllStoredFMDS,
+    this._importDataUseCase,
   ) {
-       print("Doing this hereXX");
+    print("Doing this hereXX");
 
-   getAllMembers(Gender.male);
-   print("Doing this here");
+    getAllMembers(Gender.male);
+    print("Doing this here");
   }
 
   // --- Store State Variables ---
@@ -45,10 +46,16 @@ abstract class _MemberStore with Store {
   ObservableList<Member> memberList = ObservableList();
 
   @observable
+  ObservableList<FmdData> storedFMDS = ObservableList();
+
+  @observable
   Stream<List<Member>> memberListStream = Stream.value(const []);
 
   @observable
   Member? newMember = Member(); // Used for registration forms
+
+  @observable
+  Member? findMember = Member();
 
   @observable
   Member? selectedMember = Member(); // Used for editing or displaying details
@@ -80,22 +87,20 @@ abstract class _MemberStore with Store {
 
   /// Fetches or watches all members based on the current filter.
   /// We assume the UseCase returns a Stream for reactive updates.
-  
+
   @action
   Future<void> getAllMembers(Gender gender) async {
     print("We have been called $gender");
     isLoadingMembers = true;
     try {
       final records = await _getAllMembersUseCase.call(params: gender);
-    print("We have been called and size is  ${records.length}");
+      print("We have been called and size is  ${records.length}");
 
       runInAction(() {
         memberList = ObservableList.of(records);
       });
 
-    print("We have been called and size isXX  ${memberList.length}");
-
-
+      print("We have been called and size isXX  ${memberList.length}");
     } catch (e) {
       print("Error generating daily report: $e");
       memberList = ObservableList();
@@ -105,52 +110,74 @@ abstract class _MemberStore with Store {
   }
 
   @action
-  Future<void> watchMembers({Gender? genderFilter}) async{
-    currentGenderFilter = genderFilter;
-  //
-  //   // Set a custom loading flag before starting the stream process
-  //   isLoadingMembers = true;
-  //   print("We are here to get the members");
-  // //   // The use case returns a Future<Stream<List<Member>>>
-  //  await _getAllMembersUseCase
-  //       .call(params: currentGenderFilter)
-  //       .then((stream) {
-  //         memberListStream = stream;
-  //
-  //         // We subscribe to the stream manually to populate the observable list
-  //         // for easier UI consumption, and manage the loading state.
-  //         memberListStream.listen((list) {
-  //           runInAction(() {
-  //
-  //                 print("We are here to get the membersList ${list.length}");
-  //
-  //
-  //             memberList = ObservableList.of(list);
-  //             isLoadingMembers =
-  //                 false; // Loading finishes once the first list arrives
-  //           });
-  //         });
-  //       })
-  //       .catchError((error) {
-  //         runInAction(() {
-  //           print("Error setting up member stream: $error");
-  //           isLoadingMembers = false;
-  //         });
-  //         // Do not re-throw here, let the stream handle its own errors or recovery
-  //       });
+  Future<Member?> findMemberById(int memberId) async {
+    isLoadingMembers = true;
+    try {
+      final member = await _findMemberByIdUseCase.call(params: memberId);
+      runInAction(() {
+        findMember = member;
+      });
+    } catch (e) {
+      print("Error generating daily report: $e");
+      findMember = Member();
+    } finally {
+      isLoadingMembers = false;
+    }
+    return findMember;
   }
+
+  @action
+  Future<void> watchMembers({Gender? genderFilter}) async {
+    currentGenderFilter = genderFilter;
+    //
+    //   // Set a custom loading flag before starting the stream process
+    //   isLoadingMembers = true;
+    //   print("We are here to get the members");
+    // //   // The use case returns a Future<Stream<List<Member>>>
+    //  await _getAllMembersUseCase
+    //       .call(params: currentGenderFilter)
+    //       .then((stream) {
+    //         memberListStream = stream;
+    //
+    //         // We subscribe to the stream manually to populate the observable list
+    //         // for easier UI consumption, and manage the loading state.
+    //         memberListStream.listen((list) {
+    //           runInAction(() {
+    //
+    //                 print("We are here to get the membersList ${list.length}");
+    //
+    //
+    //             memberList = ObservableList.of(list);
+    //             isLoadingMembers =
+    //                 false; // Loading finishes once the first list arrives
+    //           });
+    //         });
+    //       })
+    //       .catchError((error) {
+    //         runInAction(() {
+    //           print("Error setting up member stream: $error");
+    //           isLoadingMembers = false;
+    //         });
+    //         // Do not re-throw here, let the stream handle its own errors or recovery
+    //       });
+  }
+
   @action
   Future<int> importDataToDatabase(List<List<String>> csvData) async {
-    return await _importDataUseCase.call(params: ImportDataParams(csvData: csvData,type: CsvImportType.member));
+    return await _importDataUseCase.call(
+      params: ImportDataParams(csvData: csvData, type: CsvImportType.member),
+    );
   }
 
   /// Looks up a member for attendance check-in.
   @action
-  Future<Member?> findMemberByFingerprint(String template) async {
+  Future<List<FmdData>?> getAllStoredFMDID(Gender gender) async {
     try {
-      final member = await _findByFingerprintUseCase.call(params: template);
-      selectedMember = member;
-      return member;
+      final storedFMS = await _getAllStoredFMDS.call(params: gender);
+      runInAction(() {
+        storedFMDS = ObservableList.of(storedFMS);
+      });
+      return storedFMS;
     } catch (e) {
       print("Fingerprint lookup failed: $e");
       selectedMember = null;
@@ -175,14 +202,12 @@ abstract class _MemberStore with Store {
             DateTime.now(), // Assume first fee paid on registration
       );
 
-      final insertedMember = await _insertMemberUseCase.call(
-        params: member!,
-      );
+      final insertedMember = await _insertMemberUseCase.call(params: member!);
 
       // Update UI list and clear the form model
       newMember = Member(); // Clear form
       selectedMember = insertedMember;
-      await getAllMembers(currentGenderFilter??Gender.male); // Refresh list
+      await getAllMembers(currentGenderFilter ?? Gender.male); // Refresh list
       return insertedMember;
     } catch (error) {
       print("Error registering member: $error");
@@ -196,12 +221,15 @@ abstract class _MemberStore with Store {
     if (member == null || member!.memberId == null) return;
 
     try {
-      final memberToUpdate = member!.copyWith(notes: "Updated",lastFeePaymentDate: DateTime.now());
+      final memberToUpdate = member!.copyWith(
+        notes: "Updated",
+        lastFeePaymentDate: DateTime.now(),
+      );
 
       await _updateMemberUseCase.call(params: memberToUpdate);
 
       // Refresh the list to reflect changes
-      getAllMembers(currentGenderFilter??Gender.male);
+      getAllMembers(currentGenderFilter ?? Gender.male);
       print("Member ${member!.memberId} updated.");
     } catch (error) {
       print("Error updating member: $error");

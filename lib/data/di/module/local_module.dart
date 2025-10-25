@@ -39,17 +39,15 @@ mixin LocalModule {
     injector.registerLazySingleton<AuthService>(() => AuthServiceImpl());
 
     injector.registerLazySingleton<DataUtilityService>(() => DataUtilityServiceImpl(injector<MemberRepository>(),injector<FinancialRepository>(),injector<ExpenseRepository>(),injector<AttendanceRepository>()));
-
-    injector.registerLazySingleton<BiometricService>(() => BiometricServiceImpl(injector<MemberRepository>()));
-
+    //injector.registerLazySingleton<BiometricService>(() => BiometricServiceImpl());
 
     injector.registerFactory(() => LoginUseCase(injector<AuthService>()));
     injector.registerFactory(() => LogoutUseCase(injector<AuthService>()));
     injector.registerFactory(() => ChangePasswordUseCase(injector<AuthService>()));
 
     // --- Biometric Use Cases ---
-    injector.registerFactory(() => EnrollFingerprintUseCase(injector<BiometricService>()));
-    injector.registerFactory(() => VerifyFingerprintUseCase(injector<BiometricService>()));
+   // injector.registerFactory(() => EnrollFingerprintUseCase(injector<BiometricService>()));
+    //injector.registerFactory(() => VerifyFingerprintUseCase(injector<BiometricService>()));
 
     // --- Data Utility Use Cases ---
     injector.registerFactory(() => ExportDataUseCase(injector<DataUtilityService>()));

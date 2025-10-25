@@ -30,7 +30,7 @@ class AppToggle extends StatelessWidget {
           onChanged: onChanged,
           activeThumbColor: Colors.black,
           activeTrackColor: activeColor,
-          inactiveThumbColor: AppColors.surface,
+          inactiveThumbColor: AppColors.danger,
           inactiveTrackColor: AppColors.textSecondary.withOpacity(0.4),
         ),
       ],

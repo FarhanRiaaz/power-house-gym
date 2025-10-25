@@ -98,6 +98,7 @@ abstract class _AttendanceStore with Store {
         lastCheckIn = record;
       });
       print("Member $memberId successfully checked in at ${record.checkInTime}");
+      await generateDailyReport();
     } catch (e) {
       print("Error logging attendance: $e");
       lastCheckIn = null;

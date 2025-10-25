@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:finger_print_flutter/presentation/auth/route_manager.dart';
 import 'package:finger_print_flutter/presentation/auth/store/auth_store.dart';
 import 'package:finger_print_flutter/presentation/components/app_button.dart';
@@ -17,6 +15,75 @@ class LoginScreen extends StatelessWidget {
   final store = getIt<AuthStore>();
 
   LoginScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: BackgroundWrapper(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    height: 200,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white),
+                      ),
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        fit: BoxFit.fitWidth,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    'Power House',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.headlineLarge?.copyWith(fontSize: 42),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'The Ultimate Fitness Center',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 30),
+                  AppTextField(
+                    label: 'Username',
+                    controller: usernameController,
+                    prefixIcon: Icons.person,
+                  ),
+                  const SizedBox(height: 24),
+                  AppTextField(
+                    label: 'Password',
+                    controller: passwordController,
+                    prefixIcon: Icons.lock,
+                    obscureText: true,
+                  ),
+                  const SizedBox(height: 36),
+                  Observer(
+                    builder: (_) => AppButton(
+                      label: store.isLoading ? 'Logging in...' : 'Login',
+                      onPressed: () {
+                        _handleLogin(context, store);
+                      },
+                      icon: Icons.login,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   void _handleLogin(BuildContext context, AuthStore store) async {
     final success = await store.login(
@@ -42,72 +109,5 @@ class LoginScreen extends StatelessWidget {
         ),
       );
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    
-
-    return Scaffold(
-          backgroundColor: Colors.transparent,
-      body: BackgroundWrapper(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    height: 200,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white,
-                        ),
-                      ),
-                      child: Image.asset(
-                                'assets/images/logo.png',
-                                fit: BoxFit.fitWidth,
-                              ),
-                    ),
-                  ),
-                  Text('Power House', style: Theme.of(context).textTheme.headlineLarge?.copyWith(fontSize: 42)),
-                  const SizedBox(height: 16),
-                  Text('The Ultimate Fitness Center', style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 30),
-                  AppTextField(
-                    label: 'Username',
-                    controller: usernameController,
-                    prefixIcon: Icons.person,
-                  ),
-                  const SizedBox(height: 24),
-                  AppTextField(
-                    label: 'Password',
-                    controller: passwordController,
-                    prefixIcon: Icons.lock,
-                    obscureText: true,
-                  ),
-                  const SizedBox(height: 36),
-                  Observer(
-                    builder: (_) => AppButton(
-                      label: store.isLoading ? 'Logging in...' : 'Login',
-                       onPressed: () {
-           // if (!store.isLoading) 
-            _handleLogin(context, store);
-          },
-                      icon: Icons.login
-          
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }

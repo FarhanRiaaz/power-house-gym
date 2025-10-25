@@ -2,6 +2,7 @@ import 'package:finger_print_flutter/core/base_usecase.dart';
 import 'package:finger_print_flutter/data/service/auth/auth_service.dart';
 import 'package:finger_print_flutter/data/service/biometric/biometric_service.dart';
 import 'package:finger_print_flutter/domain/entities/models/admin_user.dart';
+import 'package:finger_print_flutter/domain/entities/models/fmd_model.dart';
 
 class LoginParams {
   final String username;
@@ -78,12 +79,12 @@ class EnrollFingerprintUseCase extends UseCase<String?, void> {
 }
 
 /// Use Case for verifying an existing user via fingerprint match.
-class VerifyFingerprintUseCase extends UseCase<String?, void> {
+class VerifyFingerprintUseCase extends UseCase<void, void> {
   final BiometricService _biometricService;
   VerifyFingerprintUseCase(this._biometricService);
 
   @override
-  Future<String?> call({required void params}) {
+  Future<void> call({required void params}) {
     return _biometricService.verifyUser();
   }
 }

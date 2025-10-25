@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:finger_print_flutter/data/service/biometric/biometric_service.dart';
 import 'package:finger_print_flutter/domain/usecases/attendance/log_attendance_usecase.dart';
 import 'package:finger_print_flutter/domain/usecases/auth/auth_usecase.dart';
 import 'package:finger_print_flutter/domain/usecases/bill/bill_usecase.dart';
@@ -26,7 +27,7 @@ mixin StoreModule {
         getIt<InsertMemberUseCase>(),
         getIt<DeleteMemberUseCase>(),
         getIt<FindMemberByIdUseCase>(),
-        getIt<FindMemberByFingerprintUseCase>(),
+        getIt<GetAllStoredFMDS>(),
         getIt<ImportDataUseCase>(),
         // getIt<EnrollFingerprintUseCase>(), // New Biometric dependency
       ),
@@ -41,6 +42,7 @@ mixin StoreModule {
         getIt<GetTransactionsByDateRangeUseCase>(),
 
         getIt<GetAllMembersUseCase>(),
+        //getIt<BiometricService>(),
       ),
     );
 

@@ -20,7 +20,7 @@ mixin UseCaseModule {
     getIt.registerFactory(() => UpdateMemberUseCase(getIt<MemberRepository>()));
     getIt.registerFactory(() => DeleteMemberUseCase(getIt<MemberRepository>()));
     getIt.registerFactory(() => FindMemberByIdUseCase(getIt<MemberRepository>()));
-    getIt.registerFactory(() => FindMemberByFingerprintUseCase(getIt<MemberRepository>()));
+    getIt.registerFactory(() => GetAllStoredFMDS(getIt<MemberRepository>()));
 
     // Attendance Use Cases (depend on AttendanceRepository)
     getIt.registerFactory(() => LogAttendanceUseCase(getIt<AttendanceRepository>()));

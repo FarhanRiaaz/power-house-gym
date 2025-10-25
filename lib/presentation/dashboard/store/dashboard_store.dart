@@ -1,4 +1,5 @@
 import 'package:finger_print_flutter/core/enum.dart';
+import 'package:finger_print_flutter/data/service/biometric/biometric_service.dart';
 import 'package:finger_print_flutter/domain/entities/models/attendance_record.dart';
 import 'package:finger_print_flutter/domain/entities/models/bill_payment.dart';
 import 'package:finger_print_flutter/domain/entities/models/dashboard.dart';

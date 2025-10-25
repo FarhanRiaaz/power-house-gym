@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 /// Defines the contract for interacting with the external biometric hardware
 /// (DigitalPersona 5100 via C# wrapper).
 abstract class BiometricService {
@@ -15,5 +13,5 @@ abstract class BiometricService {
   /// 3. Executing the C# app's 'match' command.
   ///
   /// Returns the `memberId` of the matched user, or null if no match is found.
-  Future<String?> verifyUser();
+  Future<void> verifyUser();
 }

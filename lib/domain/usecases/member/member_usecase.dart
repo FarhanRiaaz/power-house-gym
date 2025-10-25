@@ -1,5 +1,6 @@
 import 'package:finger_print_flutter/core/base_usecase.dart';
 import 'package:finger_print_flutter/data/service/report/export/export_data_service_impl.dart';
+import 'package:finger_print_flutter/domain/entities/models/fmd_model.dart';
 import 'package:finger_print_flutter/domain/usecases/export/import_export_usecase.dart';
 import 'dart:typed_data';
 import '../../../core/enum.dart';
@@ -92,16 +93,16 @@ class FindMemberByIdUseCase extends UseCase<Member?, int> {
 ///
 /// Type: Member?
 /// Params: String (The encoded fingerprint template string)
-class FindMemberByFingerprintUseCase extends UseCase<Member?, String> {
+class GetAllStoredFMDS extends UseCase<List<FmdData>?, Gender> {
   final MemberRepository _memberRepository;
 
-  FindMemberByFingerprintUseCase(this._memberRepository);
+  GetAllStoredFMDS(this._memberRepository);
 
   @override
-  Future<Member?> call({required String params}) {
+  Future<List<FmdData>> call({required Gender params}) {
     // IMPORTANT: The repository layer will be responsible for converting
     // this String representation of the template back to Uint8List for the DB lookup.
-    return _memberRepository.findMemberByFingerprint(params);
+    return _memberRepository.getAllFmds(genderFilter: params);
   }
 }
 

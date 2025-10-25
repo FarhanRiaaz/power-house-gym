@@ -5,34 +5,35 @@ import 'package:finger_print_flutter/core/style/app_colors.dart';
 import 'package:finger_print_flutter/core/style/app_text_styles.dart';
 import 'package:finger_print_flutter/core/style/app_theme.dart';
 import 'package:finger_print_flutter/enrollment_screen.dart';
-import 'package:finger_print_flutter/presentation/auth/login_screen.dart';
 import 'package:finger_print_flutter/presentation/auth/route_manager.dart';
 import 'package:finger_print_flutter/presentation/dashboard/dashboard_screen.dart';
+import 'package:finger_print_flutter/presentation/dashboard/home.dart';
 import 'package:finger_print_flutter/presentation/expense/expense_screen.dart';
 import 'package:finger_print_flutter/presentation/financial/financial_transaction_screen.dart';
 import 'package:finger_print_flutter/presentation/member/attendance_screen.dart';
 import 'package:finger_print_flutter/presentation/member/member_screen.dart';
 import 'package:flutter/material.dart';
-
+import 'package:wakelock_plus/wakelock_plus.dart';
 import 'di/service_locator.dart';
 
 Future<void> main() async {
   return runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
-
+    WakelockPlus.enable();
     await ServiceLocator.configureDependencies();
     runApp(FingerprintApp());
   }, (error, stackTrace) {});
 }
 
 class FingerprintApp extends StatefulWidget {
-  FingerprintApp({super.key});
+  const FingerprintApp({super.key});
 
   @override
   State<FingerprintApp> createState() => _FingerprintAppState();
 }
 
 class _FingerprintAppState extends State<FingerprintApp> {
+
   int _selectedIndex = 0;
 
   // 2. A list of all your screen widgets
@@ -52,8 +53,8 @@ class _FingerprintAppState extends State<FingerprintApp> {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,
-      // initialRoute: RouteManager.dashboard,
-      // onGenerateRoute: RouteManager.generateRoute,
+       // initialRoute: RouteManager.dashboard,
+       // onGenerateRoute: RouteManager.generateRoute,
       home: Scaffold(
         body: Row(
           children: <Widget>[
@@ -151,10 +152,14 @@ class _FingerprintAppState extends State<FingerprintApp> {
               leading: Padding(
                 padding: const EdgeInsets.only(top: 8.0, bottom: 20.0),
                 child: SizedBox(
-                    height: 48,
-                    width: 48,
-                    child: Icon(Icons.fitness_center_outlined,size: 48,color: AppColors.textPrimary,)),
-
+                  height: 48,
+                  width: 48,
+                  child: Icon(
+                    Icons.fitness_center_outlined,
+                    size: 48,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
               ),
             ),
 
@@ -467,7 +472,6 @@ class _FingerprintHomeState extends State<FingerprintHome> {
     );
   }
 }
-
 
 // Login screen login check with actual credentials
 // Dashboard all access to super admin and limited for other admins

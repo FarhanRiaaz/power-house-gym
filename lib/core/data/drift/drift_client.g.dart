@@ -75,21 +75,15 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       ).withConverter<Gender>($MembersTable.$convertergender);
-  static const VerificationMeta _membershipTypeMeta = const VerificationMeta(
-    'membershipType',
-  );
   @override
-  late final GeneratedColumn<String> membershipType = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<MemberShipType, String>
+  membershipType = GeneratedColumn<String>(
     'membership_type',
     aliasedName,
     false,
-    additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 1,
-      maxTextLength: 50,
-    ),
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-  );
+  ).withConverter<MemberShipType>($MembersTable.$convertermembershipType);
   static const VerificationMeta _registrationDateMeta = const VerificationMeta(
     'registrationDate',
   );
@@ -195,17 +189,6 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
     } else if (isInserting) {
       context.missing(_fatherNameMeta);
     }
-    if (data.containsKey('membership_type')) {
-      context.handle(
-        _membershipTypeMeta,
-        membershipType.isAcceptableOrUnknown(
-          data['membership_type']!,
-          _membershipTypeMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_membershipTypeMeta);
-    }
     if (data.containsKey('registration_date')) {
       context.handle(
         _registrationDateMeta,
@@ -276,10 +259,12 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
           data['${effectivePrefix}gender'],
         )!,
       ),
-      membershipType: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}membership_type'],
-      )!,
+      membershipType: $MembersTable.$convertermembershipType.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}membership_type'],
+        )!,
+      ),
       registrationDate: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}registration_date'],
@@ -306,6 +291,10 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
 
   static JsonTypeConverter2<Gender, String, String> $convertergender =
       const EnumNameConverter<Gender>(Gender.values);
+  static JsonTypeConverter2<MemberShipType, String, String>
+  $convertermembershipType = const EnumNameConverter<MemberShipType>(
+    MemberShipType.values,
+  );
 }
 
 class Member extends DataClass implements Insertable<Member> {
@@ -314,7 +303,7 @@ class Member extends DataClass implements Insertable<Member> {
   final String phoneNumber;
   final String fatherName;
   final Gender gender;
-  final String membershipType;
+  final MemberShipType membershipType;
   final DateTime registrationDate;
   final DateTime lastFeePaymentDate;
   final String fingerprintTemplate;
@@ -343,7 +332,11 @@ class Member extends DataClass implements Insertable<Member> {
         $MembersTable.$convertergender.toSql(gender),
       );
     }
-    map['membership_type'] = Variable<String>(membershipType);
+    {
+      map['membership_type'] = Variable<String>(
+        $MembersTable.$convertermembershipType.toSql(membershipType),
+      );
+    }
     map['registration_date'] = Variable<DateTime>(registrationDate);
     map['last_fee_payment_date'] = Variable<DateTime>(lastFeePaymentDate);
     map['fingerprint_template'] = Variable<String>(fingerprintTemplate);
@@ -383,7 +376,9 @@ class Member extends DataClass implements Insertable<Member> {
       gender: $MembersTable.$convertergender.fromJson(
         serializer.fromJson<String>(json['gender']),
       ),
-      membershipType: serializer.fromJson<String>(json['membershipType']),
+      membershipType: $MembersTable.$convertermembershipType.fromJson(
+        serializer.fromJson<String>(json['membershipType']),
+      ),
       registrationDate: serializer.fromJson<DateTime>(json['registrationDate']),
       lastFeePaymentDate: serializer.fromJson<DateTime>(
         json['lastFeePaymentDate'],
@@ -405,7 +400,9 @@ class Member extends DataClass implements Insertable<Member> {
       'gender': serializer.toJson<String>(
         $MembersTable.$convertergender.toJson(gender),
       ),
-      'membershipType': serializer.toJson<String>(membershipType),
+      'membershipType': serializer.toJson<String>(
+        $MembersTable.$convertermembershipType.toJson(membershipType),
+      ),
       'registrationDate': serializer.toJson<DateTime>(registrationDate),
       'lastFeePaymentDate': serializer.toJson<DateTime>(lastFeePaymentDate),
       'fingerprintTemplate': serializer.toJson<String>(fingerprintTemplate),
@@ -419,7 +416,7 @@ class Member extends DataClass implements Insertable<Member> {
     String? phoneNumber,
     String? fatherName,
     Gender? gender,
-    String? membershipType,
+    MemberShipType? membershipType,
     DateTime? registrationDate,
     DateTime? lastFeePaymentDate,
     String? fingerprintTemplate,
@@ -515,7 +512,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
   final Value<String> phoneNumber;
   final Value<String> fatherName;
   final Value<Gender> gender;
-  final Value<String> membershipType;
+  final Value<MemberShipType> membershipType;
   final Value<DateTime> registrationDate;
   final Value<DateTime> lastFeePaymentDate;
   final Value<String> fingerprintTemplate;
@@ -538,7 +535,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
     required String phoneNumber,
     required String fatherName,
     required Gender gender,
-    required String membershipType,
+    required MemberShipType membershipType,
     required DateTime registrationDate,
     required DateTime lastFeePaymentDate,
     required String fingerprintTemplate,
@@ -585,7 +582,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
     Value<String>? phoneNumber,
     Value<String>? fatherName,
     Value<Gender>? gender,
-    Value<String>? membershipType,
+    Value<MemberShipType>? membershipType,
     Value<DateTime>? registrationDate,
     Value<DateTime>? lastFeePaymentDate,
     Value<String>? fingerprintTemplate,
@@ -626,7 +623,9 @@ class MembersCompanion extends UpdateCompanion<Member> {
       );
     }
     if (membershipType.present) {
-      map['membership_type'] = Variable<String>(membershipType.value);
+      map['membership_type'] = Variable<String>(
+        $MembersTable.$convertermembershipType.toSql(membershipType.value),
+      );
     }
     if (registrationDate.present) {
       map['registration_date'] = Variable<DateTime>(registrationDate.value);
@@ -1746,7 +1745,7 @@ typedef $$MembersTableCreateCompanionBuilder =
       required String phoneNumber,
       required String fatherName,
       required Gender gender,
-      required String membershipType,
+      required MemberShipType membershipType,
       required DateTime registrationDate,
       required DateTime lastFeePaymentDate,
       required String fingerprintTemplate,
@@ -1759,7 +1758,7 @@ typedef $$MembersTableUpdateCompanionBuilder =
       Value<String> phoneNumber,
       Value<String> fatherName,
       Value<Gender> gender,
-      Value<String> membershipType,
+      Value<MemberShipType> membershipType,
       Value<DateTime> registrationDate,
       Value<DateTime> lastFeePaymentDate,
       Value<String> fingerprintTemplate,
@@ -1866,9 +1865,10 @@ class $$MembersTableFilterComposer
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
 
-  ColumnFilters<String> get membershipType => $composableBuilder(
+  ColumnWithTypeConverterFilters<MemberShipType, MemberShipType, String>
+  get membershipType => $composableBuilder(
     column: $table.membershipType,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   ColumnFilters<DateTime> get registrationDate => $composableBuilder(
@@ -2031,10 +2031,11 @@ class $$MembersTableAnnotationComposer
   GeneratedColumnWithTypeConverter<Gender, String> get gender =>
       $composableBuilder(column: $table.gender, builder: (column) => column);
 
-  GeneratedColumn<String> get membershipType => $composableBuilder(
-    column: $table.membershipType,
-    builder: (column) => column,
-  );
+  GeneratedColumnWithTypeConverter<MemberShipType, String> get membershipType =>
+      $composableBuilder(
+        column: $table.membershipType,
+        builder: (column) => column,
+      );
 
   GeneratedColumn<DateTime> get registrationDate => $composableBuilder(
     column: $table.registrationDate,
@@ -2143,7 +2144,7 @@ class $$MembersTableTableManager
                 Value<String> phoneNumber = const Value.absent(),
                 Value<String> fatherName = const Value.absent(),
                 Value<Gender> gender = const Value.absent(),
-                Value<String> membershipType = const Value.absent(),
+                Value<MemberShipType> membershipType = const Value.absent(),
                 Value<DateTime> registrationDate = const Value.absent(),
                 Value<DateTime> lastFeePaymentDate = const Value.absent(),
                 Value<String> fingerprintTemplate = const Value.absent(),
@@ -2167,7 +2168,7 @@ class $$MembersTableTableManager
                 required String phoneNumber,
                 required String fatherName,
                 required Gender gender,
-                required String membershipType,
+                required MemberShipType membershipType,
                 required DateTime registrationDate,
                 required DateTime lastFeePaymentDate,
                 required String fingerprintTemplate,
