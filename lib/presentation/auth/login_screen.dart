@@ -4,6 +4,8 @@ import 'package:finger_print_flutter/presentation/components/app_button.dart';
 import 'package:finger_print_flutter/presentation/components/app_dialog.dart';
 import 'package:finger_print_flutter/presentation/components/app_text_field.dart';
 import 'package:finger_print_flutter/presentation/components/background_wrapper.dart';
+import 'package:finger_print_flutter/presentation/dashboard/dashboard_screen.dart';
+import 'package:finger_print_flutter/presentation/dashboard/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
@@ -92,17 +94,21 @@ class LoginScreen extends StatelessWidget {
     );
 
     if (success) {
-      Navigator.pushReplacementNamed(context, RouteManager.dashboard);
+      print("Success");
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
     } else {
       showDialog(
         context: context,
-        builder: (_) => AppDialog(
+        builder: (dialogContext) => AppDialog(
           title: 'Login Failed',
           message: store.loginError,
           type: AppDialogType.error,
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('OK'),
             ),
           ],

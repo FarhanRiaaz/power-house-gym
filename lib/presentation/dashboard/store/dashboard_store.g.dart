@@ -61,24 +61,6 @@ mixin _$DashboardStore on _DashboardStore, Store {
     });
   }
 
-  late final _$genderAtom = Atom(
-    name: '_DashboardStore.gender',
-    context: context,
-  );
-
-  @override
-  Gender get gender {
-    _$genderAtom.reportRead();
-    return super.gender;
-  }
-
-  @override
-  set gender(Gender value) {
-    _$genderAtom.reportWrite(value, super.gender, () {
-      super.gender = value;
-    });
-  }
-
   late final _$_currentFilterRangeAtom = Atom(
     name: '_DashboardStore._currentFilterRange',
     context: context,
@@ -189,7 +171,6 @@ mixin _$DashboardStore on _DashboardStore, Store {
   String toString() {
     return '''
 isLoading: ${isLoading},
-gender: ${gender},
 memberList: ${memberList},
 singleAttendanceList: ${singleAttendanceList},
 allTransactionsList: ${allTransactionsList},

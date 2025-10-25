@@ -125,24 +125,6 @@ mixin _$MemberStore on _MemberStore, Store {
     });
   }
 
-  late final _$currentGenderFilterAtom = Atom(
-    name: '_MemberStore.currentGenderFilter',
-    context: context,
-  );
-
-  @override
-  Gender? get currentGenderFilter {
-    _$currentGenderFilterAtom.reportRead();
-    return super.currentGenderFilter;
-  }
-
-  @override
-  set currentGenderFilter(Gender? value) {
-    _$currentGenderFilterAtom.reportWrite(value, super.currentGenderFilter, () {
-      super.currentGenderFilter = value;
-    });
-  }
-
   late final _$isSortedByNameAscendingAtom = Atom(
     name: '_MemberStore.isSortedByNameAscending',
     context: context,
@@ -298,7 +280,6 @@ memberListStream: ${memberListStream},
 newMember: ${newMember},
 findMember: ${findMember},
 selectedMember: ${selectedMember},
-currentGenderFilter: ${currentGenderFilter},
 isSortedByNameAscending: ${isSortedByNameAscending},
 fetchMembersFuture: ${fetchMembersFuture},
 isLoadingMembers: ${isLoadingMembers},

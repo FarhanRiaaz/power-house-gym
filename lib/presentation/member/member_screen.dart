@@ -15,6 +15,7 @@ import 'package:finger_print_flutter/presentation/components/app_section_header.
 import 'package:finger_print_flutter/presentation/components/app_status_bar.dart';
 import 'package:finger_print_flutter/presentation/components/app_text_field.dart';
 import 'package:finger_print_flutter/presentation/components/background_wrapper.dart';
+import 'package:finger_print_flutter/presentation/dashboard/home.dart';
 import 'package:finger_print_flutter/presentation/financial/store/financial_store.dart';
 import 'package:finger_print_flutter/presentation/member/add_member_dialog.dart';
 import 'package:finger_print_flutter/presentation/member/store/member_store.dart';
@@ -36,7 +37,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
   @override
   void initState() {
     super.initState();
-    memberStore.getAllMembers(Gender.male);
+    memberStore.getAllMembers(HomeScreen.currentReportFilter);
   }
 
   MemberStore memberStore = getIt<MemberStore>();

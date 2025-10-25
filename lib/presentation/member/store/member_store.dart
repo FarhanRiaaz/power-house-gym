@@ -5,6 +5,7 @@ import 'package:finger_print_flutter/data/service/report/export/export_data_serv
 import 'package:finger_print_flutter/domain/entities/models/fmd_model.dart';
 import 'package:finger_print_flutter/domain/usecases/export/import_export_usecase.dart';
 import 'package:finger_print_flutter/domain/usecases/member/member_usecase.dart';
+import 'package:finger_print_flutter/presentation/dashboard/home.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mobx/mobx.dart';
 
@@ -35,8 +36,8 @@ abstract class _MemberStore with Store {
   ) {
     print("Doing this hereXX");
 
-    getAllMembers(Gender.male);
-    getAllStoredFMDID(Gender.male);
+    getAllMembers(HomeScreen.currentReportFilter);
+    getAllStoredFMDID(HomeScreen.currentReportFilter);
     print("Doing this here");
   }
 
@@ -60,9 +61,6 @@ abstract class _MemberStore with Store {
 
   @observable
   Member? selectedMember = Member(); // Used for editing or displaying details
-
-  @observable
-  Gender? currentGenderFilter; // Filter for UI lists
 
   @observable
   bool isSortedByNameAscending = true;
@@ -129,7 +127,6 @@ abstract class _MemberStore with Store {
 
   @action
   Future<void> watchMembers({Gender? genderFilter}) async {
-    currentGenderFilter = genderFilter;
     //
     //   // Set a custom loading flag before starting the stream process
     //   isLoadingMembers = true;
@@ -178,6 +175,7 @@ abstract class _MemberStore with Store {
       runInAction(() {
         storedFMDS = ObservableList.of(storedFMS);
       });
+      print("We got fmds ${storedFMS.length}");
       return storedFMS;
     } catch (e) {
       print("Fingerprint lookup failed: $e");
@@ -208,7 +206,7 @@ abstract class _MemberStore with Store {
       // Update UI list and clear the form model
       newMember = Member(); // Clear form
       selectedMember = insertedMember;
-      await getAllMembers(currentGenderFilter ?? Gender.male); // Refresh list
+      await getAllMembers(HomeScreen.currentReportFilter ?? Gender.male); // Refresh list
       return insertedMember;
     } catch (error) {
       print("Error registering member: $error");
@@ -230,7 +228,7 @@ abstract class _MemberStore with Store {
       await _updateMemberUseCase.call(params: memberToUpdate);
 
       // Refresh the list to reflect changes
-      getAllMembers(currentGenderFilter ?? Gender.male);
+      getAllMembers(HomeScreen.currentReportFilter ?? Gender.male);
       print("Member ${member!.memberId} updated.");
     } catch (error) {
       print("Error updating member: $error");

@@ -4,8 +4,8 @@ import 'package:finger_print_flutter/core/style/app_text_styles.dart';
 import 'package:finger_print_flutter/data/service/biometric/biometric_service_impl.dart';
 import 'package:finger_print_flutter/domain/entities/models/attendance_record.dart';
 import 'package:finger_print_flutter/domain/entities/models/financial_transaction.dart';
-import 'package:finger_print_flutter/domain/entities/models/scan_status.dart';
 import 'package:finger_print_flutter/presentation/attendance/store/attendance_store.dart';
+import 'package:finger_print_flutter/presentation/auth/login_screen.dart';
 import 'package:finger_print_flutter/presentation/auth/store/auth_store.dart';
 import 'package:finger_print_flutter/presentation/components/app_button.dart';
 import 'package:finger_print_flutter/presentation/components/app_card.dart';
@@ -14,6 +14,7 @@ import 'package:finger_print_flutter/presentation/components/app_section_header.
 import 'package:finger_print_flutter/presentation/components/app_status_bar.dart';
 import 'package:finger_print_flutter/presentation/components/app_toggle.dart';
 import 'package:finger_print_flutter/presentation/components/background_wrapper.dart';
+import 'package:finger_print_flutter/presentation/dashboard/home.dart';
 import 'package:finger_print_flutter/presentation/dashboard/store/dashboard_store.dart';
 import 'package:finger_print_flutter/presentation/expense/store/expense_store.dart';
 import 'package:finger_print_flutter/presentation/financial/store/financial_store.dart';
@@ -21,131 +22,43 @@ import 'package:finger_print_flutter/presentation/member/store/member_store.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
-import 'package:mobx/mobx.dart';
 
 import '../../di/service_locator.dart';
 import '../components/metric_card.dart';
 import 'dashboard_range_dialog.dart';
 
 class DashboardScreen extends StatefulWidget {
-
-  DashboardScreen({super.key});
+  const DashboardScreen({super.key});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  bool _isDialogVisible = false;
+
 
   @override
   void initState() {
-
-    reaction((_) => biometricServiceImpl.lastScanResult.value, (result) {
-      if (result != null && result['status'] != ScanStatus.noFinger) {
-        print("We lnow me? ${result['status']}");
-        _handleScanResult(result);
-      }
-    });
+    attendanceStore.currentReportFilter = authStore.currentUser!.role.toString().contains("female")?Gender.female:Gender.male;
     super.initState();
     _initBiometricTempFile();
   }
 
-    @override
+  @override
   void didChangeDependencies() {
+    _initBiometricTempFile();
     super.didChangeDependencies();
-    
-    // MobX Reaction: This runs every time lastScanResult changes and is not null.
-    // This is the ideal place to trigger UI changes based on service results.
-    reaction((_) => biometricServiceImpl.lastScanResult.value, (result) {
-      if (result != null && result['status'] != ScanStatus.noFinger) {
-        _handleScanResult(result);
-      }
-    });
   }
 
   Future<void> _initBiometricTempFile() async {
-    await memberStore.getAllStoredFMDID(Gender.male);
+    await dashboardStore. fetchDashboardData(range: null);
+    await memberStore.getAllStoredFMDID(HomeScreen.currentReportFilter);
     await biometricServiceImpl.getTempFile(memberStore.storedFMDS);
-  // Do something with tempFile (e.g. store it, log it, pass to another service)
-}
 
-    void _handleScanResult(Map<String, dynamic> result) {
-    if (_isDialogVisible) return; // Prevent multiple popups
-
-    String title = "Scan Result";
-    String message = "Unknown error occurred.";
-    bool isEnrollment = false;
-    Function? onConfirm;
-
-    switch (result['status']) {
-      case ScanStatus.matchSuccess:
-        title = "Welcome!";
-        message = "Attendance marked for ${result['name']}.";
-        break;
-        
-      case ScanStatus.matchFeeOverdue:
-        title = "Fee Overdue";
-        message = "Welcome ${result['name']}! Your fee is overdue. Please pay.";
-        break;
-        
-      case ScanStatus.notRecognized:
-        title = "Unrecognized Fingerprint";
-        message = "Fingerprint not recognized. Register this user?";
-        isEnrollment = true;
-        // The data field contains the FMD template (Base64 string)
-        final fmdBase64 = result['data'] as String;
-        onConfirm = () {
-          // Navigate to enrollment screen using the FMD data
-          debugPrint('Navigating to Enrollment with FMD: $fmdBase64');
-          // Example: Navigator.of(context).push(MaterialPageRoute(...))
-        };
-        break;
-
-      case ScanStatus.errorIntegrity:
-        title = "System Error";
-        message = "Matched ID found by device, but not in database. Check data integrity.";
-        break;
-
-      default:
-        return; // Ignore other non-critical statuses like NO_FINGER
-    }
-
-    _isDialogVisible = true;
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: [
-            TextButton(
-              child: const Text("OK"),
-              onPressed: () {
-                Navigator.of(context).pop();
-                setState(() => _isDialogVisible = false);
-              },
-            ),
-            if (isEnrollment)
-              ElevatedButton(
-                child: const Text("Register"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  setState(() => _isDialogVisible = false);
-                  onConfirm!(); // Trigger enrollment navigation
-                },
-              ),
-          ],
-        );
-      },
-    ).then((_) {
-       // Ensure state is reset if dismissed via barrier or back button
-       if (_isDialogVisible) {
-          setState(() => _isDialogVisible = false);
-       }
-    });
+    // Do something with tempFile (e.g. store it, log it, pass to another service)
   }
+
+
   // Assume stores are accessible via getIt
   final AuthStore authStore = getIt<AuthStore>();
 
@@ -159,7 +72,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final DashboardStore dashboardStore = getIt<DashboardStore>();
 
-  final BiometricServiceImpl biometricServiceImpl = getIt<BiometricServiceImpl>();
+  final BiometricServiceImpl biometricServiceImpl =
+      getIt<BiometricServiceImpl>();
 
   /// Builds a KPI card with responsiveness based on constraints.
   Widget _buildKpiRow({
@@ -200,19 +114,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 AppSectionHeader(title: 'Dashboard'),
                 const SizedBox(height: 24),
-
- Observer(
-              builder: (_) {
-                final status = biometricServiceImpl.lastScanResult.value?['status'] ?? ScanStatus.noFinger;
-                return Text(
-                  biometricServiceImpl.isScanning.value 
-                      ? "Scanning: ${status.split('_').last}" 
-                      : "Scanning Stopped",
-                  style: Theme.of(context).textTheme.headlineMedium,
-                );
-              },
-            ),
-
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.35,
                   child: DateRangeFilterWidget(),
@@ -239,7 +140,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             fullWidth: false,
                             label: 'Logout',
                             icon: Icons.logout,
-                            onPressed: () => authStore.logout(),
+                            onPressed: () {
+                              authStore.logout();
+                              Navigator.of(context).pushAndRemoveUntil(
+                                MaterialPageRoute(builder: (context) =>  LoginScreen()),
+                                    (Route<dynamic> route) => false,
+                              );
+
+                              },
                           ),
                         ];
                         return Row(children: cards);
@@ -270,18 +178,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         );
                       },
                     ),
-                    AppButton(
-                      label: 'Enroll Member',
-                      icon: Icons.person_add,
-                      onPressed: () => () {},
-                      //onPressed: () => memberStore.openEnrollDialog(),
-                    ),
+                    authStore.currentUser?.role==UserRole.superAdmin?
                     AppButton(
                       label: 'Export Data',
                       icon: Icons.download,
-                      onPressed: () => () {},
-                      // onPressed: () => financeStore.exportToExcel(),
-                    ),
+                      isOutline: true,
+                      fullWidth: false,
+                      onPressed: ()async {
+                        await dashboardStore.exportData();
+                      },
+                    ):SizedBox.shrink(),
+
+
                   ],
                 ),
 
@@ -322,7 +230,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   ),
 
                                 // Finance (Today’s Revenue)
-                                if (hasValue(data?.todayRevenue))
+                                if (hasValue(data?.todayRevenue) &&  authStore.currentUser?.role==UserRole.superAdmin)
                                   MetricCard(
                                     title: 'Finance',
                                     subtitle:
@@ -339,7 +247,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     fontSize: 20,
                                   ),
 
-                                if (hasValue(data?.expense))
+                                if (hasValue(data?.expense) &&          authStore.currentUser?.role==UserRole.superAdmin)
                                   MetricCard(
                                     title: 'Expense',
                                     subtitle: 'Amount',

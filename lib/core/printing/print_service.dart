@@ -11,8 +11,18 @@ class ReceiptService {
   /// Helper to format the current date and time for the receipt header.
   String _formatDateTime(DateTime now) {
     final monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
 
     final hour = now.hour;
@@ -33,23 +43,26 @@ class ReceiptService {
     String message = '';
 
     if (percentage >= 80.0) {
-      message = 'ELITE PERFORMANCE! \n\nYour $roundedPercentage% attendance in the last month is incredible.\nKeep the momentum high, we are proud of you!';
+      message =
+          'ELITE PERFORMANCE! \n\nYour $roundedPercentage% attendance in the last month is incredible.\nKeep the momentum high, we are proud of you!';
     } else if (percentage >= 50.0) {
-      message = 'GREAT CONSISTENCY! \n\nYour $roundedPercentage% attendance is strong. Push for that 80% mark next month!';
+      message =
+          'GREAT CONSISTENCY! \n\nYour $roundedPercentage% attendance is strong. Push for that 80% mark next month!';
     } else {
-      message = 'WE MISSED YOU! \n\nYour current attendance is $roundedPercentage%.\nA little progress adds up—let\'s make the next 30 days your strongest yet!';
+      message =
+          'WE MISSED YOU! \n\nYour current attendance is $roundedPercentage%.\nA little progress adds up—lets make the next 30 days your strongest yet!';
     }
 
     // Return as a centered PDF widget
     return pw.Center(
       child: pw.Text(
-          message,
-          textAlign: pw.TextAlign.center,
-          style: pw.TextStyle(
-              fontSize: 8,
-              font: pw.Font.courier(), // Use monospaced font
-              lineSpacing: 1.2
-          )
+        message,
+        textAlign: pw.TextAlign.center,
+        style: pw.TextStyle(
+          fontSize: 8,
+          font: pw.Font.courier(), // Use monospaced font
+          lineSpacing: 1.2,
+        ),
       ),
     );
   }
@@ -76,14 +89,18 @@ class ReceiptService {
   }
 
   /// Generates the receipt PDF and sends it to the native printer service.
-  Future<bool> generateAndPrintReceipt({required FinancialTransaction params,double? percentage,String? userName}) async {
+  Future<bool> generateAndPrintReceipt({
+    required FinancialTransaction params,
+    double? percentage,
+    String? userName,
+  }) async {
     try {
       // 2. Calculate financial totals
       const tax = 0.00; // Based on your code setting tax to 0
-      final total = params.amount??1000.0;
+      final total = params.amount ?? 1000.0;
       final timestamp = _formatDateTime(DateTime.now());
       // Placeholder attendance percentage for the motivational message
-      final finalAmountStr = params.amount?.toStringAsFixed(2) ??"1000.0";
+      final finalAmountStr = params.amount?.toStringAsFixed(2) ?? "1000.0";
       final taxStr = tax.toStringAsFixed(2);
       final totalStr = total.toStringAsFixed(2);
 
@@ -104,24 +121,58 @@ class ReceiptService {
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 // Transaction Details
-                pw.Text('Transaction ID: PWH${DateTime.now().microsecondsSinceEpoch}', style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
-                pw.Text('Date: $timestamp', style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
+                pw.Text(
+                  'Transaction ID: PWH${DateTime.now().microsecondsSinceEpoch}',
+                  style: pw.TextStyle(fontSize: 8, font: pw.Font.courier()),
+                ),
+                pw.Text(
+                  'Date: $timestamp',
+                  style: pw.TextStyle(fontSize: 8, font: pw.Font.courier()),
+                ),
                 pw.SizedBox(height: 3),
-                pw.Text(dividerText, style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
+                pw.Text(
+                  dividerText,
+                  style: pw.TextStyle(fontSize: 8, font: pw.Font.courier()),
+                ),
 
                 // Member Details
-                pw.Text('MEMBER DETAILS:', style: pw.TextStyle(fontSize: 9, font: pw.Font.courier(), fontWeight: pw.FontWeight.bold)),
-                pw.Text('Name: $userName', style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
-                pw.Text('ID: ${params.relatedMemberId}', style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
-                pw.Text(dividerText, style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
+                pw.Text(
+                  'MEMBER DETAILS:',
+                  style: pw.TextStyle(
+                    fontSize: 9,
+                    font: pw.Font.courier(),
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.Text(
+                  'Name: $userName',
+                  style: pw.TextStyle(fontSize: 8, font: pw.Font.courier()),
+                ),
+                pw.Text(
+                  'ID: ${params.relatedMemberId}',
+                  style: pw.TextStyle(fontSize: 8, font: pw.Font.courier()),
+                ),
+                pw.Text(
+                  dividerText,
+                  style: pw.TextStyle(fontSize: 8, font: pw.Font.courier()),
+                ),
 
                 // Items Table Header
                 _buildReceiptRow('ITEM', 'AMOUNT (PKR)', bold: true),
-                pw.Text(dividerText, style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
+                pw.Text(
+                  dividerText,
+                  style: pw.TextStyle(fontSize: 8, font: pw.Font.courier()),
+                ),
 
                 // Items Row
-                _buildReceiptRow(params.type ?? 'Service', 'PKR $finalAmountStr'),
-                pw.Text(dividerText, style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
+                _buildReceiptRow(
+                  params.type?.toUpperCase() ?? 'Service',
+                  'PKR $finalAmountStr',
+                ),
+                pw.Text(
+                  dividerText,
+                  style: pw.TextStyle(fontSize: 8, font: pw.Font.courier()),
+                ),
 
                 // Totals
                 _buildReceiptRow('Subtotal', 'PKR $finalAmountStr'),
@@ -130,17 +181,30 @@ class ReceiptService {
                 // Total Line
                 pw.Padding(
                   padding: const pw.EdgeInsets.only(top: 3),
-                  child: _buildReceiptRow('TOTAL DUE', 'PKR $totalStr', bold: true),
+                  child: _buildReceiptRow(
+                    'TOTAL DUE',
+                    'PKR $totalStr',
+                    bold: true,
+                  ),
                 ),
-                pw.Text(dividerText, style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
+                pw.Text(
+                  dividerText,
+                  style: pw.TextStyle(fontSize: 8, font: pw.Font.courier()),
+                ),
 
                 // Footer
-                pw.Text('Cashier: Power House Admin', style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
-                pw.Text(dividerText, style: pw.TextStyle(fontSize: 8, font: pw.Font.courier())),
+                pw.Text(
+                  'Cashier: Power House Admin',
+                  style: pw.TextStyle(fontSize: 8, font: pw.Font.courier()),
+                ),
+                pw.Text(
+                  dividerText,
+                  style: pw.TextStyle(fontSize: 8, font: pw.Font.courier()),
+                ),
                 pw.SizedBox(height: 10),
 
                 // Motivational Message
-                _generateMotivation(percentage??50.00),
+                _generateMotivation(percentage ?? 50.00),
               ],
             );
           },
@@ -154,11 +218,9 @@ class ReceiptService {
       );
 
       return true;
-
     } catch (e) {
       print('Error during receipt printing: $e');
       return false;
     }
   }
 }
-

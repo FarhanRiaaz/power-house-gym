@@ -1,13 +1,13 @@
-import 'package:finger_print_flutter/core/enum.dart';
-import 'package:finger_print_flutter/data/service/biometric/biometric_service.dart';
 import 'package:finger_print_flutter/domain/entities/models/attendance_record.dart';
 import 'package:finger_print_flutter/domain/entities/models/bill_payment.dart';
 import 'package:finger_print_flutter/domain/entities/models/dashboard.dart';
 import 'package:finger_print_flutter/domain/entities/models/financial_transaction.dart';
 import 'package:finger_print_flutter/domain/usecases/attendance/log_attendance_usecase.dart';
 import 'package:finger_print_flutter/domain/usecases/bill/bill_usecase.dart';
+import 'package:finger_print_flutter/domain/usecases/export/import_export_usecase.dart';
 import 'package:finger_print_flutter/domain/usecases/financial/financial_usecase.dart';
 import 'package:finger_print_flutter/domain/usecases/member/member_usecase.dart';
+import 'package:finger_print_flutter/presentation/dashboard/home.dart';
 
 import 'package:mobx/mobx.dart';
 
@@ -23,12 +23,14 @@ abstract class _DashboardStore with Store {
   final GetAttendanceRecordUseCase _getAttendanceRecordUseCase;
   final GetTransactionsByDateRangeUseCase _getRangeReportFinanceUseCase;
   final GetAllMembersUseCase _getAllMembersUseCase;
+  final ExportDataUseCase _exportDataUseCase;
 
   _DashboardStore(
     this._getRangeReportUseCase,
     this._getAttendanceRecordUseCase,
     this._getRangeReportFinanceUseCase,
     this._getAllMembersUseCase,
+      this._exportDataUseCase,
   ) {
     fetchDashboardData(range: null);
   }
@@ -39,9 +41,6 @@ abstract class _DashboardStore with Store {
 
   @observable
   DashboardData? _data = DashboardData();
-
-  @observable
-  Gender gender = Gender.male;
 
   @observable
   DateRangeParams? _currentFilterRange = DateRangeParams(
@@ -75,7 +74,7 @@ abstract class _DashboardStore with Store {
 
   Future<List<T>> select<T>(T table, DateRangeParams? range) async {
     if (table is Member) {
-      return await _getAllMembersUseCase.call(params: gender) as List<T>;
+      return await _getAllMembersUseCase.call(params: HomeScreen.currentReportFilter) as List<T>;
     } else if (table is FinancialTransaction) {
       final filteredTransactions = await (_getRangeReportFinanceUseCase.call(
         params:
@@ -116,6 +115,10 @@ abstract class _DashboardStore with Store {
       return filteredRecords as List<T>;
     }
     return [] as List<T>;
+  }
+
+  Future<void> exportData() async{
+    await _exportDataUseCase.call(params: null);
   }
 
   // --- CORE DATA FETCHING ACTION using Drift Logic ---
@@ -244,7 +247,6 @@ abstract class _DashboardStore with Store {
         final expiryDate = m.lastFeePaymentDate!.add(const Duration(days: 30));
         return expiryDate.isBetween(now, tomorrow);
       }).length;
-
 
       // Attendance Rate: (Active Members / Total Members) * 100
       final attendanceRate = totalMemberCount > 0

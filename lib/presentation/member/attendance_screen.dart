@@ -31,7 +31,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   @override
   void initState() {
     attendanceStore.getSingleAttendanceList(0);
-    memberStore.watchMembers();
     super.initState();
   }
 

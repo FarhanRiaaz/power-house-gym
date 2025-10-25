@@ -13,17 +13,17 @@ class AuthServiceImpl implements AuthService {
   // We use clear text here for simplification.
   static final List<Map<String, dynamic>> _hardcodedAdmins = [
     {
-      'username': 'superadmin',
-      'password': 'admin123',
+      'username': 'SuperAdmin',
+      'password': 'Arham129',
       'role': UserRole.superAdmin,
     },
     {
-      'username': 'maleadmin',
+      'username': 'man@powerhouse.com',
       'password': 'male123',
       'role': UserRole.maleAdmin,
     },
     {
-      'username': 'femaleadmin',
+      'username': 'women@powerhouse.com',
       'password': 'female123',
       'role': UserRole.femaleAdmin,
     },

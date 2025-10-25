@@ -42,6 +42,9 @@ mixin StoreModule {
         getIt<GetTransactionsByDateRangeUseCase>(),
 
         getIt<GetAllMembersUseCase>(),
+
+        getIt<ExportDataUseCase>(),
+
         //getIt<BiometricService>(),
       ),
     );

@@ -31,7 +31,17 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
   @override
   void initState() {
     super.initState();
-    expenseStore.generateRangeReport();
+    syncData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    syncData();
+  }
+
+  Future<void> syncData() async {
+    await expenseStore.generateRangeReport();
   }
 
   final ExpenseStore expenseStore = getIt<ExpenseStore>();

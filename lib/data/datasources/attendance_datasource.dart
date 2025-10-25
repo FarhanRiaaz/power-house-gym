@@ -166,7 +166,7 @@ class AttendanceRecordDatasource {
     final List<List<dynamic>> csvData = [];
 
     // Add the header row first
-    csvData.add(members.first.toCsvHeader());
+    //csvData.add(members.first.toCsvHeader());
 
     // Add all member data rows
     for (final member in members) {
