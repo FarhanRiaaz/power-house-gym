@@ -1,3 +1,4 @@
+import 'package:finger_print_flutter/core/enum.dart';
 import 'package:finger_print_flutter/core/style/app_colors.dart';
 import 'package:finger_print_flutter/core/style/app_text_styles.dart';
 import 'package:finger_print_flutter/data/service/biometric/biometric_service_impl.dart';
@@ -46,6 +47,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       }
     });
     super.initState();
+    _initBiometricTempFile();
   }
 
     @override
@@ -60,6 +62,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       }
     });
   }
+
+  Future<void> _initBiometricTempFile() async {
+    await memberStore.getAllStoredFMDID(Gender.male);
+    await biometricServiceImpl.getTempFile(memberStore.storedFMDS);
+  // Do something with tempFile (e.g. store it, log it, pass to another service)
+}
 
     void _handleScanResult(Map<String, dynamic> result) {
     if (_isDialogVisible) return; // Prevent multiple popups
@@ -150,7 +158,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final DashboardStore dashboardStore = getIt<DashboardStore>();
 
-  final BiometricServiceImpl biometricServiceImpl = BiometricServiceImpl();
+  final BiometricServiceImpl biometricServiceImpl = getIt<BiometricServiceImpl>();
 
   /// Builds a KPI card with responsiveness based on constraints.
   Widget _buildKpiRow({

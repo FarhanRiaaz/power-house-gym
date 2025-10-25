@@ -15,6 +15,8 @@ import 'package:finger_print_flutter/domain/repository/financial/financial_repos
 import 'package:finger_print_flutter/domain/repository/member/member_repository.dart';
 import 'package:finger_print_flutter/domain/usecases/auth/auth_usecase.dart';
 import 'package:finger_print_flutter/domain/usecases/export/import_export_usecase.dart';
+import 'package:finger_print_flutter/presentation/attendance/store/attendance_store.dart';
+import 'package:finger_print_flutter/presentation/member/store/member_store.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -39,8 +41,9 @@ mixin LocalModule {
     injector.registerLazySingleton<AuthService>(() => AuthServiceImpl());
 
     injector.registerLazySingleton<DataUtilityService>(() => DataUtilityServiceImpl(injector<MemberRepository>(),injector<FinancialRepository>(),injector<ExpenseRepository>(),injector<AttendanceRepository>()));
-    //injector.registerLazySingleton<BiometricService>(() => BiometricServiceImpl());
 
+    injector.registerLazySingleton<BiometricService>(() => BiometricServiceImpl (injector<AttendanceStore>(),injector<MemberStore>(),));
+injector.registerLazySingleton<BiometricServiceImpl>(() => injector<BiometricService>() as BiometricServiceImpl);
     injector.registerFactory(() => LoginUseCase(injector<AuthService>()));
     injector.registerFactory(() => LogoutUseCase(injector<AuthService>()));
     injector.registerFactory(() => ChangePasswordUseCase(injector<AuthService>()));
@@ -52,6 +55,7 @@ mixin LocalModule {
     // --- Data Utility Use Cases ---
     injector.registerFactory(() => ExportDataUseCase(injector<DataUtilityService>()));
     injector.registerFactory(() => ImportDataUseCase(injector<DataUtilityService>()));
+    
 
     // data sources:------------------------------------------------------------
     injector.registerSingleton(

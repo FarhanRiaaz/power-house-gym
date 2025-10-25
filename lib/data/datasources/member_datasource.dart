@@ -78,11 +78,11 @@ class MemberDatasource {
   }
 
   Future<List<Member>> getAll({Gender? genderFilter}) async {
-    print("we got query fro getl All ${genderFilter?.name}");
-    _driftClient.members.deleteAll();
-    _driftClient.financialTransactions.deleteAll();
-    _driftClient.attendanceRecords.deleteAll();
-    _driftClient.billExpenses.deleteAll();
+    // print("we got query fro getl All ${genderFilter?.name}");
+    // _driftClient.members.deleteAll();
+    // _driftClient.financialTransactions.deleteAll();
+    // _driftClient.attendanceRecords.deleteAll();
+    // _driftClient.billExpenses.deleteAll();
 
     final query = _driftClient.select(_driftClient.members);
     if (genderFilter != null) {

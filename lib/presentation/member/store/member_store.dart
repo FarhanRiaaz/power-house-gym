@@ -36,6 +36,7 @@ abstract class _MemberStore with Store {
     print("Doing this hereXX");
 
     getAllMembers(Gender.male);
+    getAllStoredFMDID(Gender.male);
     print("Doing this here");
   }
 

@@ -16,8 +16,10 @@ import '../../../domain/entities/models/attendance_record.dart';
 class BiometricServiceImpl implements BiometricService {
   // NOTE: In a real app, these would point to your EXE and shared JSON file.
   static const String _exePath = 'assets/FingerprintApp.exe';
+  final MemberStore memberStore;
+  final AttendanceStore attendanceStore;
 
-  BiometricServiceImpl() {
+  BiometricServiceImpl(this.attendanceStore,this.memberStore) {
     reaction((_) => isScanning.value, (bool scanning) {
       if (scanning) {
         print("i ahve enjoed");
@@ -25,9 +27,6 @@ class BiometricServiceImpl implements BiometricService {
       }
     });
   }
-
-  final MemberStore memberStore = getIt<MemberStore>();
-  final AttendanceStore attendanceStore = getIt<AttendanceStore>();
 
   final isScanning = Observable<bool>(false);
 
@@ -74,6 +73,7 @@ class BiometricServiceImpl implements BiometricService {
   }
 
   Future<String> getTempFile(List<FmdData> fmdList) async {
+    print("Finding the tempList ${fmdList.toString()}");
     final fmdJson = jsonEncode({'members': fmdList});
     final tempFileName = 'temp_fmd_data.json';
     final tempFilePath =

@@ -7,6 +7,7 @@ import 'package:finger_print_flutter/presentation/components/app_text_field.dart
 import 'package:flutter/material.dart';
 import '../../../domain/entities/models/member.dart';
 import '../../../core/enum.dart';
+import '../../di/service_locator.dart';
 
 
 class MemberFormDialog extends StatefulWidget {
@@ -29,7 +30,7 @@ class MemberFormDialogState extends State<MemberFormDialog> {
   late TextEditingController _fatherNameController;
   late TextEditingController _phoneController;
   late TextEditingController _notesController;
-  final BiometricServiceImpl biometricServiceImpl = BiometricServiceImpl();
+  final BiometricServiceImpl biometricServiceImpl = getIt<BiometricServiceImpl>();
 
   @override
   void initState() {
@@ -84,7 +85,6 @@ class MemberFormDialogState extends State<MemberFormDialog> {
       _currentMember.fatherName = _fatherNameController.text;
       _currentMember.phoneNumber = _phoneController.text;
       _currentMember.notes = _notesController.text;
-      _currentMember.fingerprintTemplate = "";
       _currentMember.lastFeePaymentDate = DateTime.now();
       _currentMember.registrationDate = _tempRegistrationDate;
 
@@ -256,7 +256,7 @@ class MemberFormDialogState extends State<MemberFormDialog> {
 
     biometricServiceImpl.toggleScanning(false);
     // Close the initial info dialog before showing result
-    if (Navigator.canPop(context)) Navigator.pop(context);
+   // if (Navigator.canPop(context)) Navigator.pop(context);
 
     await handleEnrollment(context);
   }

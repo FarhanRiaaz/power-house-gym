@@ -2,6 +2,7 @@ import 'package:finger_print_flutter/core/enum.dart';
 import 'package:finger_print_flutter/core/list_to_csv_converter.dart';
 import 'package:finger_print_flutter/core/printing/print_service.dart';
 import 'package:finger_print_flutter/core/style/app_text_styles.dart';
+import 'package:finger_print_flutter/data/service/biometric/biometric_service_impl.dart';
 import 'package:finger_print_flutter/domain/entities/models/attendance_record.dart';
 import 'package:finger_print_flutter/domain/entities/models/financial_transaction.dart';
 import 'package:finger_print_flutter/presentation/attendance/store/attendance_store.dart';
@@ -42,6 +43,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
   AttendanceStore attendanceStore = getIt<AttendanceStore>();
   ReceiptService receiptService = ReceiptService();
   FinancialStore financialStore = getIt<FinancialStore>();
+  BiometricServiceImpl biometricServiceImpl = getIt<BiometricServiceImpl>();
   Member? _selectedMember;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
@@ -78,6 +80,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
     } else {
       await memberStore.registerMember(member);
     }
+    await biometricServiceImpl.getTempFile( memberStore.storedFMDS);
   }
 
   void _removeMember(Member member) {
