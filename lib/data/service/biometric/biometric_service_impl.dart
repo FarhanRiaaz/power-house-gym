@@ -112,14 +112,12 @@ class BiometricServiceImpl implements BiometricService {
   Future<Map<String, dynamic>> _performSingleScanAndMatch() async {
     final processResult = await Process.run(_exePath, [
       'match',
-      "$_jsonPath",
+      _jsonPath,
     ], workingDirectory: File(_exePath).parent.path);
-              print("Got results aksjlhdajksd");
+            
 
     final output = processResult.stdout.toString().trim();
     final error = processResult.stderr.toString().trim();
-
-              print("Got resultsX $output and  $error");
 
     if (error.isNotEmpty) debugPrint("C# STDERR:\n$error");
 

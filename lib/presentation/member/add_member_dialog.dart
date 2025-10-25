@@ -122,19 +122,21 @@ class MemberFormDialogState extends State<MemberFormDialog> {
       content: SingleChildScrollView(
         child: SizedBox(
           width: 800,
+          height: 650,
           child: Form(
             key: _formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 // 💡 AppTextField for Name - Now passes required controller
+                                const  SizedBox(height: 8),
+
                 AppTextField(
                   label: 'Name *',
                   controller: _nameController,
                   validator: (value) => value!.isEmpty ? 'Name is required' : null,
                   prefixIcon: Icons.person,
                 ),
-                const SizedBox(height: 14),
                 // 💡 AppTextField for Father Name - Now passes required controller
                 AppTextField(
                   label: 'Father Name *',
@@ -143,7 +145,6 @@ class MemberFormDialogState extends State<MemberFormDialog> {
                   prefixIcon: Icons.family_restroom,
                 ),
 
-                const  SizedBox(height: 14),
                 // 💡 AppTextField for Phone Number - Now passes required controller
                 AppTextField(
                   label: 'Phone Number',
@@ -152,7 +153,7 @@ class MemberFormDialogState extends State<MemberFormDialog> {
                   prefixIcon: Icons.phone,
                 ),
 
-                const  SizedBox(height: 14),
+                const  SizedBox(height: 8),
 
                 // 💡 AppDatePicker for Registration Date
                 AppDatePicker(
@@ -165,7 +166,7 @@ class MemberFormDialogState extends State<MemberFormDialog> {
                   },
                 ),
 
-                const   SizedBox(height: 14),
+                const   SizedBox(height: 24),
                 // Standard Flutter Dropdown for Gender
                 DropdownButtonFormField<Gender>(
                   value: _currentMember.gender,
@@ -188,7 +189,7 @@ class MemberFormDialogState extends State<MemberFormDialog> {
                   },
                 ),
 
-                const    SizedBox(height: 16,),
+                const    SizedBox(height: 24,),
                 // 💡 AppTextField for Membership Type - Now passes required controller
                 DropdownButtonFormField<MemberShipType>(
                   value: _currentMember.membershipType,
@@ -211,14 +212,13 @@ class MemberFormDialogState extends State<MemberFormDialog> {
                   },
                 ),
                 // 💡 AppTextField for Notes - Now passes required controller
-                const     SizedBox(height: 14),
+                const     SizedBox(height: 16),
                 AppTextField(
                   label: 'Notes',
                   controller: _notesController,
                   maxLines: 3,
                   prefixIcon: Icons.note_alt,
                 ),
-                const SizedBox(height: 14),
                 widget.member == null?   AppButton(
                   label: 'Register Fingerprint',
                   icon: Icons.fingerprint,
