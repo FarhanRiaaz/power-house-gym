@@ -16,7 +16,7 @@ import '../../../domain/entities/models/attendance_record.dart';
 class BiometricServiceImpl implements BiometricService {
   // NOTE: In a real app, these would point to your EXE and shared JSON file.
   static const String _exePath = 'assets/FingerprintApp.exe';
-  static const String _jsonPath = 'assets/temp_fmd_data.json';
+  static const String _jsonPath = 'C:\\Users\\farha\\finger_print_flutter\\assets\\temp_fmd_data.json';
   final MemberStore memberStore;
   final AttendanceStore attendanceStore;
 
@@ -96,7 +96,8 @@ class BiometricServiceImpl implements BiometricService {
       // Update the observable so the UI can react
       runInAction(() async {
         lastScanResult.value = result;
-              print("Got RESuLts ${await lastScanResult.toString()}");
+
+      
 
       });
       // Wait before the next scan attempt
@@ -118,7 +119,8 @@ class BiometricServiceImpl implements BiometricService {
 
     final output = processResult.stdout.toString().trim();
     final error = processResult.stderr.toString().trim();
-
+    print("Error we got $error");
+    print("output we got $output");
     if (error.isNotEmpty) debugPrint("C# STDERR:\n$error");
 
     // 1. Timeout / No Finger detected

@@ -43,6 +43,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     reaction((_) => biometricServiceImpl.lastScanResult.value, (result) {
       if (result != null && result['status'] != ScanStatus.noFinger) {
+        print("We lnow me? ${result['status']}");
         _handleScanResult(result);
       }
     });
