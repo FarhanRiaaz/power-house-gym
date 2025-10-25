@@ -43,23 +43,6 @@ class DashboardScreen extends StatelessWidget {
   }) {
     final isWide = constraints.maxWidth > 1000;
     final wrapSpacing = isWide ? 16.0 : 12.0;
-
-    if (isWide) {
-      // Use Row for very wide screens (3-4 cards horizontally)
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children:
-            cards
-                .expand(
-                  (card) => [
-                    Expanded(child: card),
-                    SizedBox(width: wrapSpacing),
-                  ],
-                )
-                .toList()
-              ..removeLast(),
-      );
-    } else {
       // Use Wrap for standard desktop/tablet width (2-3 cards wrapping)
       return Wrap(
         spacing: wrapSpacing,
@@ -76,7 +59,6 @@ class DashboardScreen extends StatelessWidget {
             )
             .toList(),
       );
-    }
   }
   @override
   Widget build(BuildContext context) {
@@ -185,7 +167,7 @@ class DashboardScreen extends StatelessWidget {
                             ),
 
                           // Finance (Today’s Revenue)
-                          if (hasValue(data?.todayRevenueChange))
+                          if (hasValue(data?.todayRevenue))
                             MetricCard(
                               title: 'Finance',
                               subtitle: 'Change: ${data?.todayRevenueChange?.toStringAsFixed(2)}%',
@@ -198,17 +180,18 @@ class DashboardScreen extends StatelessWidget {
                               fontSize: 20,
                             ),
 
-                          // Active Members
-                          if (hasValue(data?.activeMemberCount))
+                          if (hasValue(data?.expense))
                             MetricCard(
-                              title: 'Active Members',
-                              subtitle: 'Total Registered & Current',
-                              icon: Icons.group,
-                              iconColor: AppColors.textPrimary,
-                              trailingText: '${data?.activeMemberCount}',
-                              trailingColor: AppColors.textSecondary,
-                              fontSize: 32,
+                              title: 'Expense',
+                              subtitle: 'Amount',
+                              icon: Icons.attach_money,
+                              iconColor: AppColors.danger,
+                              trailingText: currency.format(data?.expense),
+                              trailingColor: (data?.expense ?? 0) >= 0
+                                  ? AppColors.success
+                                  : AppColors.danger,
                             ),
+
 
 
 
@@ -236,29 +219,6 @@ class DashboardScreen extends StatelessWidget {
                      LayoutBuilder(
                     builder: (context, constraints) {
                       final cards = <Widget>[
-
-                        if (hasValue(data?.todayRevenueChange))
-                          MetricCard(
-                            title: 'Expense',
-                            subtitle: 'Change: ${data?.todayRevenueChange?.toStringAsFixed(2)}%',
-                            icon: Icons.attach_money,
-                            iconColor: AppColors.primary,
-                            trailingText: currency.format(data?.expense),
-                            trailingColor: (data?.todayRevenueChange ?? 0) >= 0
-                                ? AppColors.success
-                                : AppColors.danger,
-                          ),
-
-                        if (hasValue(data?.expiringMembers))
-                          MetricCard(
-                            title: 'Expiring Members',
-                            subtitle: 'Contracts due in 7 days',
-                            icon: Icons.person_off,
-                            iconColor: AppColors.danger,
-                            trailingText: '${data?.expiringMembers}',
-                            trailingColor: AppColors.danger,
-                          ),
-
                         if (hasValue(data?.newMembersThisWeek))
                           MetricCard(
                             title: 'New Members',
@@ -267,6 +227,18 @@ class DashboardScreen extends StatelessWidget {
                             iconColor: AppColors.success,
                             trailingText: '${data?.newMembersThisWeek}',
                             trailingColor: AppColors.success,
+                          ),
+
+                        // Active Members
+                        if (hasValue(data?.activeMemberCount))
+                          MetricCard(
+                            title: 'Active Members',
+                            subtitle: 'Total Registered & Current',
+                            icon: Icons.group,
+                            iconColor: AppColors.textPrimary,
+                            trailingText: '${data?.activeMemberCount}',
+                            trailingColor: AppColors.textSecondary,
+                            fontSize: 32,
                           ),
 
                         if (hasValue(data?.attendanceRate))
@@ -280,6 +252,27 @@ class DashboardScreen extends StatelessWidget {
                                 ? AppColors.success
                                 : AppColors.warning,
                           ),
+                        if (hasValue(data?.expiringMembers))
+                          MetricCard(
+                            title: 'Expiring Members',
+                            subtitle: 'Contracts due in 7 days',
+                            icon: Icons.person_off,
+                            iconColor: AppColors.danger,
+                            trailingText: '${data?.expiringMembers}',
+                            trailingColor: AppColors.danger,
+                          ),
+
+                        if (hasValue(data?.lastReceiptId))
+                          MetricCard(
+                            title: 'Overdue',
+                            subtitle: 'Inactive in last 30 days',
+                            icon: Icons.remove_circle_outline_outlined,
+                            iconColor: AppColors.danger,
+                            trailingText: '${data?.lastReceiptId}',
+                            trailingColor: AppColors.danger,
+                          ),
+
+
 
                       ];
                       return _buildKpiRow(

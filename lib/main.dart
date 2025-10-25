@@ -61,6 +61,8 @@ class _FingerprintAppState extends State<FingerprintApp> {
             NavigationRail(
               // Use Material 3 standard colors and shape
               backgroundColor: AppColors.backgroundDark,
+              indicatorColor: Colors.white,
+
               elevation: 4,
               minWidth: 72,
               // Standard min width
@@ -92,9 +94,9 @@ class _FingerprintAppState extends State<FingerprintApp> {
                   ),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.fitness_center_outlined),
+                  icon: Icon(Icons.how_to_reg_outlined),
                   selectedIcon: Icon(
-                    Icons.fitness_center,
+                    Icons.how_to_reg,
                     color: AppColors.primary,
                   ),
                   label: Text(
@@ -105,9 +107,9 @@ class _FingerprintAppState extends State<FingerprintApp> {
                   ),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.person_2_outlined),
+                  icon: Icon(Icons.sports_martial_arts_outlined),
                   selectedIcon: Icon(
-                    Icons.person_2,
+                    Icons.sports_martial_arts,
                     color: AppColors.primary,
                   ),
                   label: Text(
@@ -151,7 +153,7 @@ class _FingerprintAppState extends State<FingerprintApp> {
                 child: SizedBox(
                     height: 48,
                     width: 48,
-                    child: Icon(Icons.flutter_dash_outlined,size: 48,color: AppColors.textPrimary,)),
+                    child: Icon(Icons.fitness_center_outlined,size: 48,color: AppColors.textPrimary,)),
 
               ),
             ),
@@ -163,7 +165,8 @@ class _FingerprintAppState extends State<FingerprintApp> {
             // It takes up all remaining horizontal space.
             Expanded(
               child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
+                duration: const Duration(milliseconds: 400),
+                switchInCurve: Curves.easeOutCubic,
                 // Display the screen widget corresponding to the selected index
                 child: _screens[_selectedIndex],
               ),

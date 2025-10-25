@@ -223,6 +223,12 @@ abstract class _DashboardStore with Store {
           .toSet();
       final activeMemberCount = activeMemberIds.length;
 
+      final inactiveMemberCount = allMembers.where((m) {
+        // Check if the member's ID is NOT contained in the set of recently active IDs.
+        // This effectively finds everyone who hasn't shown up in 30 days.
+        return !activeMemberIds.contains(m.memberId);
+      }).length;
+
       // New members this week: registered in last 7 days
       final sevenDaysAgo = now.subtract(const Duration(days: 7));
       // Drift Query: select(db.members).where((m) => m.registrationDate.isAfter(sevenDaysAgo));
@@ -237,6 +243,7 @@ abstract class _DashboardStore with Store {
         final expiryDate = m.lastFeePaymentDate!.add(const Duration(days: 30));
         return expiryDate.isBetween(now, tomorrow);
       }).length;
+
 
       // Attendance Rate: (Active Members / Total Members) * 100
       final attendanceRate = totalMemberCount > 0
@@ -274,7 +281,7 @@ abstract class _DashboardStore with Store {
       _data = DashboardData(
         // Operational
         activeCheckIns: activeCheckIns,
-        lastReceiptId: lastReceiptId,
+        lastReceiptId: inactiveMemberCount.toString(),
         occupiedHours: occupiedHours,
 
         // Financial
