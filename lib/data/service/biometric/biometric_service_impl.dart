@@ -95,8 +95,10 @@ class BiometricServiceImpl implements BiometricService {
       print("i am here ${isScanning.value}");
       final result = await _performSingleScanAndMatch();
       // Update the observable so the UI can react
-      runInAction(() {
+      runInAction(() async {
         lastScanResult.value = result;
+              print("Got RESuLts ${await lastScanResult.toString()}");
+
       });
       // Wait before the next scan attempt
       if (result['status'] != ScanStatus.matchSuccess &&
@@ -113,9 +115,12 @@ class BiometricServiceImpl implements BiometricService {
       'match',
       "${File(_exePath).parent.path}${Platform.pathSeparator}temp_fmd_data.json",
     ], workingDirectory: File(_exePath).parent.path);
+              print("Got results aksjlhdajksd");
 
     final output = processResult.stdout.toString().trim();
     final error = processResult.stderr.toString().trim();
+
+              print("Got resultsX $output and  $error");
 
     if (error.isNotEmpty) debugPrint("C# STDERR:\n$error");
 
