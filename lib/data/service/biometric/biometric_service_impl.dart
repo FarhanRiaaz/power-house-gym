@@ -8,6 +8,8 @@ import 'package:finger_print_flutter/presentation/attendance/store/attendance_st
 import 'package:finger_print_flutter/presentation/member/store/member_store.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:mobx/mobx.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 import '../../../di/service_locator.dart';
 import '../../../domain/entities/models/attendance_record.dart';
@@ -16,17 +18,28 @@ import '../../../domain/entities/models/attendance_record.dart';
 class BiometricServiceImpl implements BiometricService {
   // NOTE: In a real app, these would point to your EXE and shared JSON file.
   static const String _exePath = 'assets/FingerprintApp.exe';
-  static const String _jsonPath = 'C:\\Users\\farha\\finger_print_flutter\\assets\\temp_fmd_data.json';
+  String tempFilePath="";
+ // static const String _jsonPath = 'C:\\Users\\farha\\finger_print_flutter\\assets\\temp_fmd_data.json';
   final MemberStore memberStore;
   final AttendanceStore attendanceStore;
 
   BiometricServiceImpl(this.attendanceStore,this.memberStore) {
+    _setupFilePaths();
     reaction((_) => isScanning.value, (bool scanning) {
       if (scanning) {
         print("i ahve enjoed");
         verifyUser();
       }
     });
+  }
+
+  Future<void> _setupFilePaths() async {
+    // 1. Get the standard writable directory for application data
+    final appDataDir = await getApplicationSupportDirectory();
+    // 2. Define the temporary file name
+    const tempFileName = 'temp_fmd_data.json';
+    // 3. Combine the directory path and file name (this is safe and portable)
+    tempFilePath = p.join(appDataDir.path, tempFileName);
   }
 
   final isScanning = Observable<bool>(false);
@@ -74,14 +87,15 @@ class BiometricServiceImpl implements BiometricService {
   }
 
   Future<String> getTempFile(List<FmdData> fmdList) async {
+    await     _setupFilePaths();
     print("Finding the tempList ${fmdList.toString()}");
     final fmdJson = jsonEncode({'members': fmdList});
 
-    final tempFile = File(_jsonPath);
+    final tempFile = File(tempFilePath);
     try {
       // Write the large JSON data to the temporary file
       await tempFile.writeAsString(fmdJson);
-      return _jsonPath;
+      return tempFilePath;
     } catch (e) {
       debugPrint("Error writing temp FMD file: $e");
       return "";
@@ -111,9 +125,10 @@ class BiometricServiceImpl implements BiometricService {
 
   // NEW: Performs a single scan and returns a structured result
   Future<Map<String, dynamic>> _performSingleScanAndMatch() async {
+    await _setupFilePaths();
     final processResult = await Process.run(_exePath, [
       'match',
-      _jsonPath,
+      tempFilePath,
     ], workingDirectory: File(_exePath).parent.path);
             
 
