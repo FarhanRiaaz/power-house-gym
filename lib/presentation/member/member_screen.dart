@@ -127,7 +127,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
     );
     financialStore.newTransaction.copyWith(
       type: "Fee Payment",
-      amount: member.membershipType!.contains("cardio") ? 2500.0 : 1000.0,
+      amount: member.membershipType!.name.contains("cardio") ? 2500.0 : 1000.0,
       transactionDate: DateTime.now(),
       relatedMemberId: member.memberId,
     );
@@ -156,7 +156,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
       await financialStore.recordTransaction(
         FinancialTransaction(
           type: "Fee Payment",
-          amount: member.membershipType!.contains("cardio") ? 2500.0 : 1000.0,
+          amount: member.membershipType!.name.contains("cardio") ? 2500.0 : 1000.0,
           transactionDate: DateTime.now(),
           description: "Fee Payment",
           relatedMemberId: member.memberId,
@@ -186,8 +186,8 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
   Future<void> _printReceipt(Member member) async {
     await receiptService.generateAndPrintReceipt(
       params: FinancialTransaction(
-        type: member.membershipType,
-        amount: member.membershipType!.contains('cardio') ? 2500.0 : 1000.0,
+        type: member.membershipType!.name,
+        amount: member.membershipType!.name.contains('cardio') ? 2500.0 : 1000.0,
         transactionDate: DateTime.now(),
         description: "Membership renewal",
         relatedMemberId: member.memberId,
@@ -220,8 +220,8 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
               if (title == "Payment Successful") {
                 await receiptService.generateAndPrintReceipt(
                   params: FinancialTransaction(
-                    type: member.membershipType,
-                    amount: member.membershipType!.contains('cardio')
+                    type: member.membershipType!.name,
+                    amount: member.membershipType!.name.contains('cardio')
                         ? 2500.0
                         : 1000.0,
                     transactionDate: DateTime.now(),
@@ -441,7 +441,7 @@ class _ManageMemberScreenState extends State<ManageMemberScreen> {
             _buildDetailRow('Father Name', member.fatherName!),
             _buildDetailRow('Phone Number', member.phoneNumber!),
             _buildDetailRow('Gender', member.gender?.name ?? 'N/A'),
-            _buildDetailRow('Membership Type', member.membershipType!),
+            _buildDetailRow('Membership Type', member.membershipType?.name.toUpperCase() ?? MemberShipType.muscle.name.toUpperCase()),
             _buildDetailRow(
               'Attendance %',
               AttendanceRecord.calculateMonthlyAttendancePercentage(

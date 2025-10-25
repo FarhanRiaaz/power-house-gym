@@ -27,7 +27,6 @@ class MemberFormDialogState extends State<MemberFormDialog> {
   late TextEditingController _nameController;
   late TextEditingController _fatherNameController;
   late TextEditingController _phoneController;
-  late TextEditingController _membershipController;
   late TextEditingController _notesController;
 
   @override
@@ -54,18 +53,16 @@ class MemberFormDialogState extends State<MemberFormDialog> {
         name: '',
         phoneNumber: '',
         fatherName: '',
-        membershipType: '',
+        membershipType:MemberShipType.muscle,
         registrationDate: DateTime.now(),
       );
     }
 
     _tempRegistrationDate = _currentMember.registrationDate ?? DateTime.now();
-
     // Initialize Controllers with existing data
     _nameController = TextEditingController(text: _currentMember.name);
     _fatherNameController = TextEditingController(text: _currentMember.fatherName);
     _phoneController = TextEditingController(text: _currentMember.phoneNumber);
-    _membershipController = TextEditingController(text: _currentMember.membershipType);
     _notesController = TextEditingController(text: _currentMember.notes);
   }
 
@@ -74,7 +71,6 @@ class MemberFormDialogState extends State<MemberFormDialog> {
     _nameController.dispose();
     _fatherNameController.dispose();
     _phoneController.dispose();
-    _membershipController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -85,7 +81,6 @@ class MemberFormDialogState extends State<MemberFormDialog> {
       _currentMember.name = _nameController.text;
       _currentMember.fatherName = _fatherNameController.text;
       _currentMember.phoneNumber = _phoneController.text;
-      _currentMember.membershipType = _membershipController.text;
       _currentMember.notes = _notesController.text;
       _currentMember.fingerprintTemplate = "akjshdjahsbdd";
       _currentMember.lastFeePaymentDate = DateTime.now();
@@ -209,17 +204,11 @@ class MemberFormDialogState extends State<MemberFormDialog> {
                   }).toList(),
                   onChanged: (MemberShipType? newValue) {
                     setState(() {
-                      _currentMember.membershipType = newValue!.name;
+                      _currentMember.membershipType = newValue;
                     });
                   },
                 ),
-                AppTextField(
-                  label: 'Membership Type',
-                  controller: _membershipController,
-                  prefixIcon: Icons.fitness_center,
-                ),
                 // 💡 AppTextField for Notes - Now passes required controller
-
                 const     SizedBox(height: 14),
                 AppTextField(
                   label: 'Notes',

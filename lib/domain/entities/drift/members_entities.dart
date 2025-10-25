@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'package:finger_print_flutter/core/enum.dart' show Gender;
+import 'package:finger_print_flutter/core/enum.dart' show Gender, MemberShipType;
 
 class Members extends Table {
   // Primary Key (Manual ID generation in the app logic or UUID)
@@ -15,7 +15,7 @@ class Members extends Table {
   // Stored as a string ('male' or 'female') for the Gender enum
   TextColumn get gender => textEnum<Gender>()();
 
-  TextColumn get membershipType => text().withLength(min: 1, max: 50)();
+  TextColumn get membershipType => textEnum<MemberShipType>()();
 
   DateTimeColumn get registrationDate => dateTime()();
 
