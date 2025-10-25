@@ -35,6 +35,24 @@ mixin _$MemberStore on _MemberStore, Store {
     });
   }
 
+  late final _$storedFMDSAtom = Atom(
+    name: '_MemberStore.storedFMDS',
+    context: context,
+  );
+
+  @override
+  ObservableList<FmdData> get storedFMDS {
+    _$storedFMDSAtom.reportRead();
+    return super.storedFMDS;
+  }
+
+  @override
+  set storedFMDS(ObservableList<FmdData> value) {
+    _$storedFMDSAtom.reportWrite(value, super.storedFMDS, () {
+      super.storedFMDS = value;
+    });
+  }
+
   late final _$memberListStreamAtom = Atom(
     name: '_MemberStore.memberListStream',
     context: context,
@@ -68,6 +86,24 @@ mixin _$MemberStore on _MemberStore, Store {
   set newMember(Member? value) {
     _$newMemberAtom.reportWrite(value, super.newMember, () {
       super.newMember = value;
+    });
+  }
+
+  late final _$findMemberAtom = Atom(
+    name: '_MemberStore.findMember',
+    context: context,
+  );
+
+  @override
+  Member? get findMember {
+    _$findMemberAtom.reportRead();
+    return super.findMember;
+  }
+
+  @override
+  set findMember(Member? value) {
+    _$findMemberAtom.reportWrite(value, super.findMember, () {
+      super.findMember = value;
     });
   }
 
@@ -175,6 +211,18 @@ mixin _$MemberStore on _MemberStore, Store {
     return _$getAllMembersAsyncAction.run(() => super.getAllMembers(gender));
   }
 
+  late final _$findMemberByIdAsyncAction = AsyncAction(
+    '_MemberStore.findMemberById',
+    context: context,
+  );
+
+  @override
+  Future<Member?> findMemberById(int memberId) {
+    return _$findMemberByIdAsyncAction.run(
+      () => super.findMemberById(memberId),
+    );
+  }
+
   late final _$watchMembersAsyncAction = AsyncAction(
     '_MemberStore.watchMembers',
     context: context,
@@ -199,15 +247,15 @@ mixin _$MemberStore on _MemberStore, Store {
     );
   }
 
-  late final _$findMemberByFingerprintAsyncAction = AsyncAction(
-    '_MemberStore.findMemberByFingerprint',
+  late final _$getAllStoredFMDIDAsyncAction = AsyncAction(
+    '_MemberStore.getAllStoredFMDID',
     context: context,
   );
 
   @override
-  Future<Member?> findMemberByFingerprint(String template) {
-    return _$findMemberByFingerprintAsyncAction.run(
-      () => super.findMemberByFingerprint(template),
+  Future<List<FmdData>?> getAllStoredFMDID(Gender gender) {
+    return _$getAllStoredFMDIDAsyncAction.run(
+      () => super.getAllStoredFMDID(gender),
     );
   }
 
@@ -245,8 +293,10 @@ mixin _$MemberStore on _MemberStore, Store {
   String toString() {
     return '''
 memberList: ${memberList},
+storedFMDS: ${storedFMDS},
 memberListStream: ${memberListStream},
 newMember: ${newMember},
+findMember: ${findMember},
 selectedMember: ${selectedMember},
 currentGenderFilter: ${currentGenderFilter},
 isSortedByNameAscending: ${isSortedByNameAscending},
