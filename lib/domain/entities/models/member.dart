@@ -37,7 +37,7 @@ class Member implements CsvConvertible {
         'phoneNumber': phoneNumber,
         'fatherName': fatherName,
         'gender': gender?.name,
-        'membershipType': membershipType,
+        'membershipType': membershipType?.name,
         'registrationDate': registrationDate?.toIso8601String(),
         'lastFeePaymentDate': lastFeePaymentDate?.toIso8601String(),
         'fingerprintTemplate': fingerprintTemplate != null
@@ -53,9 +53,9 @@ class Member implements CsvConvertible {
       name: json['name'],
       phoneNumber: json['phoneNumber'],
       fatherName: json['fatherName'],
-      gender: Gender.values.firstWhere(
-          (g) => g.name.toLowerCase() == json['gender'].toLowerCase()),
-      membershipType: json['membershipType'],
+      gender:
+      Gender.values.firstWhere((g) => g.name.toLowerCase() == json['gender'].toLowerCase()),
+      membershipType: MemberShipType.values.firstWhere((g) => g.name.toLowerCase() == json['membershipType'].toLowerCase()),
       registrationDate: DateTime.parse(json['registrationDate']),
       lastFeePaymentDate: DateTime.parse(json['lastFeePaymentDate']),
       fingerprintTemplate: json['fingerprintTemplate'] != null
@@ -175,7 +175,7 @@ class Member implements CsvConvertible {
       phoneNumber??"",
       fatherName??"",
       gender?.name ?? '', // Use enum name, default to empty string if null
-      membershipType.toString()??"",
+      membershipType?.name??"",
       registrationDate?.toIso8601String() ?? '',
       lastFeePaymentDate?.toIso8601String() ?? '',
       fingerprintTemplate ?? '',

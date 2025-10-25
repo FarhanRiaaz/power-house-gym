@@ -53,7 +53,7 @@ class MemberFormDialogState extends State<MemberFormDialog> {
         name: '',
         phoneNumber: '',
         fatherName: '',
-        membershipType:MemberShipType.muscle,
+        membershipType: MemberShipType.muscle,
         registrationDate: DateTime.now(),
       );
     }

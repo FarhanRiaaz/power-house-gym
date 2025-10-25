@@ -24,7 +24,7 @@ class MemberDatasource {
       fatherName: entity.fatherName,
       // Ensure enum mapping is safe
       gender: Gender.values.firstWhere((g) => g.name == entity.gender, orElse: () => Gender.male),
-      membershipType: MemberShipType.values.firstWhere((g) => g.name == entity.membershipType, orElse: () => MemberShipType.muscle),
+      membershipType: MemberShipType.values.firstWhere((g) => g.name == entity.membershipType.name, orElse: () => MemberShipType.muscle),
       registrationDate: entity.registrationDate,
       lastFeePaymentDate: entity.lastFeePaymentDate,
       fingerprintTemplate: entity.fingerprintTemplate,
@@ -77,12 +77,14 @@ class MemberDatasource {
   }
 
   Future<List<Member>> getAll({Gender? genderFilter}) async {
+    print("we got query fro getl All ${genderFilter?.name}");
     final query = _driftClient.select(_driftClient.members);
     if (genderFilter != null) {
       query.where((m) => m.gender.equals(genderFilter.name));
     }
     final entities = await query.get();
     // Use the explicit list mapping function
+    print("And then we got some data here with ${entities.toString()}");
     return mapMemberEntityListToMemberList(entities);
   }
 
