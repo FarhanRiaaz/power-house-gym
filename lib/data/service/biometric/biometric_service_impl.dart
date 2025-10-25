@@ -18,16 +18,16 @@ import '../../../domain/entities/models/attendance_record.dart';
 class BiometricServiceImpl implements BiometricService {
   // NOTE: In a real app, these would point to your EXE and shared JSON file.
   static const String _exePath = 'assets/FingerprintApp.exe';
-  String tempFilePath="";
- // static const String _jsonPath = 'C:\\Users\\farha\\finger_print_flutter\\assets\\temp_fmd_data.json';
+  String tempFilePath = "";
+
+  // static const String _jsonPath = 'C:\\Users\\farha\\finger_print_flutter\\assets\\temp_fmd_data.json';
   final MemberStore memberStore;
   final AttendanceStore attendanceStore;
 
-  BiometricServiceImpl(this.attendanceStore,this.memberStore) {
+  BiometricServiceImpl(this.attendanceStore, this.memberStore) {
     _setupFilePaths();
     reaction((_) => isScanning.value, (bool scanning) {
       if (scanning) {
-        print("i ahve enjoed");
         verifyUser();
       }
     });
@@ -47,7 +47,6 @@ class BiometricServiceImpl implements BiometricService {
   final lastScanResult = Observable<Map<String, dynamic>?>(null);
 
   void toggleScanning(bool enable) {
-    print("Passing it to utwwww $enable");
     runInAction(() {
       isScanning.value = enable;
     });
@@ -87,8 +86,7 @@ class BiometricServiceImpl implements BiometricService {
   }
 
   Future<String> getTempFile(List<FmdData> fmdList) async {
-    await     _setupFilePaths();
-    print("Finding the tempList ${fmdList.toString()}");
+    await _setupFilePaths();
     final fmdJson = jsonEncode({'members': fmdList});
 
     final tempFile = File(tempFilePath);
@@ -110,9 +108,6 @@ class BiometricServiceImpl implements BiometricService {
       // Update the observable so the UI can react
       runInAction(() async {
         lastScanResult.value = result;
-
-      
-
       });
       // Wait before the next scan attempt
       if (result['status'] != ScanStatus.matchSuccess &&
@@ -130,7 +125,6 @@ class BiometricServiceImpl implements BiometricService {
       'match',
       tempFilePath,
     ], workingDirectory: File(_exePath).parent.path);
-            
 
     final output = processResult.stdout.toString().trim();
     final error = processResult.stderr.toString().trim();

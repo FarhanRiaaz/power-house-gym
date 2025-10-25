@@ -34,11 +34,8 @@ abstract class _MemberStore with Store {
     this._getAllStoredFMDS,
     this._importDataUseCase,
   ) {
-    print("Doing this hereXX");
-
     getAllMembers(HomeScreen.currentReportFilter);
     getAllStoredFMDID(HomeScreen.currentReportFilter);
-    print("Doing this here");
   }
 
   // --- Store State Variables ---
@@ -89,17 +86,13 @@ abstract class _MemberStore with Store {
 
   @action
   Future<void> getAllMembers(Gender gender) async {
-    print("We have been called $gender");
     isLoadingMembers = true;
     try {
       final records = await _getAllMembersUseCase.call(params: gender);
-      print("We have been called and size is  ${records.length}");
 
       runInAction(() {
         memberList = ObservableList.of(records);
       });
-
-      print("We have been called and size isXX  ${memberList.length}");
     } catch (e) {
       print("Error generating daily report: $e");
       memberList = ObservableList();
@@ -126,39 +119,7 @@ abstract class _MemberStore with Store {
   }
 
   @action
-  Future<void> watchMembers({Gender? genderFilter}) async {
-    //
-    //   // Set a custom loading flag before starting the stream process
-    //   isLoadingMembers = true;
-    //   print("We are here to get the members");
-    // //   // The use case returns a Future<Stream<List<Member>>>
-    //  await _getAllMembersUseCase
-    //       .call(params: currentGenderFilter)
-    //       .then((stream) {
-    //         memberListStream = stream;
-    //
-    //         // We subscribe to the stream manually to populate the observable list
-    //         // for easier UI consumption, and manage the loading state.
-    //         memberListStream.listen((list) {
-    //           runInAction(() {
-    //
-    //                 print("We are here to get the membersList ${list.length}");
-    //
-    //
-    //             memberList = ObservableList.of(list);
-    //             isLoadingMembers =
-    //                 false; // Loading finishes once the first list arrives
-    //           });
-    //         });
-    //       })
-    //       .catchError((error) {
-    //         runInAction(() {
-    //           print("Error setting up member stream: $error");
-    //           isLoadingMembers = false;
-    //         });
-    //         // Do not re-throw here, let the stream handle its own errors or recovery
-    //       });
-  }
+  Future<void> watchMembers({Gender? genderFilter}) async {}
 
   @action
   Future<int> importDataToDatabase(List<List<String>> csvData) async {
@@ -175,7 +136,6 @@ abstract class _MemberStore with Store {
       runInAction(() {
         storedFMDS = ObservableList.of(storedFMS);
       });
-      print("We got fmds ${storedFMS.length}");
       return storedFMS;
     } catch (e) {
       print("Fingerprint lookup failed: $e");
@@ -187,9 +147,7 @@ abstract class _MemberStore with Store {
   /// Inserts a new member into the database.
   @action
   Future<Member?> registerMember(Member? member) async {
-    print("SomeHOw i am here ${member.toString()}  and ${member.toString()}");
     if (member == null || member!.fingerprintTemplate!.isEmpty) {
-      print("Member data is incomplete.");
       return null;
     }
 
@@ -206,7 +164,9 @@ abstract class _MemberStore with Store {
       // Update UI list and clear the form model
       newMember = Member(); // Clear form
       selectedMember = insertedMember;
-      await getAllMembers(HomeScreen.currentReportFilter ?? Gender.male); // Refresh list
+      await getAllMembers(
+        HomeScreen.currentReportFilter ?? Gender.male,
+      ); // Refresh list
       return insertedMember;
     } catch (error) {
       print("Error registering member: $error");
@@ -229,7 +189,6 @@ abstract class _MemberStore with Store {
 
       // Refresh the list to reflect changes
       getAllMembers(HomeScreen.currentReportFilter ?? Gender.male);
-      print("Member ${member!.memberId} updated.");
     } catch (error) {
       print("Error updating member: $error");
       rethrow;
@@ -241,8 +200,6 @@ abstract class _MemberStore with Store {
   Future<void> deleteMember(Member member) async {
     try {
       await _deleteMemberUseCase.call(params: member);
-
-      // Update the state
       memberList.removeWhere((m) => m.memberId == member.memberId);
       selectedMember = null;
     } catch (error) {

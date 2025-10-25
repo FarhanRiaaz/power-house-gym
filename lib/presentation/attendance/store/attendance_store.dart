@@ -69,7 +69,7 @@ abstract class _AttendanceStore with Store {
   void watchTodayAttendance({Gender? genderFilter}) {
     // Set a custom loading flag before starting the stream process
     // This is for the *initial* load of today's attendance display
-    // isLoadingReport = true;
+    isLoadingReport = true;
 
     _watchTodayAttendanceUseCase.call(params: genderFilter).then((stream) {
       todayRecordsStream = stream;
@@ -83,8 +83,7 @@ abstract class _AttendanceStore with Store {
       });
     }).catchError((error) {
       runInAction(() {
-        print("Error setting up today attendance stream: $error");
-        // isLoadingReport = false;
+        isLoadingReport = false;
       });
     });
   }
@@ -136,18 +135,12 @@ abstract class _AttendanceStore with Store {
 
   @action
   Future<void> getSingleAttendanceList(int memberId) async {
-    print("We have been called $memberId");
     isLoadingReport = true;
     try {
       final records = await _getAttendanceRecordUseCase.call(params: memberId);
-    print("We have been called and size is  ${records.length}");
-
       runInAction(() {
         singleAttendanceList = ObservableList.of(records);
       });
-
-    print("We have been called and size isXX  ${singleAttendanceList.length}");
-
 
     } catch (e) {
       print("Error generating daily report: $e");

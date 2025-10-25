@@ -53,10 +53,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> _initBiometricTempFile() async {
     await dashboardStore. fetchDashboardData(range: null);
     await memberStore.getAllStoredFMDID(HomeScreen.currentReportFilter);
-    await biometricServiceImpl.getTempFile(memberStore.storedFMDS);
-
-    // Do something with tempFile (e.g. store it, log it, pass to another service)
-  }
+    await biometricServiceImpl.getTempFile(memberStore.storedFMDS);}
 
 
   // Assume stores are accessible via getIt
@@ -168,9 +165,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               ? 'Start Attendance'
                               : 'Stop Attendance',
                           icon: Icons.fingerprint,
-                          onChanged: (value) => {
-                            print("Passing it to ut $value"),
-
+                          onChanged: (value) async => {
+                            await biometricServiceImpl.getTempFile(memberStore.storedFMDS),
                             biometricServiceImpl.toggleScanning(value),
                           },
                           activeColor: AppColors.success,

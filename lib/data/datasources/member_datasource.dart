@@ -16,8 +16,6 @@ class MemberDatasource {
 
   // Maps a single Drift Entity to the Domain Model (equivalent to mapSiteEntityToSite)
   Member mapMemberEntityToMember(DriftGen.Member entity) {
-
-    print("Adding and returning ${entity.toString()}");
     return Member(
       memberId: entity.memberId,
       name: entity.name,
@@ -78,19 +76,11 @@ class MemberDatasource {
   }
 
   Future<List<Member>> getAll({Gender? genderFilter}) async {
-    // print("we got query fro getl All ${genderFilter?.name}");
-    // _driftClient.members.deleteAll();
-    // _driftClient.financialTransactions.deleteAll();
-    // _driftClient.attendanceRecords.deleteAll();
-    // _driftClient.billExpenses.deleteAll();
-
     final query = _driftClient.select(_driftClient.members);
     if (genderFilter != null) {
       query.where((m) => m.gender.equals(genderFilter.name));
     }
     final entities = await query.get();
-    // Use the explicit list mapping function
-    print("And then we got some data here with ${entities.toString()}");
     return mapMemberEntityListToMemberList(entities);
   }
 
@@ -159,14 +149,12 @@ class MemberDatasource {
         membersToInsert.add(member);
       } on FormatException catch (e) {
         // Log the error for the specific row and skip it.
-        print('Skipping row due to format error: ${e.message} in row: $row');
       } catch (e) {
         print('An unexpected error occurred during parsing: $e');
       }
     }
 
     if (membersToInsert.isEmpty) {
-      print('No valid members found to insert.');
       return 0;
     }
 
